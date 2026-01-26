@@ -1,0 +1,54 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const outputDir = path.join(__dirname, "public", "icons");
+
+console.log("\n📱 Generador de Iconos para PWA\n");
+console.log("⚠️  Este script crea iconos SVG optimizados para la PWA.");
+console.log(
+  "⚠️  Para iconos PNG de mejor calidad, usa una herramienta online como:",
+);
+console.log("    👉 https://www.pwabuilder.com/imageGenerator\n");
+
+// Función para crear SVGs escalables
+function generateIcons() {
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  sizes.forEach((size) => {
+    const svgContent = `<svg width="${size}" height="${size}" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="url(#gradient)"/>
+  <circle cx="256" cy="256" r="128" stroke="white" stroke-width="16" fill="none"/>
+  <circle cx="256" cy="256" r="64" fill="white"/>
+  <line x1="176" y1="256" x2="208" y2="224" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <line x1="336" y1="256" x2="304" y2="224" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <line x1="256" y1="176" x2="224" y2="208" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <line x1="256" y1="336" x2="288" y2="304" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#667eea"/>
+      <stop offset="1" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+</svg>`;
+
+    const outputPath = path.join(outputDir, `icon-${size}x${size}.svg`);
+    fs.writeFileSync(outputPath, svgContent);
+    console.log(`✅ Icono creado: icon-${size}x${size}.svg`);
+  });
+
+  console.log("\n✨ ¡Iconos SVG generados correctamente!\n");
+  console.log("📝 Nota: Los navegadores modernos soportan SVG en PWAs.");
+  console.log("   Si prefieres PNG, convierte el archivo icon.svg usando:");
+  console.log("   - https://www.pwabuilder.com/imageGenerator");
+  console.log("   - https://realfavicongenerator.net/");
+  console.log("   - Herramientas locales como GIMP o Inkscape\n");
+}
+
+generateIcons();

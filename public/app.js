@@ -332,11 +332,6 @@ async function sendMessage() {
             // Renderizar markdown en tiempo real
             contentDiv.innerHTML = marked.parse(fullResponse);
 
-            // Aplicar syntax highlighting a los bloques de código
-            contentDiv.querySelectorAll("pre code").forEach((block) => {
-              hljs.highlightElement(block);
-            });
-
             // Auto-scroll
             chatMessages.scrollTop = chatMessages.scrollHeight;
           } else if (data.done) {
@@ -384,11 +379,6 @@ function addMessage(role, content) {
     );
     if (contentElement) {
       contentElement.innerHTML = marked.parse(content);
-
-      // Aplicar syntax highlighting
-      contentElement.querySelectorAll("pre code").forEach((block) => {
-        hljs.highlightElement(block);
-      });
     }
   }
 

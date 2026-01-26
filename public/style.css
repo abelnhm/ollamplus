@@ -335,19 +335,22 @@ body::before {
 }
 
 .message-content pre {
-  background: hsl(var(--muted));
-  padding: 12px;
-  border-radius: calc(var(--radius) - 2px);
+  background: #23241f !important;
+  padding: 16px;
+  border-radius: 8px;
   overflow-x: auto;
-  margin: 8px 0;
-  border: 1px solid hsl(var(--border));
+  margin: 12px 0;
+  border: 1px solid #3e3d32;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .message-content pre code {
-  background: none;
+  background: none !important;
   padding: 0;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  color: #f8f8f2;
 }
 
 /* Input container - shadcn/ui */
