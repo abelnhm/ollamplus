@@ -1,0 +1,20 @@
+{
+  "name": "ias-proyect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "deepseek.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "ollama": "^0.6.3",
+    "openai": "^6.16.0"
+  }
+}

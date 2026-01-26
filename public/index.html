@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
+  <title>OllamaUI</title>
+
+  <!-- Highlight.js para syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Marked.js para markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Sidebar de chats -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Mis Chats
+      </h2>
+      <button id="closeSidebarBtn" class="close-sidebar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="chats-list" id="chatsList">
+      <div class="no-chats">No hay chats guardados</div>
+    </div>
+  </div>
+
+  <!-- Overlay para cerrar sidebar en móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="header-left">
+        <button id="toggleSidebarBtn" class="toggle-sidebar-btn" title="Menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <h1>OllamaUI</h1>
+      </div>
+      <div class="header-buttons">
+        <button id="settingsBtn" class="icon-btn" title="Configuración">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </button>
+        <button id="darkModeToggle" class="icon-btn" title="Cambiar tema">
+          <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button id="newChatBtn" class="icon-btn" title="Nueva conversación">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button id="exportBtn" class="icon-btn" title="Exportar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <button id="clearBtn" class="icon-btn" title="Limpiar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="model-selector-container" id="modelSelectorContainer">
+      <div class="model-selector-header">
+        <svg class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+          <rect x="9" y="9" width="6" height="6"></rect>
+          <line x1="9" y1="1" x2="9" y2="4"></line>
+          <line x1="15" y1="1" x2="15" y2="4"></line>
+          <line x1="9" y1="20" x2="9" y2="23"></line>
+          <line x1="15" y1="20" x2="15" y2="23"></line>
+          <line x1="20" y1="9" x2="23" y2="9"></line>
+          <line x1="20" y1="14" x2="23" y2="14"></line>
+          <line x1="1" y1="9" x2="4" y2="9"></line>
+          <line x1="1" y1="14" x2="4" y2="14"></line>
+        </svg>
+        <span class="model-label">Modelo:</span>
+        <select id="modelSelector" class="model-selector">
+          <option value="">Cargando modelos...</option>
+        </select>
+        <span class="model-status" id="modelStatus"></span>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message assistant">
+        <div class="message-content">
+          <strong>Asistente:</strong>
+          <p>¡Hola! Soy tu asistente de IA. Selecciona un modelo y ¿en qué puedo ayudarte hoy?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-container">
+      <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+      <button id="sendBtn" class="send-btn">
+        <svg id="sendIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        <span id="sendText">Enviar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de configuración -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Configuración de Ollama</h2>
+        <button class="modal-close" id="closeSettingsModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-section">
+          <label for="ollamaHost">Dirección IP / Host</label>
+          <input type="text" id="ollamaHost" class="settings-input" placeholder="localhost o 192.168.1.100"
+            value="localhost" />
+          <small class="help-text">Dirección IP del equipo donde está ejecutándose Ollama</small>
+        </div>
+        <div class="settings-section">
+          <label for="ollamaPort">Puerto</label>
+          <input type="number" id="ollamaPort" class="settings-input" placeholder="11434" value="11434" min="1"
+            max="65535" />
+          <small class="help-text">Puerto de Ollama (por defecto 11434)</small>
+        </div>
+        <div class="settings-preview">
+          <strong>URL completa:</strong>
+          <code id="urlPreview">http://localhost:11434</code>
+        </div>
+        <div class="settings-section">
+          <button class="btn-test" id="testConnection">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="width: 16px; height: 16px; margin-right: 8px;">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Probar Conexión
+          </button>
+          <small class="help-text" id="testResult"></small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelSettings">Cancelar</button>
+        <button class="btn-primary" id="saveSettings">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
