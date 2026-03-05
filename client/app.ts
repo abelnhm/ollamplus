@@ -98,6 +98,18 @@ const modelInfoFormat = $<HTMLSpanElement>("modelInfoFormat");
 const modelInfoVramItem = $<HTMLDivElement>("modelInfoVramItem");
 const modelInfoVram = $<HTMLSpanElement>("modelInfoVram");
 
+// Indicador de tokens
+const tokenUsageContainer = $<HTMLDivElement>("tokenUsageContainer");
+const tokenUsageSummary = $<HTMLSpanElement>("tokenUsageSummary");
+const tokenUsageBar = $<HTMLDivElement>("tokenUsageBar");
+const tokenPromptCount = $<HTMLElement>("tokenPromptCount");
+const tokenResponseCount = $<HTMLElement>("tokenResponseCount");
+const tokenContextLimit = $<HTMLElement>("tokenContextLimit");
+
+// Estado de tokens
+let totalTokensUsed = 0;
+let modelContextLength = 0;
+
 // ─── Helpers ─────────────────────────────────────────────
 function getOllamaUrl(): string {
   const host = localStorage.getItem("ollamaHost") || "localhost";
@@ -389,6 +401,55 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
+function formatTokenCount(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+}
+
+function updateTokenDisplay(): void {
+  // Obtener el límite efectivo: parámetro num_ctx del usuario o el del modelo
+  const numCtxEl = document.getElementById("param_num_ctx") as HTMLSelectElement | null;
+  const userCtx = enableModelParams.checked && numCtxEl ? parseInt(numCtxEl.value, 10) : 0;
+  const effectiveLimit = userCtx > 0 ? userCtx : modelContextLength;
+
+  if (effectiveLimit <= 0 && totalTokensUsed <= 0) {
+    tokenUsageContainer.style.display = "none";
+    return;
+  }
+
+  tokenUsageContainer.style.display = "";
+
+  const limit = effectiveLimit > 0 ? effectiveLimit : 0;
+  const pct = limit > 0 ? Math.min((totalTokensUsed / limit) * 100, 100) : 0;
+
+  tokenUsageSummary.textContent = limit > 0
+    ? `${formatTokenCount(totalTokensUsed)} / ${formatTokenCount(limit)}`
+    : `${formatTokenCount(totalTokensUsed)}`;
+  tokenContextLimit.textContent = limit > 0 ? formatTokenCount(limit) : "—";
+
+  tokenUsageBar.style.width = pct + "%";
+  tokenUsageBar.classList.remove("warning", "danger");
+  if (pct >= 90) {
+    tokenUsageBar.classList.add("danger");
+  } else if (pct >= 70) {
+    tokenUsageBar.classList.add("warning");
+  }
+}
+
+function updateTokenUsage(promptTokens: number, responseTokens: number): void {
+  totalTokensUsed = promptTokens + responseTokens;
+  tokenPromptCount.textContent = formatTokenCount(promptTokens);
+  tokenResponseCount.textContent = formatTokenCount(responseTokens);
+  updateTokenDisplay();
+}
+
+function resetTokenUsage(): void {
+  totalTokensUsed = 0;
+  tokenPromptCount.textContent = "0";
+  tokenResponseCount.textContent = "0";
+  updateTokenDisplay();
+}
+
 async function loadModelInfo(modelName: string): Promise<void> {
   modelInfoPanel.style.display = "none";
   if (!modelName) return;
@@ -402,6 +463,7 @@ async function loadModelInfo(modelName: string): Promise<void> {
         format: string;
         families: string[];
         size_vram: number;
+        context_length: number;
       };
     }>("/api/model-info", {
       ollamaUrl: getOllamaUrl(),
@@ -420,6 +482,10 @@ async function loadModelInfo(modelName: string): Promise<void> {
     } else {
       modelInfoVramItem.style.display = "none";
     }
+
+    // Guardar context length del modelo y actualizar indicador
+    modelContextLength = info.context_length || 0;
+    updateTokenDisplay();
 
     modelInfoPanel.style.display = "";
   } catch (err) {
@@ -622,6 +688,9 @@ async function sendMessage(): Promise<void> {
           } else if (data.done) {
             fullText = data.fullResponse || fullText;
             updateStreamingMessage(streamWrapper, fullText);
+            if (data.tokenUsage) {
+              updateTokenUsage(data.tokenUsage.promptTokens, data.tokenUsage.responseTokens);
+            }
           } else if (data.chunk) {
             fullText += data.chunk;
             updateStreamingMessage(streamWrapper, fullText);
@@ -729,6 +798,7 @@ function newChat(): void {
   sendBtn.disabled = false;
   sendBtn.classList.remove("loading");
   sendText.textContent = "Enviar";
+  resetTokenUsage();
   closeSidebar();
 }
 

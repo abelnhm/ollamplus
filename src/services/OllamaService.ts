@@ -29,6 +29,7 @@ export class OllamaService {
     format: string;
     families: string[];
     size_vram: number;
+    context_length: number;
   }> {
     try {
       const client = this.createClient(url);
@@ -38,6 +39,7 @@ export class OllamaService {
 
       // Try to extract VRAM from model_info or estimate from model size
       let sizeVram = 0;
+      let contextLength = 0;
       if (modelInfo) {
         // Some ollama versions expose vram in model_info
         for (const key of Object.keys(modelInfo)) {
@@ -46,7 +48,9 @@ export class OllamaService {
             key.toLowerCase().includes("memory")
           ) {
             sizeVram = Number(modelInfo[key]) || 0;
-            break;
+          }
+          if (key.toLowerCase().includes("context_length")) {
+            contextLength = Number(modelInfo[key]) || 0;
           }
         }
       }
@@ -58,6 +62,7 @@ export class OllamaService {
         format: details.format || "Desconocido",
         families: details.families || [],
         size_vram: sizeVram,
+        context_length: contextLength,
       };
     } catch (error) {
       throw new Error(
@@ -94,7 +99,11 @@ export class OllamaService {
     onChunk?: (chunk: string) => void,
     options?: Record<string, unknown>,
     systemPrompt?: string,
-  ): Promise<string> {
+  ): Promise<{
+    response: string;
+    promptTokens: number;
+    responseTokens: number;
+  }> {
     try {
       const client = this.createClient(url);
 
@@ -114,6 +123,8 @@ export class OllamaService {
       const response = await client.chat(chatParams as any);
 
       let fullResponse = "";
+      let promptTokens = 0;
+      let responseTokens = 0;
 
       for await (const part of response) {
         const content = part.message.content;
@@ -121,9 +132,14 @@ export class OllamaService {
         if (onChunk) {
           onChunk(content);
         }
+        // Capture token counts from the final chunk
+        if ((part as any).done) {
+          promptTokens = (part as any).prompt_eval_count || 0;
+          responseTokens = (part as any).eval_count || 0;
+        }
       }
 
-      return fullResponse;
+      return { response: fullResponse, promptTokens, responseTokens };
     } catch (error) {
       throw new Error(
         `Error al enviar mensaje a Ollama: ${(error as Error).message}`,

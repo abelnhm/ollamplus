@@ -163,6 +163,26 @@
             <span class="model-info-value" id="modelInfoVram">—</span>
           </div>
         </div>
+        <!-- Indicador de tokens -->
+        <div class="token-usage-container" id="tokenUsageContainer" style="display:none">
+          <div class="token-usage-header">
+            <span class="token-usage-title">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Tokens
+            </span>
+            <span class="token-usage-summary" id="tokenUsageSummary">0 / 0</span>
+          </div>
+          <div class="token-usage-bar-bg">
+            <div class="token-usage-bar" id="tokenUsageBar" style="width:0%"></div>
+          </div>
+          <div class="token-usage-details">
+            <span class="token-detail"><span class="token-dot prompt"></span>Prompt: <strong id="tokenPromptCount">0</strong></span>
+            <span class="token-detail"><span class="token-dot response"></span>Respuesta: <strong id="tokenResponseCount">0</strong></span>
+            <span class="token-detail">Límite: <strong id="tokenContextLimit">—</strong></span>
+          </div>
+        </div>
       </div>
 
       <!-- Panel desplegable de instrucciones (system prompt) -->

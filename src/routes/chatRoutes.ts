@@ -58,7 +58,7 @@ export function createChatRoutes(
 
       // Enviar historial al modelo y recibir respuesta en streaming
       const history = chat.getHistory();
-      const fullResponse = await ollamaService.sendMessage(
+      const result = await ollamaService.sendMessage(
         chat.model,
         history,
         ollamaUrl || "http://localhost:11434",
@@ -70,10 +70,20 @@ export function createChatRoutes(
       );
 
       // Guardar respuesta del asistente en el chat
-      chatService.addMessage(chatId as string, "assistant", fullResponse);
+      chatService.addMessage(chatId as string, "assistant", result.response);
 
-      // Enviar señal de finalización
-      res.write(`data: ${JSON.stringify({ done: true, fullResponse })}\n\n`);
+      // Enviar señal de finalización con token usage
+      res.write(
+        `data: ${JSON.stringify({
+          done: true,
+          fullResponse: result.response,
+          tokenUsage: {
+            promptTokens: result.promptTokens,
+            responseTokens: result.responseTokens,
+            totalTokens: result.promptTokens + result.responseTokens,
+          },
+        })}\n\n`,
+      );
       res.end();
     } catch (error) {
       res.write(
