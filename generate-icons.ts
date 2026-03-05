@@ -15,8 +15,7 @@ console.log(
 );
 console.log("    👉 https://www.pwabuilder.com/imageGenerator\n");
 
-// Función para crear SVGs escalables
-function generateIcons() {
+function generateIcons(): void {
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }

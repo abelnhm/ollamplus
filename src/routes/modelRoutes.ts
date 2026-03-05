@@ -1,21 +1,18 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+import { OllamaService } from "../services/OllamaService.js";
 
 /**
  * Rutas: Modelos
  * Define los endpoints HTTP para operaciones de modelos de IA.
  *
- * CAPA: Rutas (presentación / HTTP)
- * RESPONSABILIDAD: Recibir peticiones HTTP relacionadas con modelos
- *                  y devolver la lista de modelos disponibles.
- *
  * Endpoints:
  *   POST /api/models → Obtener modelos disponibles en Ollama
  */
-export function createModelRoutes(ollamaService) {
+export function createModelRoutes(ollamaService: OllamaService): Router {
   const router = Router();
 
   // Obtener modelos disponibles
-  router.post("/models", async (req, res) => {
+  router.post("/models", async (req: Request, res: Response) => {
     try {
       const { ollamaUrl = "http://localhost:11434" } = req.body;
 
@@ -23,23 +20,21 @@ export function createModelRoutes(ollamaService) {
         !ollamaUrl.startsWith("http://") &&
         !ollamaUrl.startsWith("https://")
       ) {
-        return res
+        res
           .status(400)
           .json({ error: "La URL debe comenzar con http:// o https://" });
+        return;
       }
 
       const models = await ollamaService.listModels(ollamaUrl);
       res.json({ models });
     } catch (error) {
-      console.error("Error al obtener modelos:", error.message);
+      console.error("Error al obtener modelos:", (error as Error).message);
 
-      let errorMessage = error.message;
+      let errorMessage = (error as Error).message;
       let details = "Asegúrate de que Ollama esté corriendo (ollama serve)";
 
-      if (
-        error.message.includes("JSON") ||
-        error.message.includes("<!DOCTYPE")
-      ) {
+      if (errorMessage.includes("JSON") || errorMessage.includes("<!DOCTYPE")) {
         errorMessage =
           "URL incorrecta o Ollama no está disponible en esa dirección";
         details =

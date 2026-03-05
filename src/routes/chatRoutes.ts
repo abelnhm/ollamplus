@@ -1,12 +1,10 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+import { ChatService } from "../services/ChatService.js";
+import { OllamaService } from "../services/OllamaService.js";
 
 /**
  * Rutas: Chat
  * Define los endpoints HTTP para operaciones de chat.
- *
- * CAPA: Rutas (presentación / HTTP)
- * RESPONSABILIDAD: Recibir peticiones HTTP, llamar a los servicios
- *                  y devolver respuestas al cliente.
  *
  * Endpoints:
  *   POST   /api/new-chat              → Crear un chat nuevo
@@ -15,34 +13,39 @@ import { Router } from "express";
  *   GET    /api/chats/:chatId         → Obtener un chat por ID
  *   DELETE /api/chats/:chatId         → Eliminar un chat
  */
-export function createChatRoutes(chatService, ollamaService) {
+export function createChatRoutes(
+  chatService: ChatService,
+  ollamaService: OllamaService,
+): Router {
   const router = Router();
 
   // Crear un nuevo chat
-  router.post("/new-chat", (req, res) => {
+  router.post("/new-chat", (req: Request, res: Response) => {
     try {
       const { model, title } = req.body;
 
       if (!model || !title) {
-        return res.status(400).json({ error: "model y title son requeridos" });
+        res.status(400).json({ error: "model y title son requeridos" });
+        return;
       }
 
       const chat = chatService.create(model, title);
       res.json({ success: true, chat: chat.toJSON() });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ error: (error as Error).message });
     }
   });
 
   // Enviar un mensaje y recibir respuesta en streaming (SSE)
-  router.post("/chat/:chatId/message", async (req, res) => {
+  router.post("/chat/:chatId/message", async (req: Request, res: Response) => {
     try {
-      const { chatId } = req.params;
+      const chatId = req.params.chatId as string;
       const { content, ollamaUrl } = req.body;
 
       const chat = chatService.getById(chatId);
       if (!chat) {
-        return res.status(404).json({ error: "Chat no encontrado" });
+        res.status(404).json({ error: "Chat no encontrado" });
+        return;
       }
 
       // Configurar Server-Sent Events para streaming
@@ -51,7 +54,7 @@ export function createChatRoutes(chatService, ollamaService) {
       res.setHeader("Connection", "keep-alive");
 
       // Agregar mensaje del usuario al chat
-      chatService.addMessage(chatId, "user", content);
+      chatService.addMessage(chatId as string, "user", content);
 
       // Enviar historial al modelo y recibir respuesta en streaming
       const history = chat.getHistory();
@@ -59,54 +62,59 @@ export function createChatRoutes(chatService, ollamaService) {
         chat.model,
         history,
         ollamaUrl || "http://localhost:11434",
-        (chunk) => {
+        (chunk: string) => {
           res.write(`data: ${JSON.stringify({ chunk, done: false })}\n\n`);
         },
       );
 
       // Guardar respuesta del asistente en el chat
-      chatService.addMessage(chatId, "assistant", fullResponse);
+      chatService.addMessage(chatId as string, "assistant", fullResponse);
 
       // Enviar señal de finalización
       res.write(`data: ${JSON.stringify({ done: true, fullResponse })}\n\n`);
       res.end();
     } catch (error) {
-      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({ error: (error as Error).message })}\n\n`,
+      );
       res.end();
     }
   });
 
   // Obtener todos los chats
-  router.get("/chats", (req, res) => {
+  router.get("/chats", (req: Request, res: Response) => {
     try {
       const chats = chatService.getAll().map((chat) => chat.toJSON());
       res.json({ success: true, chats });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Obtener un chat por ID
-  router.get("/chats/:chatId", (req, res) => {
+  router.get("/chats/:chatId", (req: Request, res: Response) => {
     try {
-      const chat = chatService.getById(req.params.chatId);
+      const chat = chatService.getById(req.params.chatId as string);
       if (!chat) {
-        return res.status(404).json({ error: "Chat no encontrado" });
+        res.status(404).json({ error: "Chat no encontrado" });
+        return;
       }
       res.json({ success: true, chat: chat.toJSON() });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Eliminar un chat
-  router.delete("/chats/:chatId", (req, res) => {
+  router.delete("/chats/:chatId", (req: Request, res: Response) => {
     try {
-      chatService.delete(req.params.chatId);
+      chatService.delete(req.params.chatId as string);
       res.json({ success: true, message: "Chat eliminado" });
     } catch (error) {
-      const status = error.message.includes("no encontrado") ? 404 : 500;
-      res.status(status).json({ error: error.message });
+      const status = (error as Error).message.includes("no encontrado")
+        ? 404
+        : 500;
+      res.status(status).json({ error: (error as Error).message });
     }
   });
 

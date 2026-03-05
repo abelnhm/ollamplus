@@ -4,12 +4,33 @@ import { Message } from "./Message.js";
 /**
  * Modelo: Chat
  * Representa una conversación completa con un modelo de IA.
- *
- * CAPA: Modelos (datos)
- * RESPONSABILIDAD: Definir la estructura de un chat y sus operaciones básicas.
  */
+
+export interface ChatData {
+  id?: string;
+  model: string;
+  title: string;
+  messages?: Message[];
+  createdAt?: Date;
+  lastMessageAt?: Date;
+}
+
 export class Chat {
-  constructor({ id, model, title, messages = [], createdAt, lastMessageAt }) {
+  id: string;
+  model: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  lastMessageAt: Date;
+
+  constructor({
+    id,
+    model,
+    title,
+    messages = [],
+    createdAt,
+    lastMessageAt,
+  }: ChatData) {
     this.id = id || randomUUID();
     this.model = model;
     this.title = title;
@@ -18,28 +39,18 @@ export class Chat {
     this.lastMessageAt = lastMessageAt || new Date();
   }
 
-  /**
-   * Agrega un mensaje al chat y actualiza la fecha del último mensaje.
-   */
-  addMessage(message) {
+  addMessage(message: Message): void {
     this.messages.push(message);
     this.lastMessageAt = new Date();
   }
 
-  /**
-   * Devuelve el historial de mensajes en el formato que espera Ollama.
-   * Ollama necesita un array de objetos { role, content }.
-   */
-  getHistory() {
+  getHistory(): { role: string; content: string }[] {
     return this.messages.map((msg) => ({
       role: msg.role,
       content: msg.content,
     }));
   }
 
-  /**
-   * Convierte el chat a un objeto plano (JSON) para enviarlo como respuesta HTTP.
-   */
   toJSON() {
     return {
       id: this.id,

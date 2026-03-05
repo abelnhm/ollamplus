@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import { logger } from "./middlewares/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -16,10 +16,8 @@ import { createModelRoutes } from "./routes/modelRoutes.js";
  *   2. Se crean las rutas pasándoles los servicios que necesitan
  *   3. Se registran middlewares, rutas y manejo de errores
  *   4. Se inicia el servidor HTTP
- *
- * Este archivo es el punto de unión entre todas las capas.
  */
-export function createServer(port = 3000) {
+export function createServer(port: number = 3000): Express {
   const app = express();
 
   // --- Middlewares generales ---

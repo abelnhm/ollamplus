@@ -2,11 +2,14 @@
   "name": "ias-proyect",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --watch index.js",
-    "generate-icons": "node generate-icons.js"
+    "build": "tsc && tsc -p client",
+    "build:server": "tsc",
+    "build:client": "tsc -p client",
+    "start": "node dist/index.js",
+    "dev": "tsx --watch index.ts",
+    "generate-icons": "tsx generate-icons.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +22,12 @@
     "express": "^5.2.1",
     "ollama": "^0.6.3",
     "openai": "^6.16.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
