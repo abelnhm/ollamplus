@@ -8,16 +8,15 @@ El proyecto usa **TypeScript** tanto en el servidor como en el cliente. Para el 
 
 ## Scripts disponibles
 
-| Script           | Comando                  | Descripción                                              |
-| ---------------- | ------------------------ | -------------------------------------------------------- |
-| `dev`            | `npm run dev`            | Ejecuta servidor y cliente en modo watch simultáneamente |
-| `dev:server`     | `npm run dev:server`     | Solo el servidor en modo watch (tsx --watch)             |
-| `dev:client`     | `npm run dev:client`     | Solo el cliente en modo watch (tsc --watch)              |
-| `build`          | `npm run build`          | Compila servidor y cliente para producción               |
-| `build:server`   | `npm run build:server`   | Solo compila el servidor                                 |
-| `build:client`   | `npm run build:client`   | Solo compila el cliente                                  |
-| `start`          | `npm start`              | Inicia el servidor compilado (`dist/index.js`)           |
-| `generate-icons` | `npm run generate-icons` | Genera los iconos de la PWA                              |
+| Script         | Comando                | Descripción                                              |
+| -------------- | ---------------------- | -------------------------------------------------------- |
+| `dev`          | `npm run dev`          | Ejecuta servidor y cliente en modo watch simultáneamente |
+| `dev:server`   | `npm run dev:server`   | Solo el servidor en modo watch (tsx --watch)             |
+| `dev:client`   | `npm run dev:client`   | Solo el cliente en modo watch (tsc --watch)              |
+| `build`        | `npm run build`        | Compila servidor y cliente para producción               |
+| `build:server` | `npm run build:server` | Solo compila el servidor                                 |
+| `build:client` | `npm run build:client` | Solo compila el cliente                                  |
+| `start`        | `npm start`            | Inicia el servidor compilado (`dist/index.js`)           |
 
 ---
 

@@ -10,15 +10,13 @@
     "start": "node dist/index.js",
     "dev": "concurrently -n server,client -c blue,green \"tsx --watch index.ts\" \"tsc --watch -p client\"",
     "dev:server": "tsx --watch index.ts",
-    "dev:client": "tsc --watch -p client",
-    "generate-icons": "tsx generate-icons.ts"
+    "dev:client": "tsc --watch -p client"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "canvas": "^3.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
