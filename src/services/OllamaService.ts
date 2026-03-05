@@ -45,14 +45,19 @@ export class OllamaService {
     messages: { role: string; content: string }[],
     url: string,
     onChunk?: (chunk: string) => void,
+    options?: Record<string, unknown>,
   ): Promise<string> {
     try {
       const client = this.createClient(url);
-      const response = await client.chat({
+      const chatParams: Record<string, unknown> = {
         model,
         messages,
         stream: true,
-      });
+      };
+      if (options && Object.keys(options).length > 0) {
+        chatParams.options = options;
+      }
+      const response = await client.chat(chatParams as any);
 
       let fullResponse = "";
 

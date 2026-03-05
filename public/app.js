@@ -43,6 +43,12 @@ const modelChangeCancelBtn = $("modelChangeCancelBtn");
 const closeModelChangeModal = $("closeModelChangeModal");
 // Botón de parar
 const stopBtn = $("stopBtn");
+// Panel de parámetros del modelo
+const modelParamsToggle = $("modelParamsToggle");
+const modelParamsPanel = $("modelParamsPanel");
+const enableModelParams = $("enableModelParams");
+const modelParamsForm = $("modelParamsForm");
+const resetParamsBtn = $("resetParamsBtn");
 // ─── Helpers ─────────────────────────────────────────────
 function getOllamaUrl() {
     const host = localStorage.getItem("ollamaHost") || "localhost";
@@ -80,6 +86,137 @@ function autoResize(textarea) {
 }
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+const PARAM_DEFAULTS = {
+    temperature: 0.8,
+    top_p: 0.9,
+    top_k: 40,
+    num_ctx: 2048,
+    repeat_penalty: 1.1,
+    seed: "",
+    num_predict: -1,
+    stop: "",
+    mirostat: 0,
+    mirostat_tau: 5.0,
+    mirostat_eta: 0.1,
+};
+function getModelOptions() {
+    if (!enableModelParams.checked)
+        return null;
+    const opts = {};
+    const tempEl = document.getElementById("param_temperature_val");
+    if (tempEl)
+        opts.temperature = parseFloat(tempEl.value);
+    const topPEl = document.getElementById("param_top_p_val");
+    if (topPEl)
+        opts.top_p = parseFloat(topPEl.value);
+    const topKEl = document.getElementById("param_top_k");
+    if (topKEl)
+        opts.top_k = parseInt(topKEl.value, 10);
+    const numCtxEl = document.getElementById("param_num_ctx");
+    if (numCtxEl)
+        opts.num_ctx = parseInt(numCtxEl.value, 10);
+    const repeatEl = document.getElementById("param_repeat_penalty_val");
+    if (repeatEl)
+        opts.repeat_penalty = parseFloat(repeatEl.value);
+    const seedEl = document.getElementById("param_seed");
+    if (seedEl && seedEl.value !== "")
+        opts.seed = parseInt(seedEl.value, 10);
+    const numPredEl = document.getElementById("param_num_predict");
+    if (numPredEl)
+        opts.num_predict = parseInt(numPredEl.value, 10);
+    const stopEl = document.getElementById("param_stop");
+    if (stopEl && stopEl.value.trim() !== "") {
+        opts.stop = stopEl.value.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    const mirostatEl = document.getElementById("param_mirostat");
+    if (mirostatEl)
+        opts.mirostat = parseInt(mirostatEl.value, 10);
+    const mirostatTauEl = document.getElementById("param_mirostat_tau_val");
+    if (mirostatTauEl)
+        opts.mirostat_tau = parseFloat(mirostatTauEl.value);
+    const mirostatEtaEl = document.getElementById("param_mirostat_eta_val");
+    if (mirostatEtaEl)
+        opts.mirostat_eta = parseFloat(mirostatEtaEl.value);
+    return opts;
+}
+function resetModelParams() {
+    const pairs = [
+        ["param_temperature", "param_temperature_val"],
+        ["param_top_p", "param_top_p_val"],
+        ["param_repeat_penalty", "param_repeat_penalty_val"],
+        ["param_mirostat_tau", "param_mirostat_tau_val"],
+        ["param_mirostat_eta", "param_mirostat_eta_val"],
+    ];
+    for (const [rangeId, numId] of pairs) {
+        const key = rangeId.replace("param_", "");
+        const def = PARAM_DEFAULTS[key];
+        document.getElementById(rangeId).value = String(def);
+        document.getElementById(numId).value = String(def);
+    }
+    document.getElementById("param_top_k").value = String(PARAM_DEFAULTS.top_k);
+    document.getElementById("param_num_ctx").value = String(PARAM_DEFAULTS.num_ctx);
+    document.getElementById("param_seed").value = "";
+    document.getElementById("param_num_predict").value = String(PARAM_DEFAULTS.num_predict);
+    document.getElementById("param_stop").value = "";
+    document.getElementById("param_mirostat").value = String(PARAM_DEFAULTS.mirostat);
+}
+function initParamSync() {
+    const pairs = [
+        ["param_temperature", "param_temperature_val"],
+        ["param_top_p", "param_top_p_val"],
+        ["param_repeat_penalty", "param_repeat_penalty_val"],
+        ["param_mirostat_tau", "param_mirostat_tau_val"],
+        ["param_mirostat_eta", "param_mirostat_eta_val"],
+    ];
+    for (const [rangeId, numId] of pairs) {
+        const range = document.getElementById(rangeId);
+        const num = document.getElementById(numId);
+        range.addEventListener("input", () => { num.value = range.value; });
+        num.addEventListener("input", () => { range.value = num.value; });
+    }
+}
+function initParamTooltips() {
+    let activeTooltip = null;
+    function removeTooltip() {
+        if (activeTooltip) {
+            activeTooltip.remove();
+            activeTooltip = null;
+        }
+    }
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest(".param-help-btn");
+        if (!btn) {
+            removeTooltip();
+            return;
+        }
+        e.stopPropagation();
+        if (activeTooltip) {
+            removeTooltip();
+            return;
+        }
+        const text = btn.getAttribute("data-tooltip") || "";
+        const tip = document.createElement("div");
+        tip.className = "param-tooltip";
+        tip.textContent = text;
+        document.body.appendChild(tip);
+        const rect = btn.getBoundingClientRect();
+        let top = rect.bottom + 6;
+        let left = rect.left - 100;
+        if (left < 8)
+            left = 8;
+        if (left + 280 > window.innerWidth)
+            left = window.innerWidth - 288;
+        if (top + 100 > window.innerHeight)
+            top = rect.top - tip.offsetHeight - 6;
+        tip.style.top = top + "px";
+        tip.style.left = left + "px";
+        activeTooltip = tip;
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape")
+            removeTooltip();
+    });
 }
 // ─── API helpers ─────────────────────────────────────────
 async function apiPost(path, body) {
@@ -250,7 +387,11 @@ async function sendMessage() {
         const res = await fetch(`/api/chat/${currentChatId}/message`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content, ollamaUrl: getOllamaUrl() }),
+            body: JSON.stringify({
+                content,
+                ollamaUrl: getOllamaUrl(),
+                options: getModelOptions(),
+            }),
             signal: abortController.signal,
         });
         const reader = res.body.getReader();
@@ -517,6 +658,15 @@ saveSettingsBtn.addEventListener("click", saveSettings);
 testConnectionBtn.addEventListener("click", testConnection);
 ollamaHostInput.addEventListener("input", updateUrlPreview);
 ollamaPortInput.addEventListener("input", updateUrlPreview);
+// Panel de parámetros del modelo
+modelParamsToggle.addEventListener("click", () => {
+    const isVisible = modelParamsPanel.style.display !== "none";
+    modelParamsPanel.style.display = isVisible ? "none" : "block";
+});
+enableModelParams.addEventListener("change", () => {
+    modelParamsForm.classList.toggle("enabled", enableModelParams.checked);
+});
+resetParamsBtn.addEventListener("click", resetModelParams);
 // Botón de parar streaming
 stopBtn.addEventListener("click", () => {
     if (abortController) {
@@ -569,4 +719,6 @@ document.addEventListener("keydown", (e) => {
 initTheme();
 loadModels();
 refreshChatList();
+initParamSync();
+initParamTooltips();
 //# sourceMappingURL=app.js.map
