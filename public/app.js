@@ -49,6 +49,13 @@ const modelParamsPanel = $("modelParamsPanel");
 const enableModelParams = $("enableModelParams");
 const modelParamsForm = $("modelParamsForm");
 const resetParamsBtn = $("resetParamsBtn");
+// Panel de instrucciones (system prompt)
+const systemPromptToggle = $("systemPromptToggle");
+const systemPromptPanel = $("systemPromptPanel");
+const enableSystemPrompt = $("enableSystemPrompt");
+const systemPromptForm = $("systemPromptForm");
+const systemPromptInput = $("systemPromptInput");
+const clearSystemPromptBtn = $("clearSystemPrompt");
 // ─── Helpers ─────────────────────────────────────────────
 function getOllamaUrl() {
     const host = localStorage.getItem("ollamaHost") || "localhost";
@@ -86,6 +93,24 @@ function autoResize(textarea) {
 }
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+// ─── System Prompt ───────────────────────────────────────
+function getSystemPrompt() {
+    if (!enableSystemPrompt.checked)
+        return null;
+    const text = systemPromptInput.value.trim();
+    return text || null;
+}
+function saveSystemPromptToStorage() {
+    localStorage.setItem("systemPromptEnabled", enableSystemPrompt.checked ? "1" : "0");
+    localStorage.setItem("systemPromptText", systemPromptInput.value);
+}
+function loadSystemPromptFromStorage() {
+    const enabled = localStorage.getItem("systemPromptEnabled") === "1";
+    const text = localStorage.getItem("systemPromptText") || "";
+    enableSystemPrompt.checked = enabled;
+    systemPromptInput.value = text;
+    systemPromptForm.classList.toggle("enabled", enabled);
 }
 const PARAM_DEFAULTS = {
     temperature: 0.8,
@@ -401,6 +426,7 @@ async function sendMessage() {
                 content,
                 ollamaUrl: getOllamaUrl(),
                 options: getModelOptions(),
+                systemPrompt: getSystemPrompt(),
             }),
             signal: abortController.signal,
         });
@@ -677,6 +703,20 @@ enableModelParams.addEventListener("change", () => {
     modelParamsForm.classList.toggle("enabled", enableModelParams.checked);
 });
 resetParamsBtn.addEventListener("click", resetModelParams);
+// Panel de instrucciones (system prompt)
+systemPromptToggle.addEventListener("click", () => {
+    const isVisible = systemPromptPanel.style.display !== "none";
+    systemPromptPanel.style.display = isVisible ? "none" : "block";
+});
+enableSystemPrompt.addEventListener("change", () => {
+    systemPromptForm.classList.toggle("enabled", enableSystemPrompt.checked);
+    saveSystemPromptToStorage();
+});
+systemPromptInput.addEventListener("input", saveSystemPromptToStorage);
+clearSystemPromptBtn.addEventListener("click", () => {
+    systemPromptInput.value = "";
+    saveSystemPromptToStorage();
+});
 // Botón de parar streaming
 stopBtn.addEventListener("click", () => {
     if (abortController) {
@@ -731,4 +771,5 @@ loadModels();
 refreshChatList();
 initParamSync();
 initParamTooltips();
+loadSystemPromptFromStorage();
 //# sourceMappingURL=app.js.map

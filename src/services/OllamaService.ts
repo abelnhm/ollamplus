@@ -46,12 +46,19 @@ export class OllamaService {
     url: string,
     onChunk?: (chunk: string) => void,
     options?: Record<string, unknown>,
+    systemPrompt?: string,
   ): Promise<string> {
     try {
       const client = this.createClient(url);
+
+      // Prepend system prompt if provided
+      const finalMessages = systemPrompt
+        ? [{ role: "system", content: systemPrompt }, ...messages]
+        : messages;
+
       const chatParams: Record<string, unknown> = {
         model,
-        messages,
+        messages: finalMessages,
         stream: true,
       };
       if (options && Object.keys(options).length > 0) {

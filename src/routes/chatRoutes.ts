@@ -40,7 +40,7 @@ export function createChatRoutes(
   router.post("/chat/:chatId/message", async (req: Request, res: Response) => {
     try {
       const chatId = req.params.chatId as string;
-      const { content, ollamaUrl, options } = req.body;
+      const { content, ollamaUrl, options, systemPrompt } = req.body;
 
       const chat = chatService.getById(chatId);
       if (!chat) {
@@ -66,6 +66,7 @@ export function createChatRoutes(
           res.write(`data: ${JSON.stringify({ chunk, done: false })}\n\n`);
         },
         options,
+        systemPrompt,
       );
 
       // Guardar respuesta del asistente en el chat

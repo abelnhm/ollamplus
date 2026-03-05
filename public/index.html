@@ -126,7 +126,38 @@
           </svg>
           Ajustes
         </button>
+        <button id="systemPromptToggle" class="btn-sm btn-secondary" title="Instrucciones del asistente">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Instrucciones
+        </button>
         <span class="model-status" id="modelStatus"></span>
+      </div>
+
+      <!-- Panel desplegable de instrucciones (system prompt) -->
+      <div class="system-prompt-panel" id="systemPromptPanel" style="display:none">
+        <div class="system-prompt-header">
+          <h3>Instrucciones del asistente</h3>
+          <button type="button" class="param-help-btn" data-tooltip="Define el comportamiento del asistente mediante un 'system prompt'. Este mensaje invisible se envía antes de toda la conversación y le dice al modelo cómo debe comportarse. Ejemplos: 'Eres un experto en Python, responde siempre con código', 'Responde en español de forma concisa', 'Actúa como un profesor de matemáticas'. Si se deja vacío, el modelo usará su comportamiento por defecto.">?</button>
+        </div>
+        <div class="system-prompt-body">
+          <label class="params-toggle-label">
+            <input type="checkbox" id="enableSystemPrompt">
+            <span>Activar instrucciones personalizadas</span>
+          </label>
+          <div class="system-prompt-form" id="systemPromptForm">
+            <textarea id="systemPromptInput" class="system-prompt-textarea" rows="4" placeholder="Ej: Eres un asistente experto en programación. Responde siempre en español con ejemplos de código claros y concisos."></textarea>
+            <div class="system-prompt-footer">
+              <span class="system-prompt-hint">Este texto se enviará como contexto inicial en cada mensaje.</span>
+              <button type="button" id="clearSystemPrompt" class="btn-sm btn-secondary">Limpiar</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Panel desplegable de parámetros del modelo -->

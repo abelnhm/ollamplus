@@ -1294,6 +1294,98 @@ body::before {
 }
 
 /* ====================================
+   PANEL DE INSTRUCCIONES (SYSTEM PROMPT)
+   ==================================== */
+.system-prompt-panel {
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 12px;
+  padding-top: 12px;
+  animation: fadeIn 0.2s ease;
+}
+
+.system-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.system-prompt-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin: 0;
+}
+
+.system-prompt-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.system-prompt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.system-prompt-form.enabled {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.system-prompt-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  color: hsl(var(--foreground));
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
+  transition: border-color 0.2s ease;
+  line-height: 1.5;
+}
+
+.system-prompt-textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.system-prompt-textarea:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
+.system-prompt-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.system-prompt-hint {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.system-prompt-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+/* ====================================
    PANEL DE PARÁMETROS DEL MODELO
    ==================================== */
 .model-params-panel {
