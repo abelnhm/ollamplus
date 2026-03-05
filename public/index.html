@@ -440,6 +440,49 @@
     </div>
   </div>
 
+  <!-- Modal de exportación -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2>Exportar conversación</h2>
+        <button class="modal-close" id="closeExportModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px; line-height:1.6; color: hsl(var(--foreground)); margin-bottom: 1rem;">Selecciona el formato de exportación:</p>
+        <div class="export-formats">
+          <button class="export-format-btn" data-format="markdown">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span class="export-format-name">Markdown</span>
+            <span class="export-format-ext">.md</span>
+          </button>
+          <button class="export-format-btn" data-format="json">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span class="export-format-name">JSON</span>
+            <span class="export-format-ext">.json</span>
+          </button>
+          <button class="export-format-btn" data-format="html">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span class="export-format-name">HTML</span>
+            <span class="export-format-ext">.html</span>
+          </button>
+          <button class="export-format-btn" data-format="pdf">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>
+            <span class="export-format-name">PDF</span>
+            <span class="export-format-ext">.pdf</span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelExportBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de confirmación de cambio de modelo -->
   <div class="modal" id="modelChangeModal">
     <div class="modal-content" style="max-width: 420px;">

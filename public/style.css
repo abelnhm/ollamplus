@@ -1659,3 +1659,49 @@ body::before {
     align-items: flex-start;
   }
 }
+
+/* ─── Export modal ───────────────────────────────────────── */
+.export-formats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.export-format-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: hsl(var(--background));
+  border: 1.5px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 1.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: hsl(var(--foreground));
+}
+
+.export-format-btn:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.12);
+}
+
+.export-format-btn:active {
+  transform: translateY(0);
+}
+
+.export-format-btn svg {
+  color: hsl(var(--primary));
+}
+
+.export-format-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.export-format-ext {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
