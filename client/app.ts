@@ -110,7 +110,8 @@ function formatMarkdown(text: string): string {
 let inputMaxHeight = 150;
 function autoResize(textarea: HTMLTextAreaElement): void {
   textarea.style.height = "auto";
-  textarea.style.height = Math.min(textarea.scrollHeight, inputMaxHeight) + "px";
+  textarea.style.height =
+    Math.min(textarea.scrollHeight, inputMaxHeight) + "px";
 }
 
 function scrollToBottom(): void {
@@ -181,10 +182,17 @@ async function loadModels(): Promise<void> {
 }
 
 // ─── Renderizado de mensajes ─────────────────────────────
-function copyMessageToClipboard(btn: HTMLButtonElement, wrapper: HTMLDivElement): void {
-  const text = wrapper.querySelector(".streaming-text")?.textContent
-    || wrapper.querySelector(".message-content")?.textContent?.replace(/^🤖 Asistente:/, "").trim()
-    || "";
+function copyMessageToClipboard(
+  btn: HTMLButtonElement,
+  wrapper: HTMLDivElement,
+): void {
+  const text =
+    wrapper.querySelector(".streaming-text")?.textContent ||
+    wrapper
+      .querySelector(".message-content")
+      ?.textContent?.replace(/^🤖 Asistente:/, "")
+      .trim() ||
+    "";
   navigator.clipboard.writeText(text).then(() => {
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.title = "¡Copiado!";
@@ -241,7 +249,9 @@ function createStreamingMessage(): HTMLDivElement {
 }
 
 function updateStreamingMessage(wrapper: HTMLDivElement, text: string): void {
-  const thinking = wrapper.querySelector(".thinking-indicator") as HTMLElement | null;
+  const thinking = wrapper.querySelector(
+    ".thinking-indicator",
+  ) as HTMLElement | null;
   const span = wrapper.querySelector(".streaming-text") as HTMLElement | null;
   if (thinking) {
     thinking.remove();
@@ -477,7 +487,10 @@ function closeSidebar(): void {
 // ─── Tema oscuro ─────────────────────────────────────────
 function initTheme(): void {
   const saved = localStorage.getItem("theme");
-  if (saved === "dark" || (!saved && matchMedia("(prefers-color-scheme: dark)").matches)) {
+  if (
+    saved === "dark" ||
+    (!saved && matchMedia("(prefers-color-scheme: dark)").matches)
+  ) {
     document.body.classList.add("dark-mode");
   }
 }
@@ -550,7 +563,10 @@ messageInput.addEventListener("input", () => autoResize(messageInput));
 
   function onPointerMove(e: PointerEvent): void {
     const delta = startY - e.clientY;
-    const newMax = Math.min(Math.max(startMax + delta, 80), window.innerHeight * 0.6);
+    const newMax = Math.min(
+      Math.max(startMax + delta, 80),
+      window.innerHeight * 0.6,
+    );
     inputMaxHeight = newMax;
     messageInput.style.maxHeight = newMax + "px";
     messageInput.style.height = newMax + "px";

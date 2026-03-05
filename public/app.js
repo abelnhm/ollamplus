@@ -75,7 +75,8 @@ function formatMarkdown(text) {
 let inputMaxHeight = 150;
 function autoResize(textarea) {
     textarea.style.height = "auto";
-    textarea.style.height = Math.min(textarea.scrollHeight, inputMaxHeight) + "px";
+    textarea.style.height =
+        Math.min(textarea.scrollHeight, inputMaxHeight) + "px";
 }
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -139,9 +140,12 @@ async function loadModels() {
 }
 // ─── Renderizado de mensajes ─────────────────────────────
 function copyMessageToClipboard(btn, wrapper) {
-    const text = wrapper.querySelector(".streaming-text")?.textContent
-        || wrapper.querySelector(".message-content")?.textContent?.replace(/^🤖 Asistente:/, "").trim()
-        || "";
+    const text = wrapper.querySelector(".streaming-text")?.textContent ||
+        wrapper
+            .querySelector(".message-content")
+            ?.textContent?.replace(/^🤖 Asistente:/, "")
+            .trim() ||
+        "";
     navigator.clipboard.writeText(text).then(() => {
         btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
         btn.title = "¡Copiado!";
@@ -413,7 +417,8 @@ function closeSidebar() {
 // ─── Tema oscuro ─────────────────────────────────────────
 function initTheme() {
     const saved = localStorage.getItem("theme");
-    if (saved === "dark" || (!saved && matchMedia("(prefers-color-scheme: dark)").matches)) {
+    if (saved === "dark" ||
+        (!saved && matchMedia("(prefers-color-scheme: dark)").matches)) {
         document.body.classList.add("dark-mode");
     }
 }
