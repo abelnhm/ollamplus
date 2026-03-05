@@ -139,6 +139,32 @@
         <span class="model-status" id="modelStatus"></span>
       </div>
 
+      <!-- Panel de información del modelo -->
+      <div class="model-info-panel" id="modelInfoPanel" style="display:none">
+        <div class="model-info-grid">
+          <div class="model-info-item">
+            <span class="model-info-label">Familia</span>
+            <span class="model-info-value" id="modelInfoFamily">—</span>
+          </div>
+          <div class="model-info-item">
+            <span class="model-info-label">Tamaño</span>
+            <span class="model-info-value" id="modelInfoSize">—</span>
+          </div>
+          <div class="model-info-item">
+            <span class="model-info-label">Cuantización</span>
+            <span class="model-info-value" id="modelInfoQuant">—</span>
+          </div>
+          <div class="model-info-item">
+            <span class="model-info-label">Formato</span>
+            <span class="model-info-value" id="modelInfoFormat">—</span>
+          </div>
+          <div class="model-info-item" id="modelInfoVramItem" style="display:none">
+            <span class="model-info-label">VRAM</span>
+            <span class="model-info-value" id="modelInfoVram">—</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Panel desplegable de instrucciones (system prompt) -->
       <div class="system-prompt-panel" id="systemPromptPanel" style="display:none">
         <div class="system-prompt-header">

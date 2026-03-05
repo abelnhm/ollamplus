@@ -45,5 +45,33 @@ export function createModelRoutes(ollamaService: OllamaService): Router {
     }
   });
 
+  // Obtener información detallada de un modelo
+  router.post("/model-info", async (req: Request, res: Response) => {
+    try {
+      const { ollamaUrl = "http://localhost:11434", model } = req.body;
+
+      if (!model) {
+        res.status(400).json({ error: "Se requiere el nombre del modelo" });
+        return;
+      }
+
+      if (
+        !ollamaUrl.startsWith("http://") &&
+        !ollamaUrl.startsWith("https://")
+      ) {
+        res
+          .status(400)
+          .json({ error: "La URL debe comenzar con http:// o https://" });
+        return;
+      }
+
+      const info = await ollamaService.showModel(ollamaUrl, model);
+      res.json({ info });
+    } catch (error) {
+      console.error("Error al obtener info del modelo:", (error as Error).message);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   return router;
 }

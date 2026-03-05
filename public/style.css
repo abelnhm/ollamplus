@@ -255,6 +255,56 @@ body::before {
   margin-top: 4px;
 }
 
+/* Panel de información del modelo */
+.model-info-panel {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: hsl(var(--muted));
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--border));
+  animation: modelInfoSlideIn 0.2s ease;
+}
+
+@keyframes modelInfoSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.model-info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.model-info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.model-info-label {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.model-info-value {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  background: hsl(var(--background));
+  padding: 2px 8px;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid hsl(var(--border));
+  font-size: 11px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+}
+
 .btn-sm {
   padding: 4px 12px;
   font-size: 12px;

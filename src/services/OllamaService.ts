@@ -19,6 +19,53 @@ export class OllamaService {
     return new Ollama({ host: url });
   }
 
+  async showModel(
+    url: string,
+    modelName: string,
+  ): Promise<{
+    family: string;
+    parameter_size: string;
+    quantization_level: string;
+    format: string;
+    families: string[];
+    size_vram: number;
+  }> {
+    try {
+      const client = this.createClient(url);
+      const response = await client.show({ model: modelName });
+      const details = response.details || ({} as any);
+      const modelInfo = response.model_info as any;
+
+      // Try to extract VRAM from model_info or estimate from model size
+      let sizeVram = 0;
+      if (modelInfo) {
+        // Some ollama versions expose vram in model_info
+        for (const key of Object.keys(modelInfo)) {
+          if (
+            key.toLowerCase().includes("vram") ||
+            key.toLowerCase().includes("memory")
+          ) {
+            sizeVram = Number(modelInfo[key]) || 0;
+            break;
+          }
+        }
+      }
+
+      return {
+        family: details.family || "Desconocida",
+        parameter_size: details.parameter_size || "Desconocido",
+        quantization_level: details.quantization_level || "Desconocida",
+        format: details.format || "Desconocido",
+        families: details.families || [],
+        size_vram: sizeVram,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error al obtener info del modelo: ${(error as Error).message}`,
+      );
+    }
+  }
+
   async listModels(url: string): Promise<OllamaModel[]> {
     try {
       const client = this.createClient(url);

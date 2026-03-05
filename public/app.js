@@ -56,6 +56,14 @@ const enableSystemPrompt = $("enableSystemPrompt");
 const systemPromptForm = $("systemPromptForm");
 const systemPromptInput = $("systemPromptInput");
 const clearSystemPromptBtn = $("clearSystemPrompt");
+// Panel de información del modelo
+const modelInfoPanel = $("modelInfoPanel");
+const modelInfoFamily = $("modelInfoFamily");
+const modelInfoSize = $("modelInfoSize");
+const modelInfoQuant = $("modelInfoQuant");
+const modelInfoFormat = $("modelInfoFormat");
+const modelInfoVramItem = $("modelInfoVramItem");
+const modelInfoVram = $("modelInfoVram");
 // ─── Helpers ─────────────────────────────────────────────
 function getOllamaUrl() {
     const host = localStorage.getItem("ollamaHost") || "localhost";
@@ -279,6 +287,42 @@ async function apiDelete(path) {
     if (!res.ok) {
         const err = await res.json().catch(() => ({ error: res.statusText }));
         throw new Error(err.error || res.statusText);
+    }
+}
+function formatBytes(bytes) {
+    if (bytes === 0)
+        return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+async function loadModelInfo(modelName) {
+    modelInfoPanel.style.display = "none";
+    if (!modelName)
+        return;
+    try {
+        const data = await apiPost("/api/model-info", {
+            ollamaUrl: getOllamaUrl(),
+            model: modelName,
+        });
+        const info = data.info;
+        modelInfoFamily.textContent = info.family;
+        modelInfoSize.textContent = info.parameter_size;
+        modelInfoQuant.textContent = info.quantization_level;
+        modelInfoFormat.textContent = info.format;
+        if (info.size_vram > 0) {
+            modelInfoVram.textContent = formatBytes(info.size_vram);
+            modelInfoVramItem.style.display = "";
+        }
+        else {
+            modelInfoVramItem.style.display = "none";
+        }
+        modelInfoPanel.style.display = "";
+    }
+    catch (err) {
+        console.error("Error cargando info del modelo:", err);
+        modelInfoPanel.style.display = "none";
     }
 }
 // ─── Modelos ─────────────────────────────────────────────
@@ -522,6 +566,7 @@ async function loadChat(chatId) {
         currentChatModel = data.chat.model;
         // Seleccionar el modelo del chat
         modelSelector.value = data.chat.model;
+        loadModelInfo(data.chat.model);
         // Limpiar mensajes y renderizar los existentes
         chatMessages.innerHTML = "";
         data.chat.messages.forEach((msg) => addMessageToUI(msg.role, msg.content));
@@ -537,6 +582,9 @@ function newChat() {
     currentChatId = null;
     currentChatModel = null;
     const selectedModel = modelSelector.value;
+    if (!selectedModel) {
+        modelInfoPanel.style.display = "none";
+    }
     const modelInfo = selectedModel
         ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. ¿En qué puedo ayudarte?`
         : `Selecciona un modelo y ¿en qué puedo ayudarte hoy?`;
@@ -732,6 +780,7 @@ loadModelBtn.addEventListener("click", () => {
     // Si no hay chat activo, o el modelo es el mismo, simplemente aplicar
     if (!currentChatId || !currentChatModel || newModel === currentChatModel) {
         currentChatModel = newModel;
+        loadModelInfo(newModel);
         newChat();
         return;
     }
@@ -744,6 +793,7 @@ modelChangeAcceptBtn.addEventListener("click", () => {
     modelChangeModal.classList.remove("active");
     if (pendingModel) {
         modelSelector.value = pendingModel;
+        loadModelInfo(pendingModel);
         pendingModel = null;
         newChat();
     }
