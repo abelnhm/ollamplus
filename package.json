@@ -8,7 +8,9 @@
     "build:server": "tsc",
     "build:client": "tsc -p client",
     "start": "node dist/index.js",
-    "dev": "tsx --watch index.ts",
+    "dev": "concurrently -n server,client -c blue,green \"tsx --watch index.ts\" \"tsc --watch -p client\"",
+    "dev:server": "tsx --watch index.ts",
+    "dev:client": "tsc --watch -p client",
     "generate-icons": "tsx generate-icons.ts"
   },
   "keywords": [],
@@ -27,6 +29,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.3",
+    "concurrently": "^9.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
