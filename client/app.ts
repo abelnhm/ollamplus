@@ -141,7 +141,10 @@ function getSystemPrompt(): string | null {
 }
 
 function saveSystemPromptToStorage(): void {
-  localStorage.setItem("systemPromptEnabled", enableSystemPrompt.checked ? "1" : "0");
+  localStorage.setItem(
+    "systemPromptEnabled",
+    enableSystemPrompt.checked ? "1" : "0",
+  );
   localStorage.setItem("systemPromptText", systemPromptInput.value);
 }
 
