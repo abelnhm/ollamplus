@@ -117,6 +117,22 @@ export function createChatRoutes(
     }
   });
 
+  // Renombrar un chat
+  router.patch("/chats/:chatId", (req: Request, res: Response) => {
+    try {
+      const { title } = req.body;
+      if (!title || !title.trim()) {
+        res.status(400).json({ error: "El título es requerido" });
+        return;
+      }
+      const chat = chatService.rename(req.params.chatId as string, title.trim());
+      res.json({ success: true, chat: chat.toJSON() });
+    } catch (error) {
+      const status = (error as Error).message.includes("no encontrado") ? 404 : 500;
+      res.status(status).json({ error: (error as Error).message });
+    }
+  });
+
   // Eliminar un chat
   router.delete("/chats/:chatId", (req: Request, res: Response) => {
     try {

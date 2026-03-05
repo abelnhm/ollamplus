@@ -907,6 +907,59 @@ body::before {
   color: hsl(var(--muted-foreground));
 }
 
+.chat-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-item:hover .chat-item-actions {
+  opacity: 1;
+}
+
+.rename-chat-btn {
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.rename-chat-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: hsl(var(--muted-foreground));
+}
+
+.rename-chat-btn:hover {
+  background: hsl(var(--accent));
+}
+
+.rename-chat-btn:hover svg {
+  stroke: hsl(var(--foreground));
+}
+
+.rename-input {
+  width: 100%;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--primary));
+  border-radius: calc(var(--radius) - 4px);
+  padding: 2px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  outline: none;
+  font-family: inherit;
+}
+
 .delete-chat-btn {
   background: hsl(var(--destructive) / 0.1);
   border: 1px solid hsl(var(--destructive) / 0.3);

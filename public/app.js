@@ -631,16 +631,81 @@ async function refreshChatList() {
             const item = document.createElement("div");
             item.className = `chat-item${chat.id === currentChatId ? " active" : ""}`;
             item.innerHTML = `
-          <div class="chat-item-title">${escapeHtml(chat.title)}</div>
-          <div class="chat-item-meta">${chat.model} · ${chat.messageCount} msgs</div>
+          <div class="chat-item-content">
+            <div class="chat-item-title">${escapeHtml(chat.title)}</div>
+            <div class="chat-item-meta">${chat.model} · ${chat.messageCount} msgs</div>
+          </div>
+          <div class="chat-item-actions">
+            <button class="rename-chat-btn" title="Renombrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                <path d="m15 5 4 4"></path>
+              </svg>
+            </button>
+          </div>
         `;
-            item.addEventListener("click", () => loadChat(chat.id));
+            item.querySelector(".chat-item-content").addEventListener("click", () => loadChat(chat.id));
+            item.querySelector(".rename-chat-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                startRenameChat(item, chat.id, chat.title);
+            });
             chatsList.appendChild(item);
         });
     }
     catch (err) {
         console.error("Error cargando chats:", err);
     }
+}
+function startRenameChat(item, chatId, currentTitle) {
+    const titleEl = item.querySelector(".chat-item-title");
+    if (!titleEl || titleEl.querySelector(".rename-input"))
+        return;
+    const originalText = titleEl.textContent || currentTitle;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "rename-input";
+    input.value = originalText;
+    input.maxLength = 100;
+    titleEl.textContent = "";
+    titleEl.appendChild(input);
+    input.focus();
+    input.select();
+    function commit() {
+        const newTitle = input.value.trim();
+        if (newTitle && newTitle !== originalText) {
+            fetch(`/api/chats/${chatId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: newTitle }),
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                if (data.success) {
+                    titleEl.textContent = newTitle;
+                }
+                else {
+                    titleEl.textContent = originalText;
+                }
+            })
+                .catch(() => {
+                titleEl.textContent = originalText;
+            });
+        }
+        else {
+            titleEl.textContent = originalText;
+        }
+    }
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+        }
+        else if (e.key === "Escape") {
+            input.removeEventListener("blur", commit);
+            titleEl.textContent = originalText;
+        }
+    });
 }
 async function loadChat(chatId) {
     try {

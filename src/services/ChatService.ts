@@ -25,6 +25,15 @@ export class ChatService {
     return Array.from(this.#chats.values());
   }
 
+  rename(chatId: string, newTitle: string): Chat {
+    const chat = this.getById(chatId);
+    if (!chat) {
+      throw new Error(`Chat con ID ${chatId} no encontrado`);
+    }
+    chat.title = newTitle;
+    return chat;
+  }
+
   delete(chatId: string): void {
     if (!this.#chats.has(chatId)) {
       throw new Error(`Chat con ID ${chatId} no encontrado`);
