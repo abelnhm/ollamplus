@@ -421,7 +421,10 @@ body::before {
   cursor: pointer;
   color: hsl(var(--muted-foreground));
   opacity: 0;
-  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -494,7 +497,9 @@ body::before {
   max-height: 150px;
   min-height: 44px;
   font-family: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   overflow: hidden;
 }
 

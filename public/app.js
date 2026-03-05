@@ -127,7 +127,10 @@ function getModelOptions() {
         opts.num_predict = parseInt(numPredEl.value, 10);
     const stopEl = document.getElementById("param_stop");
     if (stopEl && stopEl.value.trim() !== "") {
-        opts.stop = stopEl.value.split(",").map((s) => s.trim()).filter(Boolean);
+        opts.stop = stopEl.value
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
     }
     const mirostatEl = document.getElementById("param_mirostat");
     if (mirostatEl)
@@ -155,11 +158,14 @@ function resetModelParams() {
         document.getElementById(numId).value = String(def);
     }
     document.getElementById("param_top_k").value = String(PARAM_DEFAULTS.top_k);
-    document.getElementById("param_num_ctx").value = String(PARAM_DEFAULTS.num_ctx);
+    document.getElementById("param_num_ctx").value =
+        String(PARAM_DEFAULTS.num_ctx);
     document.getElementById("param_seed").value = "";
-    document.getElementById("param_num_predict").value = String(PARAM_DEFAULTS.num_predict);
+    document.getElementById("param_num_predict").value =
+        String(PARAM_DEFAULTS.num_predict);
     document.getElementById("param_stop").value = "";
-    document.getElementById("param_mirostat").value = String(PARAM_DEFAULTS.mirostat);
+    document.getElementById("param_mirostat").value =
+        String(PARAM_DEFAULTS.mirostat);
 }
 function initParamSync() {
     const pairs = [
@@ -172,8 +178,12 @@ function initParamSync() {
     for (const [rangeId, numId] of pairs) {
         const range = document.getElementById(rangeId);
         const num = document.getElementById(numId);
-        range.addEventListener("input", () => { num.value = range.value; });
-        num.addEventListener("input", () => { range.value = num.value; });
+        range.addEventListener("input", () => {
+            num.value = range.value;
+        });
+        num.addEventListener("input", () => {
+            range.value = num.value;
+        });
     }
 }
 function initParamTooltips() {

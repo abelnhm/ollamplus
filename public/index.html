@@ -114,10 +114,14 @@
         </button>
         <button id="modelParamsToggle" class="btn-sm btn-secondary" title="Ajustes del modelo">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
-            <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
             <line x1="17" y1="16" x2="23" y2="16"></line>
           </svg>
           Ajustes
@@ -140,11 +144,13 @@
           <div class="param-row">
             <div class="param-label">
               <span>temperature</span>
-              <button type="button" class="param-help-btn" data-tooltip="Controla la creatividad de las respuestas. Valores bajos (0.0–0.3) generan respuestas más precisas y deterministas. Valores altos (1.0–2.0) generan respuestas más creativas y variadas.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Controla la creatividad de las respuestas. Valores bajos (0.0–0.3) generan respuestas más precisas y deterministas. Valores altos (1.0–2.0) generan respuestas más creativas y variadas.">?</button>
             </div>
             <div class="param-input-group">
               <input type="range" id="param_temperature" min="0" max="2" step="0.1" value="0.8" class="param-range">
-              <input type="number" id="param_temperature_val" min="0" max="2" step="0.1" value="0.8" class="param-number">
+              <input type="number" id="param_temperature_val" min="0" max="2" step="0.1" value="0.8"
+                class="param-number">
             </div>
           </div>
 
@@ -152,7 +158,8 @@
           <div class="param-row">
             <div class="param-label">
               <span>top_p</span>
-              <button type="button" class="param-help-btn" data-tooltip="Nucleus sampling. Limita la selección de tokens a aquellos cuya probabilidad acumulada no supere este valor. 0.9 significa que solo se consideran los tokens que suman el 90% de probabilidad.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Nucleus sampling. Limita la selección de tokens a aquellos cuya probabilidad acumulada no supere este valor. 0.9 significa que solo se consideran los tokens que suman el 90% de probabilidad.">?</button>
             </div>
             <div class="param-input-group">
               <input type="range" id="param_top_p" min="0" max="1" step="0.05" value="0.9" class="param-range">
@@ -164,10 +171,12 @@
           <div class="param-row">
             <div class="param-label">
               <span>top_k</span>
-              <button type="button" class="param-help-btn" data-tooltip="Solo considera los K tokens más probables en cada paso de generación. Un valor bajo (10) hace respuestas más enfocadas. Un valor alto (100) permite más variedad. 40 es el valor por defecto.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Solo considera los K tokens más probables en cada paso de generación. Un valor bajo (10) hace respuestas más enfocadas. Un valor alto (100) permite más variedad. 40 es el valor por defecto.">?</button>
             </div>
             <div class="param-input-group">
-              <input type="number" id="param_top_k" min="1" max="1000" step="1" value="40" class="param-number param-number-wide">
+              <input type="number" id="param_top_k" min="1" max="1000" step="1" value="40"
+                class="param-number param-number-wide">
             </div>
           </div>
 
@@ -175,7 +184,8 @@
           <div class="param-row">
             <div class="param-label">
               <span>num_ctx</span>
-              <button type="button" class="param-help-btn" data-tooltip="Tamaño de la ventana de contexto en tokens. Define cuánta conversación puede 'recordar' el modelo. Valores más altos consumen más VRAM. 2048 es el mínimo, modelos modernos soportan hasta 128K.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Tamaño de la ventana de contexto en tokens. Define cuánta conversación puede 'recordar' el modelo. Valores más altos consumen más VRAM. 2048 es el mínimo, modelos modernos soportan hasta 128K.">?</button>
             </div>
             <div class="param-input-group">
               <select id="param_num_ctx" class="param-select">
@@ -196,11 +206,13 @@
           <div class="param-row">
             <div class="param-label">
               <span>repeat_penalty</span>
-              <button type="button" class="param-help-btn" data-tooltip="Penalización por repetir tokens ya generados. Valores mayores a 1.0 reducen las repeticiones. 1.0 = sin penalización, 1.5+ = muy restrictivo contra repeticiones.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Penalización por repetir tokens ya generados. Valores mayores a 1.0 reducen las repeticiones. 1.0 = sin penalización, 1.5+ = muy restrictivo contra repeticiones.">?</button>
             </div>
             <div class="param-input-group">
               <input type="range" id="param_repeat_penalty" min="0" max="2" step="0.1" value="1.1" class="param-range">
-              <input type="number" id="param_repeat_penalty_val" min="0" max="2" step="0.1" value="1.1" class="param-number">
+              <input type="number" id="param_repeat_penalty_val" min="0" max="2" step="0.1" value="1.1"
+                class="param-number">
             </div>
           </div>
 
@@ -208,10 +220,12 @@
           <div class="param-row">
             <div class="param-label">
               <span>seed</span>
-              <button type="button" class="param-help-btn" data-tooltip="Semilla para reproducibilidad. Si usas el mismo seed con los mismos parámetros y prompt, obtendrás la misma respuesta. Déjalo vacío para aleatorio.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Semilla para reproducibilidad. Si usas el mismo seed con los mismos parámetros y prompt, obtendrás la misma respuesta. Déjalo vacío para aleatorio.">?</button>
             </div>
             <div class="param-input-group">
-              <input type="number" id="param_seed" min="0" step="1" value="" placeholder="Aleatorio" class="param-number param-number-wide">
+              <input type="number" id="param_seed" min="0" step="1" value="" placeholder="Aleatorio"
+                class="param-number param-number-wide">
             </div>
           </div>
 
@@ -219,10 +233,12 @@
           <div class="param-row">
             <div class="param-label">
               <span>num_predict</span>
-              <button type="button" class="param-help-btn" data-tooltip="Máximo número de tokens a generar en la respuesta. -1 = ilimitado (el modelo decide cuándo parar). Útil para limitar respuestas largas.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Máximo número de tokens a generar en la respuesta. -1 = ilimitado (el modelo decide cuándo parar). Útil para limitar respuestas largas.">?</button>
             </div>
             <div class="param-input-group">
-              <input type="number" id="param_num_predict" min="-1" step="1" value="-1" class="param-number param-number-wide">
+              <input type="number" id="param_num_predict" min="-1" step="1" value="-1"
+                class="param-number param-number-wide">
             </div>
           </div>
 
@@ -230,7 +246,8 @@
           <div class="param-row">
             <div class="param-label">
               <span>stop</span>
-              <button type="button" class="param-help-btn" data-tooltip="Secuencias de parada personalizadas. El modelo dejará de generar al encontrar cualquiera de estas cadenas. Separa con comas. Ejemplo: ###,END,---">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Secuencias de parada personalizadas. El modelo dejará de generar al encontrar cualquiera de estas cadenas. Separa con comas. Ejemplo: ###,END,---">?</button>
             </div>
             <div class="param-input-group">
               <input type="text" id="param_stop" value="" placeholder="Separar con comas" class="param-text">
@@ -241,7 +258,8 @@
           <div class="param-row">
             <div class="param-label">
               <span>mirostat</span>
-              <button type="button" class="param-help-btn" data-tooltip="Algoritmo de muestreo alternativo que controla la perplejidad. 0 = desactivado (usa temperature/top_p). 1 = Mirostat v1. 2 = Mirostat v2. Cuando está activo, temperature/top_p se ignoran.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Algoritmo de muestreo alternativo que controla la perplejidad. 0 = desactivado (usa temperature/top_p). 1 = Mirostat v1. 2 = Mirostat v2. Cuando está activo, temperature/top_p se ignoran.">?</button>
             </div>
             <div class="param-input-group">
               <select id="param_mirostat" class="param-select">
@@ -256,11 +274,13 @@
           <div class="param-row">
             <div class="param-label">
               <span>mirostat_tau</span>
-              <button type="button" class="param-help-btn" data-tooltip="Controla el equilibrio entre coherencia y diversidad del texto cuando Mirostat está activo. Valores más bajos = texto más enfocado. Valores más altos = más diverso.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Controla el equilibrio entre coherencia y diversidad del texto cuando Mirostat está activo. Valores más bajos = texto más enfocado. Valores más altos = más diverso.">?</button>
             </div>
             <div class="param-input-group">
               <input type="range" id="param_mirostat_tau" min="0" max="10" step="0.1" value="5.0" class="param-range">
-              <input type="number" id="param_mirostat_tau_val" min="0" max="10" step="0.1" value="5.0" class="param-number">
+              <input type="number" id="param_mirostat_tau_val" min="0" max="10" step="0.1" value="5.0"
+                class="param-number">
             </div>
           </div>
 
@@ -268,16 +288,19 @@
           <div class="param-row">
             <div class="param-label">
               <span>mirostat_eta</span>
-              <button type="button" class="param-help-btn" data-tooltip="Learning rate de Mirostat. Controla la velocidad con la que el algoritmo responde al feedback del texto generado. Valores bajos = ajuste lento y estable. Valores altos = ajuste rápido.">?</button>
+              <button type="button" class="param-help-btn"
+                data-tooltip="Learning rate de Mirostat. Controla la velocidad con la que el algoritmo responde al feedback del texto generado. Valores bajos = ajuste lento y estable. Valores altos = ajuste rápido.">?</button>
             </div>
             <div class="param-input-group">
               <input type="range" id="param_mirostat_eta" min="0" max="1" step="0.01" value="0.1" class="param-range">
-              <input type="number" id="param_mirostat_eta_val" min="0" max="1" step="0.01" value="0.1" class="param-number">
+              <input type="number" id="param_mirostat_eta_val" min="0" max="1" step="0.01" value="0.1"
+                class="param-number">
             </div>
           </div>
 
           <div class="param-row param-actions">
-            <button type="button" id="resetParamsBtn" class="btn-sm btn-secondary">Restaurar valores por defecto</button>
+            <button type="button" id="resetParamsBtn" class="btn-sm btn-secondary">Restaurar valores por
+              defecto</button>
           </div>
         </div>
       </div>

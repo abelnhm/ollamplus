@@ -159,7 +159,9 @@ function getModelOptions(): ModelOptions | null {
 
   const opts: ModelOptions = {};
 
-  const tempEl = document.getElementById("param_temperature_val") as HTMLInputElement;
+  const tempEl = document.getElementById(
+    "param_temperature_val",
+  ) as HTMLInputElement;
   if (tempEl) opts.temperature = parseFloat(tempEl.value);
 
   const topPEl = document.getElementById("param_top_p_val") as HTMLInputElement;
@@ -168,30 +170,45 @@ function getModelOptions(): ModelOptions | null {
   const topKEl = document.getElementById("param_top_k") as HTMLInputElement;
   if (topKEl) opts.top_k = parseInt(topKEl.value, 10);
 
-  const numCtxEl = document.getElementById("param_num_ctx") as HTMLSelectElement;
+  const numCtxEl = document.getElementById(
+    "param_num_ctx",
+  ) as HTMLSelectElement;
   if (numCtxEl) opts.num_ctx = parseInt(numCtxEl.value, 10);
 
-  const repeatEl = document.getElementById("param_repeat_penalty_val") as HTMLInputElement;
+  const repeatEl = document.getElementById(
+    "param_repeat_penalty_val",
+  ) as HTMLInputElement;
   if (repeatEl) opts.repeat_penalty = parseFloat(repeatEl.value);
 
   const seedEl = document.getElementById("param_seed") as HTMLInputElement;
   if (seedEl && seedEl.value !== "") opts.seed = parseInt(seedEl.value, 10);
 
-  const numPredEl = document.getElementById("param_num_predict") as HTMLInputElement;
+  const numPredEl = document.getElementById(
+    "param_num_predict",
+  ) as HTMLInputElement;
   if (numPredEl) opts.num_predict = parseInt(numPredEl.value, 10);
 
   const stopEl = document.getElementById("param_stop") as HTMLInputElement;
   if (stopEl && stopEl.value.trim() !== "") {
-    opts.stop = stopEl.value.split(",").map((s) => s.trim()).filter(Boolean);
+    opts.stop = stopEl.value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
-  const mirostatEl = document.getElementById("param_mirostat") as HTMLSelectElement;
+  const mirostatEl = document.getElementById(
+    "param_mirostat",
+  ) as HTMLSelectElement;
   if (mirostatEl) opts.mirostat = parseInt(mirostatEl.value, 10);
 
-  const mirostatTauEl = document.getElementById("param_mirostat_tau_val") as HTMLInputElement;
+  const mirostatTauEl = document.getElementById(
+    "param_mirostat_tau_val",
+  ) as HTMLInputElement;
   if (mirostatTauEl) opts.mirostat_tau = parseFloat(mirostatTauEl.value);
 
-  const mirostatEtaEl = document.getElementById("param_mirostat_eta_val") as HTMLInputElement;
+  const mirostatEtaEl = document.getElementById(
+    "param_mirostat_eta_val",
+  ) as HTMLInputElement;
   if (mirostatEtaEl) opts.mirostat_eta = parseFloat(mirostatEtaEl.value);
 
   return opts;
@@ -212,12 +229,17 @@ function resetModelParams(): void {
     (document.getElementById(numId) as HTMLInputElement).value = String(def);
   }
 
-  (document.getElementById("param_top_k") as HTMLInputElement).value = String(PARAM_DEFAULTS.top_k);
-  (document.getElementById("param_num_ctx") as HTMLSelectElement).value = String(PARAM_DEFAULTS.num_ctx);
+  (document.getElementById("param_top_k") as HTMLInputElement).value = String(
+    PARAM_DEFAULTS.top_k,
+  );
+  (document.getElementById("param_num_ctx") as HTMLSelectElement).value =
+    String(PARAM_DEFAULTS.num_ctx);
   (document.getElementById("param_seed") as HTMLInputElement).value = "";
-  (document.getElementById("param_num_predict") as HTMLInputElement).value = String(PARAM_DEFAULTS.num_predict);
+  (document.getElementById("param_num_predict") as HTMLInputElement).value =
+    String(PARAM_DEFAULTS.num_predict);
   (document.getElementById("param_stop") as HTMLInputElement).value = "";
-  (document.getElementById("param_mirostat") as HTMLSelectElement).value = String(PARAM_DEFAULTS.mirostat);
+  (document.getElementById("param_mirostat") as HTMLSelectElement).value =
+    String(PARAM_DEFAULTS.mirostat);
 }
 
 function initParamSync(): void {
@@ -231,8 +253,12 @@ function initParamSync(): void {
   for (const [rangeId, numId] of pairs) {
     const range = document.getElementById(rangeId) as HTMLInputElement;
     const num = document.getElementById(numId) as HTMLInputElement;
-    range.addEventListener("input", () => { num.value = range.value; });
-    num.addEventListener("input", () => { range.value = num.value; });
+    range.addEventListener("input", () => {
+      num.value = range.value;
+    });
+    num.addEventListener("input", () => {
+      range.value = num.value;
+    });
   }
 }
 
@@ -247,7 +273,9 @@ function initParamTooltips(): void {
   }
 
   document.addEventListener("click", (e) => {
-    const btn = (e.target as HTMLElement).closest(".param-help-btn") as HTMLElement | null;
+    const btn = (e.target as HTMLElement).closest(
+      ".param-help-btn",
+    ) as HTMLElement | null;
     if (!btn) {
       removeTooltip();
       return;
