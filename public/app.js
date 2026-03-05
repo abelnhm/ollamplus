@@ -290,15 +290,13 @@ async function sendMessage() {
 
   try {
     const config = getOllamaConfig();
-    const response = await fetch("/api/chat", {
+    const response = await fetch(`/api/chat/${sessionId}/message`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message,
-        sessionId,
-        model: currentModel,
+        content: message,
         ollamaUrl: config.url,
       }),
     });
@@ -423,18 +421,10 @@ async function clearChat() {
     return;
   }
 
-  try {
-    await fetch("/api/clear", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ sessionId }),
-    });
-
-    // Limpiar UI y datos
-    conversationData = [];
-    chatMessages.innerHTML = `
+  // Limpiar UI y datos locales (el historial en memoria del servidor
+  // se preserva; para un reset completo crea un nuevo chat)
+  conversationData = [];
+  chatMessages.innerHTML = `
             <div class="message assistant">
                 <div class="message-content">
                     <strong>Asistente:</strong>
@@ -443,11 +433,7 @@ async function clearChat() {
             </div>
         `;
 
-    messageInput.focus();
-  } catch (error) {
-    console.error("Error al limpiar:", error);
-    alert("Error al limpiar el historial");
-  }
+  messageInput.focus();
 }
 
 function exportToMarkdown() {
@@ -603,19 +589,18 @@ async function handleModelChange() {
 // Crear nueva conversación con modelo específico
 async function createNewChatWithModel(model) {
   try {
-    sessionId = "user_" + Math.random().toString(36).substring(7);
-
     const response = await fetch("/api/new-chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ sessionId, model }),
+      body: JSON.stringify({ model, title: `Chat con ${model}` }),
     });
 
     const data = await response.json();
 
     if (data.success) {
+      sessionId = data.chat.id;
       // Limpiar conversación actual
       conversationData = [];
       chatMessages.innerHTML = `
@@ -738,7 +723,7 @@ async function loadChat(chatId) {
       modelSelector.value = chat.model;
 
       // Limpiar y cargar mensajes
-      conversationData = chat.history || [];
+      conversationData = chat.messages || [];
       chatMessages.innerHTML = "";
 
       conversationData.forEach((msg) => {

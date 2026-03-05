@@ -2,9 +2,10 @@
   "name": "ias-proyect",
   "version": "1.0.0",
   "description": "",
-  "main": "deepseek.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "node --watch index.js",
     "generate-icons": "node generate-icons.js"
   },
   "keywords": [],

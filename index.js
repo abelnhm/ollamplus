@@ -1,4 +1,5 @@
-import { startChatServer } from "./feature/Ollama/ollama-ui.js";
+import { DependencyContainer } from "./src/infrastructure/http/DependencyContainer.js";
 
-// Iniciar servidor web con interfaz UI en el puerto 3000
-startChatServer(3000);
+const PORT = process.env.PORT || 3000;
+const container = new DependencyContainer(PORT);
+container.start();
