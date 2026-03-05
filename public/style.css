@@ -451,10 +451,35 @@ body::before {
   background: hsl(var(--card));
   border-top: 1px solid hsl(var(--border));
   padding: 12px;
+  padding-top: 0;
   display: flex;
   gap: 8px;
   align-items: flex-end;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.resize-handle {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 14px;
+  cursor: ns-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.resize-handle-bar {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: hsl(var(--border));
+  transition: background 0.2s;
+}
+
+.resize-handle:hover .resize-handle-bar {
+  background: hsl(var(--muted-foreground));
 }
 
 .message-input {
@@ -466,9 +491,11 @@ body::before {
   font-size: 14px;
   color: hsl(var(--foreground));
   resize: none;
-  max-height: 120px;
+  max-height: 150px;
+  min-height: 44px;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
 .message-input::placeholder {
@@ -671,7 +698,8 @@ body::before {
 
 .chat-item.active .chat-item-content,
 .chat-item.active .chat-item-title,
-.chat-item.active .chat-item-date {
+.chat-item.active .chat-item-date,
+.chat-item.active .chat-item-meta {
   color: hsl(var(--primary-foreground));
 }
 

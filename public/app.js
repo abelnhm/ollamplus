@@ -72,9 +72,10 @@ function formatMarkdown(text) {
     }
     return escapeHtml(text).replace(/\n/g, "<br>");
 }
+let inputMaxHeight = 150;
 function autoResize(textarea) {
     textarea.style.height = "auto";
-    textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
+    textarea.style.height = Math.min(textarea.scrollHeight, inputMaxHeight) + "px";
 }
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -465,6 +466,38 @@ messageInput.addEventListener("keydown", (e) => {
     }
 });
 messageInput.addEventListener("input", () => autoResize(messageInput));
+// Resize handle para el input
+(function initResizeHandle() {
+    const handle = $("resizeHandle");
+    if (!handle)
+        return;
+    let startY = 0;
+    let startMax = 0;
+    let isDragging = false;
+    function onPointerMove(e) {
+        const delta = startY - e.clientY;
+        const newMax = Math.min(Math.max(startMax + delta, 80), window.innerHeight * 0.6);
+        inputMaxHeight = newMax;
+        messageInput.style.maxHeight = newMax + "px";
+        messageInput.style.height = newMax + "px";
+        messageInput.style.overflow = "auto";
+    }
+    function onPointerUp() {
+        isDragging = false;
+        document.removeEventListener("pointermove", onPointerMove);
+        document.removeEventListener("pointerup", onPointerUp);
+        document.body.style.userSelect = "";
+    }
+    handle.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        isDragging = true;
+        startY = e.clientY;
+        startMax = inputMaxHeight;
+        document.body.style.userSelect = "none";
+        document.addEventListener("pointermove", onPointerMove);
+        document.addEventListener("pointerup", onPointerUp);
+    });
+})();
 toggleSidebarBtn.addEventListener("click", openSidebar);
 closeSidebarBtn.addEventListener("click", closeSidebar);
 sidebarOverlay.addEventListener("click", closeSidebar);
