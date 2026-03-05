@@ -25,8 +25,14 @@ export function createServer(port: number = 3000): Express {
   app.use(express.json());
   app.use(logger);
 
-  // --- Archivos estáticos (frontend) ---
-  app.use(express.static("public"));
+  // --- Archivos estáticos (frontend, sin caché en desarrollo) ---
+  app.use(express.static("public", {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "no-store");
+    },
+  }));
 
   // --- Capa de servicios (lógica de negocio) ---
   const chatService = new ChatService();

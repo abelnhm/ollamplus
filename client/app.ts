@@ -238,7 +238,8 @@ async function sendMessage(): Promise<void> {
   // Estado de streaming
   isStreaming = true;
   sendBtn.disabled = true;
-  sendText.textContent = "…";
+  sendBtn.classList.add("loading");
+  sendText.textContent = "Pensando…";
 
   const streamWrapper = createStreamingMessage();
   let fullText = "";
@@ -288,6 +289,7 @@ async function sendMessage(): Promise<void> {
   } finally {
     isStreaming = false;
     sendBtn.disabled = false;
+    sendBtn.classList.remove("loading");
     sendText.textContent = "Enviar";
     refreshChatList();
   }
@@ -348,13 +350,23 @@ async function loadChat(chatId: string): Promise<void> {
 // ─── Acciones de cabecera ────────────────────────────────
 function newChat(): void {
   currentChatId = null;
+  const selectedModel = modelSelector.value;
+  const modelInfo = selectedModel
+    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. ¿En qué puedo ayudarte?`
+    : `Selecciona un modelo y ¿en qué puedo ayudarte hoy?`;
   chatMessages.innerHTML = `
     <div class="message assistant">
       <div class="message-content">
         <strong>🤖 Asistente:</strong>
-        <p>¡Hola! Soy tu asistente de IA. Selecciona un modelo y ¿en qué puedo ayudarte hoy?</p>
+        <p>¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
       </div>
     </div>`;
+  messageInput.value = "";
+  messageInput.style.height = "auto";
+  isStreaming = false;
+  sendBtn.disabled = false;
+  sendBtn.classList.remove("loading");
+  sendText.textContent = "Enviar";
   closeSidebar();
 }
 
