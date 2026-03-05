@@ -1,5 +1,4 @@
-import { DependencyContainer } from "./src/infrastructure/http/DependencyContainer.js";
+import { createServer } from "./src/server.js";
 
 const PORT = process.env.PORT || 3000;
-const container = new DependencyContainer(PORT);
-container.start();
+createServer(PORT);

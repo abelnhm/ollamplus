@@ -1,6 +1,9 @@
 /**
- * Presentation: Logger
- * Middleware para logging de peticiones HTTP
+ * Middleware: Logger
+ * Registra en consola cada petición HTTP que llega al servidor.
+ *
+ * Muestra: MÉTODO RUTA - CÓDIGO_ESTADO (duración en ms)
+ * Ejemplo: GET /api/chats - 200 (15ms)
  */
 export function logger(req, res, next) {
   const start = Date.now();

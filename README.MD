@@ -1,491 +1,426 @@
-# 🤖 IAS-PROYECT - Chat Web con Ollama
+# OllamaUI — Chat con IA usando Arquitectura por Capas
 
-Proyecto de chat interactivo en tiempo real con modelos de IA locales usando Ollama. Interfaz web moderna con streaming de respuestas y gestión de múltiples sesiones.
+## ¿Qué es este proyecto?
 
-## 📋 Descripción
+Una aplicación web **completa** (frontend + backend) que te permite chatear con modelos de inteligencia artificial ejecutados localmente con [Ollama](https://ollama.com). Funciona como un "ChatGPT local" en tu propia máquina.
 
-Sistema de chat web completo que permite interactuar con modelos de IA locales a través de Ollama. Implementa una arquitectura cliente-servidor con streaming en tiempo real, manteniendo el contexto de conversación y permitiendo múltiples sesiones simultáneas.
+**Características:**
 
-## ✨ Características Principales
+- Múltiples conversaciones simultáneas
+- Respuestas en tiempo real (streaming)
+- Selección de modelos de IA instalados
+- Exportar conversaciones a Markdown
+- Interfaz responsiva (móvil y escritorio)
+- Modo oscuro
+- PWA (Progressive Web App)
 
-- 💬 **Chat en tiempo real** con streaming de respuestas
-- 🔄 **Historial de conversación** persistente por sesión
-- 👥 **Múltiples sesiones** simultáneas e independientes
-- 🎨 **Interfaz web moderna** con diseño responsive
-- ⚡ **Streaming con SSE** (Server-Sent Events)
-- 🧹 **Limpieza de historial** individual por sesión
-- 📱 **Diseño responsive** adaptable a dispositivos móviles
-- 🎯 **Indicadores visuales** de estado y procesamiento
+---
 
-## 🛠️ Requisitos Previos
+## Arquitectura por Capas
 
-- **Node.js** v16 o superior
-- **Ollama** instalado y en ejecución
-- Un modelo de Ollama descargado (ej: llama2, mistral, codellama)
+Este proyecto está organizado en **3 capas** bien definidas. Cada capa tiene una responsabilidad única y solo se comunica con la capa inmediatamente inferior.
 
-### Instalar Ollama
+```
+┌─────────────────────────────────────────────┐
+│            CAPA 3: RUTAS (HTTP)             │  ← Recibe peticiones del navegador
+│         src/routes/                         │
+├─────────────────────────────────────────────┤
+│         CAPA 2: SERVICIOS (Negocio)         │  ← Lógica y reglas de la aplicación
+│         src/services/                       │
+├─────────────────────────────────────────────┤
+│         CAPA 1: MODELOS (Datos)             │  ← Estructura de los datos
+│         src/models/                         │
+└─────────────────────────────────────────────┘
+```
 
-1. Descarga Ollama desde [ollama.ai](https://ollama.ai)
-2. Instala y ejecuta el servicio
-3. Descarga un modelo:
-   ```bash
-   ollama pull llama2
-   ```
+### ¿Por qué capas?
 
-## 📦 Instalación
+1. **Separación de responsabilidades**: Cada archivo hace UNA sola cosa.
+2. **Facilidad para entender**: Sabes dónde buscar según lo que necesites.
+3. **Mantenibilidad**: Puedes cambiar la base de datos sin tocar las rutas, o agregar endpoints nuevos sin modificar la lógica de negocio.
 
-1. **Clonar o descargar el proyecto**
+---
 
-2. **Instalar dependencias**
+## Estructura de Archivos
 
-   ```bash
-   npm install
-   ```
+```
+IAS-PROJECT/
+│
+├── index.js                    # Punto de entrada — arranca el servidor
+├── package.json                # Dependencias y scripts de npm
+│
+├── src/                        # === BACKEND (Node.js + Express) ===
+│   │
+│   ├── server.js               # Configura Express y conecta todas las capas
+│   │
+│   ├── models/                 # CAPA 1: Modelos de datos
+│   │   ├── Chat.js             #   → Estructura de una conversación
+│   │   └── Message.js          #   → Estructura de un mensaje
+│   │
+│   ├── services/               # CAPA 2: Lógica de negocio
+│   │   ├── ChatService.js      #   → CRUD de chats + agregar mensajes
+│   │   └── OllamaService.js    #   → Comunicación con la API de Ollama
+│   │
+│   ├── routes/                 # CAPA 3: Rutas HTTP (endpoints)
+│   │   ├── chatRoutes.js       #   → POST/GET/DELETE para chats
+│   │   └── modelRoutes.js      #   → POST para obtener modelos
+│   │
+│   └── middlewares/            # Funciones auxiliares de Express
+│       ├── logger.js           #   → Registra cada petición en consola
+│       └── errorHandler.js     #   → Captura errores y responde JSON
+│
+└── public/                     # === FRONTEND (HTML/CSS/JS) ===
+    ├── index.html              # Página principal
+    ├── app.js                  # Lógica del frontend (DOM, eventos, fetch)
+    ├── style.css               # Estilos (diseño responsivo, dark mode)
+    ├── sw.js                   # Service Worker (cache para PWA)
+    ├── manifest.json           # Configuración PWA
+    └── icons/                  # Iconos de la aplicación
+```
 
-3. **Configurar variables de entorno**
+---
 
-   Crea un archivo `.env` en la raíz del proyecto:
+## Explicación Capa por Capa
 
-   ```env
-   OLLAMA_MODEL=llama2
-   ```
+### CAPA 1: Modelos (`src/models/`)
 
-   Puedes cambiar `llama2` por cualquier modelo que tengas instalado en Ollama.
+Los modelos definen **la forma de los datos**. No tienen lógica compleja, solo representan "cosas" del mundo real.
 
-## 🚀 Uso
+#### `Chat.js` — Una conversación
 
-### Iniciar el servidor web
+```javascript
+// Un chat tiene:
+//   - id: identificador único (UUID generado automáticamente)
+//   - model: nombre del modelo de IA (ej: "llama2")
+//   - title: título de la conversación
+//   - messages: array de mensajes
+//   - createdAt: fecha de creación
+//   - lastMessageAt: fecha del último mensaje
+
+const chat = new Chat({ model: "llama2", title: "Mi primer chat" });
+chat.addMessage(message); // Agregar un mensaje
+chat.getHistory(); // Obtener historial para Ollama
+chat.toJSON(); // Convertir a objeto plano (para HTTP)
+```
+
+#### `Message.js` — Un mensaje
+
+```javascript
+// Un mensaje tiene:
+//   - id: identificador único
+//   - role: "user" | "assistant" | "system"
+//   - content: texto del mensaje
+//   - timestamp: fecha y hora
+
+const msg = new Message({ role: "user", content: "Hola, ¿cómo estás?" });
+msg.toJSON(); // { id: "abc-123", role: "user", content: "Hola...", timestamp: "..." }
+```
+
+**Pregunta para pensar**: ¿Por qué `Chat.toJSON()` convierte las fechas a string con `.toISOString()`? Porque JSON no puede representar objetos `Date` directamente — necesitan convertirse a texto.
+
+---
+
+### CAPA 2: Servicios (`src/services/`)
+
+Los servicios contienen **la lógica de negocio**. Aquí ocurren las operaciones importantes: crear chats, enviar mensajes, comunicarse con Ollama.
+
+#### `ChatService.js` — Gestión de chats
+
+```javascript
+const chatService = new ChatService();
+
+// Crear un chat
+const chat = chatService.create("llama2", "Mi chat");
+
+// Obtener un chat por ID
+const found = chatService.getById("abc-123");
+
+// Listar todos los chats
+const all = chatService.getAll();
+
+// Agregar un mensaje a un chat
+chatService.addMessage("abc-123", "user", "Hola");
+
+// Eliminar un chat
+chatService.delete("abc-123");
+```
+
+Internamente usa un `Map()` como almacenamiento en memoria. En un proyecto real, esto se reemplazaría por una base de datos (MongoDB, PostgreSQL, etc.).
+
+#### `OllamaService.js` — Comunicación con la IA
+
+```javascript
+const ollamaService = new OllamaService();
+
+// Obtener modelos instalados
+const models = await ollamaService.listModels("http://localhost:11434");
+// → [{ name: "llama2", size: 3826793472, modified_at: "..." }]
+
+// Enviar mensaje con streaming
+const response = await ollamaService.sendMessage(
+  "llama2", // modelo
+  [{ role: "user", content: "Hola" }], // historial
+  "http://localhost:11434", // URL de Ollama
+  (chunk) => console.log(chunk), // callback por cada fragmento
+);
+```
+
+**Concepto clave — Streaming**: En lugar de esperar a que el modelo genere TODA la respuesta (que puede tardar segundos o minutos), recibimos la respuesta **palabra por palabra** usando `for await...of`. Esto permite mostrarla en tiempo real en la interfaz.
+
+---
+
+### CAPA 3: Rutas (`src/routes/`)
+
+Las rutas traducen **peticiones HTTP → llamadas a servicios → respuestas JSON**.
+
+#### `chatRoutes.js` — API de chats
+
+| Método   | Ruta                        | Descripción                   |
+| -------- | --------------------------- | ----------------------------- |
+| `POST`   | `/api/new-chat`             | Crea un nuevo chat            |
+| `POST`   | `/api/chat/:chatId/message` | Envía mensaje (streaming SSE) |
+| `GET`    | `/api/chats`                | Lista todos los chats         |
+| `GET`    | `/api/chats/:chatId`        | Obtiene un chat por ID        |
+| `DELETE` | `/api/chats/:chatId`        | Elimina un chat               |
+
+#### `modelRoutes.js` — API de modelos
+
+| Método | Ruta          | Descripción                         |
+| ------ | ------------- | ----------------------------------- |
+| `POST` | `/api/models` | Lista modelos de Ollama disponibles |
+
+#### Ejemplo de flujo completo
+
+```
+1. El usuario escribe "Hola" en el navegador
+2. El frontend hace: POST /api/chat/abc-123/message { content: "Hola" }
+3. La RUTA (chatRoutes.js) recibe la petición
+4. La ruta llama al SERVICIO: chatService.addMessage("abc-123", "user", "Hola")
+5. La ruta llama al SERVICIO: ollamaService.sendMessage(...)
+6. Ollama responde en streaming → la ruta reenvía cada fragmento al frontend
+7. La ruta llama al SERVICIO: chatService.addMessage("abc-123", "assistant", respuesta)
+8. El frontend muestra la respuesta palabra por palabra
+```
+
+---
+
+### Middlewares (`src/middlewares/`)
+
+Los middlewares son funciones que se ejecutan **antes** (o después) de cada petición. Express los ejecuta en orden.
+
+```
+Petición → logger → cors → json → RUTA → errorHandler → Respuesta
+```
+
+- **`logger.js`**: Imprime en consola cada petición (método, ruta, código de estado, duración).
+- **`errorHandler.js`**: Si alguna ruta lanza un error no manejado, este middleware lo captura y devuelve una respuesta JSON con el error. Debe registrarse **siempre al final**.
+
+---
+
+### `server.js` — El pegamento
+
+Este archivo conecta todas las capas:
+
+```javascript
+// 1. Crear la app Express
+const app = express();
+
+// 2. Registrar middlewares
+app.use(cors()); // Permitir peticiones de otros orígenes
+app.use(express.json()); // Parsear body JSON de las peticiones
+app.use(logger); // Registrar peticiones en consola
+app.use(express.static("public")); // Servir el frontend
+
+// 3. Crear servicios (CAPA 2)
+const chatService = new ChatService();
+const ollamaService = new OllamaService();
+
+// 4. Crear rutas pasándoles los servicios (CAPA 3 usa CAPA 2)
+app.use("/api", createChatRoutes(chatService, ollamaService));
+app.use("/api", createModelRoutes(ollamaService));
+
+// 5. Manejo de errores (siempre al final)
+app.use(errorHandler);
+
+// 6. Arrancar
+app.listen(port);
+```
+
+---
+
+## ¿Cómo funciona el Frontend?
+
+El frontend es una aplicación **HTML/CSS/JavaScript pura** (sin frameworks). Vive en la carpeta `public/` y Express la sirve como archivos estáticos.
+
+### `index.html`
+
+Estructura HTML con sidebar de chats, selector de modelos, área de mensajes, input de texto y modal de configuración.
+
+### `app.js`
+
+Toda la lógica del frontend en un solo archivo:
+
+- **Eventos DOM**: Clicks en botones, envío con Enter, cambio de modelo
+- **Fetch API**: Comunicación con el backend (`/api/chats`, `/api/models`, etc.)
+- **Streaming con ReadableStream**: Lee la respuesta del servidor palabra por palabra
+- **Renderizado Markdown**: Usa `marked.js` y `highlight.js` para formatear respuestas
+- **Dark mode**: Alterna entre temas claro y oscuro con localStorage
+- **Configuración de Ollama**: Permite cambiar host/puerto de conexión
+
+### `style.css`
+
+Diseño responsivo mobile-first con variables CSS al estilo shadcn/ui. Soporta modo claro y oscuro.
+
+### `sw.js`
+
+Service Worker que cachea archivos para funcionamiento offline (PWA).
+
+---
+
+## Conceptos Clave para Estudiar
+
+### 1. Server-Sent Events (SSE)
+
+El streaming de respuestas usa SSE. El servidor envía datos línea por línea:
+
+```
+data: {"chunk": "Hola", "done": false}
+
+data: {"chunk": " mundo", "done": false}
+
+data: {"done": true, "fullResponse": "Hola mundo"}
+```
+
+El frontend los lee con `ReadableStream` y `TextDecoder`.
+
+### 2. Inyección de dependencias (simple)
+
+Los servicios se crean en `server.js` y se pasan como parámetros a las rutas:
+
+```javascript
+createChatRoutes(chatService, ollamaService);
+```
+
+Las rutas no crean sus propias dependencias — las reciben. Esto permite:
+
+- Testear las rutas con servicios "falsos" (mocks)
+- Cambiar la implementación sin modificar las rutas
+
+### 3. Separación Frontend / Backend
+
+El frontend es 100% estático (HTML/CSS/JS) y se comunica con el backend solo mediante `fetch()` a la API REST. Podrías reemplazar el frontend por React, Vue o cualquier otro framework sin tocar el backend.
+
+### 4. Map como almacenamiento temporal
+
+```javascript
+#chats = new Map();
+```
+
+`Map` es una estructura de datos de JavaScript ideal para almacenamiento clave-valor. Es más rápido que un objeto para operaciones frecuentes de inserción/eliminación. Los datos se pierden al reiniciar el servidor — en producción se usaría una base de datos.
+
+---
+
+## Instalación y Ejecución
+
+### Requisitos previos
+
+1. [Node.js](https://nodejs.org) (v18 o superior)
+2. [Ollama](https://ollama.com) instalado y ejecutándose
+3. Al menos un modelo descargado (`ollama pull llama2`)
+
+### Pasos
 
 ```bash
-node index-local.js
+# 1. Instalar dependencias
+npm install
+
+# 2. Iniciar en modo desarrollo (con auto-reload)
+npm run dev
+
+# 3. Abrir en el navegador
+# http://localhost:3000
 ```
 
-El servidor se iniciará en `http://localhost:3000`
+### Scripts disponibles
 
-### Acceder a la interfaz
-
-Abre tu navegador web en:
-
-```
-http://localhost:3000
-```
-
-### Interacción
-
-1. **Escribir mensaje**: Escribe en el campo de texto
-2. **Enviar**: Presiona `Enter` o haz clic en "Enviar"
-3. **Nueva línea**: Usa `Shift + Enter` para saltos de línea
-4. **Limpiar chat**: Haz clic en "🗑️ Limpiar chat" para reiniciar la conversación
-
-## 📁 Estructura del Proyecto
-
-```
-IAS-PROYECT/
-├── feature/
-│   ├── Ollama/
-│   │   ├── ollama-local.js      # Implementación de chat en consola
-│   │   └── ollama-ui.js         # Servidor web con API REST
-│   └── deep-seek/
-│       └── deepseek.js          # Integración con DeepSeek
-├── public/
-│   ├── index.html               # Interfaz de usuario
-│   ├── style.css                # Estilos de la aplicación
-│   └── app.js                   # Lógica del cliente
-├── index-local.js               # Punto de entrada del servidor web
-├── index.js                     # Punto de entrada principal
-├── package.json                 # Dependencias del proyecto
-├── .env                         # Variables de entorno
-└── README.md                    # Documentación
-```
-
-## 🌐 API REST
-
-### Servidor Express
-
-El servidor Express escucha en el puerto `3000` y proporciona los siguientes endpoints:
-
-#### **POST** `/api/chat`
-
-Envía un mensaje al modelo de IA con streaming en tiempo real.
-
-**Request Body:**
-
-```json
-{
-  "message": "Tu mensaje aquí",
-  "sessionId": "user_abc123" // Opcional, default: "default"
-}
-```
-
-**Response:**
-
-Streaming SSE (Server-Sent Events):
-
-```
-data: {"chunk": "Hola"}
-data: {"chunk": " mundo"}
-data: {"done": true}
-```
-
-**Ejemplo con JavaScript:**
-
-```javascript
-const response = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    message: "¿Qué es JavaScript?",
-    sessionId: "user_123",
-  }),
-});
-
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-
-  const chunk = decoder.decode(value);
-  // Procesar chunk...
-}
-```
+| Script  | Comando       | Descripción                                         |
+| ------- | ------------- | --------------------------------------------------- |
+| `dev`   | `npm run dev` | Inicia con `--watch` (reinicia al cambiar archivos) |
+| `start` | `npm start`   | Inicia en modo producción                           |
 
 ---
 
-#### **POST** `/api/clear`
+## Ejercicios para Practicar
 
-Limpia el historial de conversación de una sesión específica.
+### Nivel Básico
 
-**Request Body:**
+1. **Agrega un endpoint** `GET /api/chats/count` que devuelva el número total de chats.
+2. **Agrega una propiedad** `updatedAt` al modelo `Chat` que se actualice cada vez que se modifica el título.
+3. **Modifica el logger** para que muestre también la IP del cliente (`req.ip`).
 
-```json
-{
-  "sessionId": "user_abc123" // Opcional, default: "default"
-}
-```
+### Nivel Intermedio
 
-**Response:**
+4. **Implementa un método** `clearMessages(chatId)` en `ChatService` que elimine todos los mensajes de un chat sin borrar el chat.
+5. **Agrega validaciones** al crear un chat: el título debe tener entre 3 y 100 caracteres, y el nombre del modelo no puede estar vacío.
+6. **Crea un nuevo endpoint** `PUT /api/chats/:chatId` en `chatRoutes.js` que permita renombrar un chat (cambiar su título).
 
-```json
-{
-  "success": true
-}
-```
+### Nivel Avanzado
 
-**Ejemplo:**
-
-```javascript
-await fetch("/api/clear", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ sessionId: "user_123" }),
-});
-```
+7. **Reemplaza el Map** del `ChatService` por una base de datos SQLite usando la librería `better-sqlite3`.
+8. **Agrega autenticación** básica con un middleware que verifique un token en el header `Authorization`.
+9. **Escribe tests unitarios** para `ChatService` usando Node.js test runner (`node --test`).
 
 ---
 
-#### **GET** `/api/history`
+## Dependencias del Proyecto
 
-Obtiene el historial de conversación de una sesión.
-
-**Query Parameters:**
-
-- `sessionId` (opcional): ID de la sesión, default: "default"
-
-**Response:**
-
-```json
-{
-  "history": [
-    {
-      "role": "user",
-      "content": "¿Qué es JavaScript?"
-    },
-    {
-      "role": "assistant",
-      "content": "JavaScript es un lenguaje de programación..."
-    }
-  ]
-}
-```
-
-**Ejemplo:**
-
-```javascript
-const response = await fetch("/api/history?sessionId=user_123");
-const data = await response.json();
-console.log(data.history);
-```
+| Paquete   | Para qué se usa                                         |
+| --------- | ------------------------------------------------------- |
+| `express` | Framework web para crear el servidor HTTP y las rutas   |
+| `cors`    | Permitir peticiones desde otros orígenes (Cross-Origin) |
+| `ollama`  | Librería oficial para comunicarse con la API de Ollama  |
+| `dotenv`  | Cargar variables de entorno desde un archivo `.env`     |
+| `canvas`  | Generación de iconos para la PWA                        |
+| `openai`  | Disponible para integración futura con OpenAI           |
 
 ---
 
-### Gestión de Sesiones
-
-- Cada usuario tiene un **sessionId único** generado automáticamente
-- Las sesiones son **independientes** y no se cruzan entre usuarios
-- El historial de conversación se **mantiene en memoria** durante la vida del servidor
-- Múltiples usuarios pueden chatear **simultáneamente** sin interferencias
-
-### Streaming con SSE
-
-El servidor utiliza **Server-Sent Events** para transmitir las respuestas en tiempo real:
-
-1. Cliente envía mensaje vía POST
-2. Servidor inicia streaming SSE
-3. Respuesta se envía chunk por chunk
-4. Cliente muestra texto en tiempo real
-5. Servidor envía señal de finalización
-
-**Ventajas:**
-
-- Respuestas instantáneas
-- Mejor experiencia de usuario
-- Uso eficiente de recursos
-- Comunicación unidireccional optimizada
-
-## 🏗️ Arquitectura
-
-### Backend (Node.js + Express)
-
-```
-┌─────────────────────────────────────┐
-│     Express Server (Port 3000)      │
-├─────────────────────────────────────┤
-│  ┌──────────────────────────────┐   │
-│  │   Session Manager (Map)      │   │
-│  │  - user_1: OllamaChat        │   │
-│  │  - user_2: OllamaChat        │   │
-│  │  - user_N: OllamaChat        │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │      API Endpoints           │   │
-│  │  /api/chat    (POST + SSE)   │   │
-│  │  /api/clear   (POST)         │   │
-│  │  /api/history (GET)          │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │    Static File Serving       │   │
-│  │  /public/* (HTML/CSS/JS)     │   │
-│  └──────────────────────────────┘   │
-└────────────┬────────────────────────┘
-             │
-             ▼
-    ┌────────────────┐
-    │  Ollama API    │
-    │  (Local Model) │
-    └────────────────┘
-```
-
-### Frontend (Vanilla JavaScript)
-
-```
-┌─────────────────────────────────────┐
-│         Browser (Client)            │
-├─────────────────────────────────────┤
-│  ┌──────────────────────────────┐   │
-│  │      index.html              │   │
-│  │  - Chat container            │   │
-│  │  - Message list              │   │
-│  │  - Input form                │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │      style.css               │   │
-│  │  - Modern gradient design    │   │
-│  │  - Responsive layout         │   │
-│  │  - Animations                │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │      app.js                  │   │
-│  │  - Fetch API                 │   │
-│  │  - SSE reader                │   │
-│  │  - UI updates                │   │
-│  └──────────────────────────────┘   │
-└────────────┬────────────────────────┘
-             │
-             ▼ HTTP/SSE
-    ┌────────────────┐
-    │  Express API   │
-    └────────────────┘
-```
-
-## 🔧 Componentes Principales
-
-### OllamaChat (Class)
-
-Gestiona una conversación individual con el modelo de IA.
-
-**Propiedades:**
-
-- `conversationHistory`: Array de mensajes (user/assistant)
-
-**Métodos:**
-
-- `sendMessage(userMessage, streamCallback)`: Envía mensaje y recibe respuesta
-- `clearHistory()`: Limpia el historial de conversación
-
-### startChatServer(port)
-
-Inicia el servidor Express con todos los endpoints configurados.
-
-**Parámetros:**
-
-- `port`: Puerto de escucha (default: 3000)
-
-**Retorna:**
-
-- Instancia de la aplicación Express
-
-## 📝 Cambios Realizados
-
-### 1. **Modificación de `ollama-ui.js`**
-
-- ✅ Añadido soporte para **streaming con callback**
-- ✅ Implementado **servidor Express** con API REST
-- ✅ Creado sistema de **gestión de sesiones múltiples**
-- ✅ Configurado **CORS** para peticiones cross-origin
-- ✅ Implementado **SSE** (Server-Sent Events) para streaming
-- ✅ Añadidos endpoints `/api/chat`, `/api/clear`, `/api/history`
-
-### 2. **Actualización de `index-local.js`**
-
-- ✅ Cambiado de modo consola a **modo servidor web**
-- ✅ Importación de `startChatServer` desde `ollama-ui.js`
-- ✅ Inicio automático del servidor en puerto 3000
-
-### 3. **Creación de Interfaz Web (`public/`)**
-
-**`index.html`:**
-
-- ✅ Estructura HTML5 semántica
-- ✅ Header con título y botón de limpieza
-- ✅ Área de mensajes scrollable
-- ✅ Input con textarea auto-expandible
-- ✅ Botón de envío con estados
-
-**`style.css`:**
-
-- ✅ Diseño moderno con gradientes
-- ✅ Animaciones suaves (fadeIn, typing)
-- ✅ Estilos diferenciados para user/assistant
-- ✅ Responsive design (mobile-first)
-- ✅ Custom scrollbar
-- ✅ Estados hover y disabled
-
-**`app.js`:**
-
-- ✅ Generación de sessionId único
-- ✅ Manejo de eventos (Enter, Shift+Enter)
-- ✅ Fetch API con SSE reader
-- ✅ Streaming en tiempo real
-- ✅ Auto-scroll automático
-- ✅ Indicador de escritura (typing)
-- ✅ Manejo de errores
-- ✅ Auto-resize del textarea
-
-### 4. **Actualización de Dependencias**
-
-- ✅ `express@5.2.1` - Servidor web
-- ✅ `cors@2.8.6` - CORS middleware
-
-## 🎨 Capturas de Interfaz
-
-### Características visuales:
-
-- 🎨 Gradiente morado/azul en header
-- 💬 Mensajes del usuario alineados a la derecha (gradiente)
-- 🤖 Mensajes del asistente alineados a la izquierda (blanco)
-- ⏳ Indicador de "escribiendo..." con puntos animados
-- 🗑️ Botón de limpieza en el header
-- 📱 Diseño responsive que se adapta a móviles
-
-## 🚀 Próximas Mejoras
-
-- [ ] Persistencia de conversaciones en base de datos
-- [ ] Autenticación de usuarios
-- [ ] Soporte para adjuntar archivos/imágenes
-- [ ] Exportar conversaciones (TXT, JSON)
-- [ ] Modo oscuro/claro
-- [ ] Selección de modelo desde la UI
-- [ ] WebSocket para comunicación bidireccional
-- [ ] Historial de conversaciones anteriores
-- [ ] Markdown rendering en respuestas
-- [ ] Copiar respuestas al portapapeles
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Para cambios importantes:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-ISC License - Este proyecto es de código abierto.
-
-## 🐛 Resolución de Problemas
+## Resolución de Problemas
 
 ### El servidor no inicia
 
 - Verifica que el puerto 3000 esté disponible
-- Asegúrate de tener todas las dependencias instaladas: `npm install`
+- Asegúrate de tener todas las dependencias: `npm install`
 
-### No recibo respuestas
+### No recibo respuestas de la IA
 
 - Verifica que Ollama esté en ejecución: `ollama serve`
-- Confirma que el modelo esté instalado: `ollama list`
-- Revisa que el `.env` tenga el modelo correcto
+- Confirma que tienes un modelo instalado: `ollama list`
+- Revisa la URL de conexión en la configuración de la app
 
-### Errores de CORS
+### Error "Cannot connect to Ollama"
 
-- El middleware CORS está configurado, pero verifica que el frontend acceda desde `http://localhost:3000`
-
-### Streaming no funciona
-
-- Asegúrate de usar un navegador moderno con soporte para SSE
-- Revisa la consola del navegador para errores
-
-## 📞 Soporte
-
-Para problemas o preguntas, abre un issue en el repositorio del proyecto.
+- Si usas Ollama en otra máquina de la red, configura la IP desde el botón de configuración en la interfaz
+- Verifica que el firewall no bloquee el puerto 11434
 
 ---
 
-## 📚 Referencias API
+## Resumen Visual del Flujo
 
-### DeepSeek API
-
-https://api-docs.deepseek.com/api/deepseek-api
-
-### Ollama API
-
-- Documentación: https://github.com/ollama/ollama/blob/main/docs/api.md
-- JavaScript SDK: https://github.com/ollama/ollama-js
-
-#### Ejemplo de respuesta Ollama:
-
-```json
-{
-  "model": "granite3.3:2b",
-  "created_at": "2026-01-26T12:36:27.2894708Z",
-  "message": {
-    "role": "assistant",
-    "content": "Greetings! How can I assist you today?"
-  },
-  "done": true,
-  "done_reason": "stop",
-  "total_duration": 595989400,
-  "load_duration": 100032200,
-  "prompt_eval_count": 21,
-  "prompt_eval_duration": 96243600,
-  "eval_count": 12,
-  "eval_duration": 379641700
-}
 ```
-
----
-
-**Desarrollado con ❤️ usando Node.js, Express y Ollama**
+┌──────────┐     HTTP      ┌──────────────┐    lógica     ┌──────────────┐
+│          │  ──────────►  │              │  ──────────►  │              │
+│ Frontend │    fetch()    │    Rutas     │   métodos()   │  Servicios   │
+│ (public) │  ◄──────────  │  (routes/)   │  ◄──────────  │ (services/)  │
+│          │     JSON      │              │    datos      │              │
+└──────────┘               └──────────────┘               └──────┬───────┘
+                                                                 │
+                                                                 │ usa
+                                                                 ▼
+                                                          ┌──────────────┐
+                                                          │   Modelos    │
+                                                          │  (models/)   │
+                                                          │  Chat.js     │
+                                                          │  Message.js  │
+                                                          └──────────────┘
+```

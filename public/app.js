@@ -391,7 +391,7 @@ function createMessageElement(role, content) {
   messageContent.className = "message-content";
 
   const strong = document.createElement("strong");
-  strong.textContent = role === "user" ? "Tú:" : "Asistente:";
+  strong.textContent = role === "user" ? "👤 Tú:" : "Asistente:";
 
   // Para mensajes del asistente, usar div para markdown
   // Para mensajes del usuario, usar p normal
@@ -427,7 +427,7 @@ async function clearChat() {
   chatMessages.innerHTML = `
             <div class="message assistant">
                 <div class="message-content">
-                    <strong>Asistente:</strong>
+                    <strong>🤖 Asistente:</strong>
                     <p>Historial limpiado. ¿En qué puedo ayudarte?</p>
                 </div>
             </div>
