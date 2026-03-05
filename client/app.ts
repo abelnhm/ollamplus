@@ -89,6 +89,12 @@ const systemPromptForm = $<HTMLDivElement>("systemPromptForm");
 const systemPromptInput = $<HTMLTextAreaElement>("systemPromptInput");
 const clearSystemPromptBtn = $<HTMLButtonElement>("clearSystemPrompt");
 
+// Modal de confirmación de eliminar chat
+const deleteChatModal = $<HTMLDivElement>("deleteChatModal");
+const closeDeleteChatModalBtn = $<HTMLButtonElement>("closeDeleteChatModal");
+const deleteChatAcceptBtn = $<HTMLButtonElement>("deleteChatAcceptBtn");
+const deleteChatCancelBtn = $<HTMLButtonElement>("deleteChatCancelBtn");
+
 // Panel de información del modelo
 const modelInfoPanel = $<HTMLDivElement>("modelInfoPanel");
 const modelInfoFamily = $<HTMLSpanElement>("modelInfoFamily");
@@ -408,8 +414,11 @@ function formatTokenCount(n: number): string {
 
 function updateTokenDisplay(): void {
   // Obtener el límite efectivo: parámetro num_ctx del usuario o el del modelo
-  const numCtxEl = document.getElementById("param_num_ctx") as HTMLSelectElement | null;
-  const userCtx = enableModelParams.checked && numCtxEl ? parseInt(numCtxEl.value, 10) : 0;
+  const numCtxEl = document.getElementById(
+    "param_num_ctx",
+  ) as HTMLSelectElement | null;
+  const userCtx =
+    enableModelParams.checked && numCtxEl ? parseInt(numCtxEl.value, 10) : 0;
   const effectiveLimit = userCtx > 0 ? userCtx : modelContextLength;
 
   if (effectiveLimit <= 0 && totalTokensUsed <= 0) {
@@ -422,9 +431,10 @@ function updateTokenDisplay(): void {
   const limit = effectiveLimit > 0 ? effectiveLimit : 0;
   const pct = limit > 0 ? Math.min((totalTokensUsed / limit) * 100, 100) : 0;
 
-  tokenUsageSummary.textContent = limit > 0
-    ? `${formatTokenCount(totalTokensUsed)} / ${formatTokenCount(limit)}`
-    : `${formatTokenCount(totalTokensUsed)}`;
+  tokenUsageSummary.textContent =
+    limit > 0
+      ? `${formatTokenCount(totalTokensUsed)} / ${formatTokenCount(limit)}`
+      : `${formatTokenCount(totalTokensUsed)}`;
   tokenContextLimit.textContent = limit > 0 ? formatTokenCount(limit) : "—";
 
   tokenUsageBar.style.width = pct + "%";
@@ -714,7 +724,10 @@ async function sendMessage(): Promise<void> {
             fullText = data.fullResponse || fullText;
             updateStreamingMessage(streamWrapper, fullText);
             if (data.tokenUsage) {
-              updateTokenUsage(data.tokenUsage.promptTokens, data.tokenUsage.responseTokens);
+              updateTokenUsage(
+                data.tokenUsage.promptTokens,
+                data.tokenUsage.responseTokens,
+              );
             }
           } else if (data.chunk) {
             fullText += data.chunk;
@@ -780,11 +793,15 @@ async function refreshChatList(): Promise<void> {
             </button>
           </div>
         `;
-        item.querySelector(".chat-item-content")!.addEventListener("click", () => loadChat(chat.id));
-        item.querySelector(".rename-chat-btn")!.addEventListener("click", (e) => {
-          e.stopPropagation();
-          startRenameChat(item, chat.id, chat.title);
-        });
+        item
+          .querySelector(".chat-item-content")!
+          .addEventListener("click", () => loadChat(chat.id));
+        item
+          .querySelector(".rename-chat-btn")!
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            startRenameChat(item, chat.id, chat.title);
+          });
         chatsList.appendChild(item);
       });
   } catch (err) {
@@ -792,7 +809,11 @@ async function refreshChatList(): Promise<void> {
   }
 }
 
-function startRenameChat(item: HTMLDivElement, chatId: string, currentTitle: string): void {
+function startRenameChat(
+  item: HTMLDivElement,
+  chatId: string,
+  currentTitle: string,
+): void {
   const titleEl = item.querySelector(".chat-item-title") as HTMLDivElement;
   if (!titleEl || titleEl.querySelector(".rename-input")) return;
 
@@ -898,8 +919,15 @@ function clearChat(): void {
     newChat();
     return;
   }
-  if (!confirm("¿Eliminar este chat?")) return;
+  deleteChatModal.classList.add("active");
+}
 
+function closeDeleteChatModal(): void {
+  deleteChatModal.classList.remove("active");
+}
+
+function confirmDeleteChat(): void {
+  closeDeleteChatModal();
   apiDelete(`/api/chats/${currentChatId}`)
     .then(() => {
       newChat();
@@ -907,6 +935,13 @@ function clearChat(): void {
     })
     .catch((err) => console.error("Error eliminando chat:", err));
 }
+
+closeDeleteChatModalBtn.addEventListener("click", closeDeleteChatModal);
+deleteChatCancelBtn.addEventListener("click", closeDeleteChatModal);
+deleteChatAcceptBtn.addEventListener("click", confirmDeleteChat);
+deleteChatModal.addEventListener("click", (e) => {
+  if (e.target === deleteChatModal) closeDeleteChatModal();
+});
 
 // ─── Modal de exportación ─────────────────────────────────
 const exportModal = $("exportModal") as HTMLDivElement;
@@ -925,7 +960,11 @@ function closeExportModal(): void {
   exportModal.classList.remove("active");
 }
 
-function downloadFile(content: string, filename: string, mimeType: string): void {
+function downloadFile(
+  content: string,
+  filename: string,
+  mimeType: string,
+): void {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -938,7 +977,9 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 async function getChatData(): Promise<ChatJSON | null> {
   if (!currentChatId) return null;
   try {
-    const data = await apiGet<{ chat: ChatJSON }>(`/api/chats/${currentChatId}`);
+    const data = await apiGet<{ chat: ChatJSON }>(
+      `/api/chats/${currentChatId}`,
+    );
     return data.chat;
   } catch {
     return null;
@@ -966,16 +1007,18 @@ function exportAsJSON(chat: ChatJSON): string {
 
 function exportAsHTML(chat: ChatJSON): string {
   const dateStr = new Date(chat.createdAt).toLocaleString();
-  const messagesHtml = chat.messages.map((msg) => {
-    const role = msg.role === "user" ? "👤 Usuario" : "🤖 Asistente";
-    const bgColor = msg.role === "user" ? "#e3f2fd" : "#f5f5f5";
-    const time = new Date(msg.timestamp).toLocaleTimeString();
-    const contentEscaped = escapeHtml(msg.content).replace(/\n/g, "<br>");
-    return `<div style="background:${bgColor};border-radius:8px;padding:12px 16px;margin-bottom:12px;">
+  const messagesHtml = chat.messages
+    .map((msg) => {
+      const role = msg.role === "user" ? "👤 Usuario" : "🤖 Asistente";
+      const bgColor = msg.role === "user" ? "#e3f2fd" : "#f5f5f5";
+      const time = new Date(msg.timestamp).toLocaleTimeString();
+      const contentEscaped = escapeHtml(msg.content).replace(/\n/g, "<br>");
+      return `<div style="background:${bgColor};border-radius:8px;padding:12px 16px;margin-bottom:12px;">
       <strong>${role}</strong> <small style="color:#888">${time}</small>
       <div style="margin-top:8px;white-space:pre-wrap;">${contentEscaped}</div>
     </div>`;
-  }).join("\n");
+    })
+    .join("\n");
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -1003,7 +1046,9 @@ function exportAsPDF(chat: ChatJSON): void {
   const htmlContent = exportAsHTML(chat);
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
-    alert("No se pudo abrir la ventana de impresión. Permite las ventanas emergentes.");
+    alert(
+      "No se pudo abrir la ventana de impresión. Permite las ventanas emergentes.",
+    );
     return;
   }
   printWindow.document.write(htmlContent);

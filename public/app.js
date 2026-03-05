@@ -56,6 +56,11 @@ const enableSystemPrompt = $("enableSystemPrompt");
 const systemPromptForm = $("systemPromptForm");
 const systemPromptInput = $("systemPromptInput");
 const clearSystemPromptBtn = $("clearSystemPrompt");
+// Modal de confirmación de eliminar chat
+const deleteChatModal = $("deleteChatModal");
+const closeDeleteChatModalBtn = $("closeDeleteChatModal");
+const deleteChatAcceptBtn = $("deleteChatAcceptBtn");
+const deleteChatCancelBtn = $("deleteChatCancelBtn");
 // Panel de información del modelo
 const modelInfoPanel = $("modelInfoPanel");
 const modelInfoFamily = $("modelInfoFamily");
@@ -324,9 +329,10 @@ function updateTokenDisplay() {
     tokenUsageContainer.style.display = "";
     const limit = effectiveLimit > 0 ? effectiveLimit : 0;
     const pct = limit > 0 ? Math.min((totalTokensUsed / limit) * 100, 100) : 0;
-    tokenUsageSummary.textContent = limit > 0
-        ? `${formatTokenCount(totalTokensUsed)} / ${formatTokenCount(limit)}`
-        : `${formatTokenCount(totalTokensUsed)}`;
+    tokenUsageSummary.textContent =
+        limit > 0
+            ? `${formatTokenCount(totalTokensUsed)} / ${formatTokenCount(limit)}`
+            : `${formatTokenCount(totalTokensUsed)}`;
     tokenContextLimit.textContent = limit > 0 ? formatTokenCount(limit) : "—";
     tokenUsageBar.style.width = pct + "%";
     tokenUsageBar.classList.remove("warning", "danger");
@@ -644,8 +650,12 @@ async function refreshChatList() {
             </button>
           </div>
         `;
-            item.querySelector(".chat-item-content").addEventListener("click", () => loadChat(chat.id));
-            item.querySelector(".rename-chat-btn").addEventListener("click", (e) => {
+            item
+                .querySelector(".chat-item-content")
+                .addEventListener("click", () => loadChat(chat.id));
+            item
+                .querySelector(".rename-chat-btn")
+                .addEventListener("click", (e) => {
                 e.stopPropagation();
                 startRenameChat(item, chat.id, chat.title);
             });
@@ -757,8 +767,13 @@ function clearChat() {
         newChat();
         return;
     }
-    if (!confirm("¿Eliminar este chat?"))
-        return;
+    deleteChatModal.classList.add("active");
+}
+function closeDeleteChatModal() {
+    deleteChatModal.classList.remove("active");
+}
+function confirmDeleteChat() {
+    closeDeleteChatModal();
     apiDelete(`/api/chats/${currentChatId}`)
         .then(() => {
         newChat();
@@ -766,6 +781,13 @@ function clearChat() {
     })
         .catch((err) => console.error("Error eliminando chat:", err));
 }
+closeDeleteChatModalBtn.addEventListener("click", closeDeleteChatModal);
+deleteChatCancelBtn.addEventListener("click", closeDeleteChatModal);
+deleteChatAcceptBtn.addEventListener("click", confirmDeleteChat);
+deleteChatModal.addEventListener("click", (e) => {
+    if (e.target === deleteChatModal)
+        closeDeleteChatModal();
+});
 // ─── Modal de exportación ─────────────────────────────────
 const exportModal = $("exportModal");
 const closeExportModalBtn = $("closeExportModal");
@@ -818,7 +840,8 @@ function exportAsJSON(chat) {
 }
 function exportAsHTML(chat) {
     const dateStr = new Date(chat.createdAt).toLocaleString();
-    const messagesHtml = chat.messages.map((msg) => {
+    const messagesHtml = chat.messages
+        .map((msg) => {
         const role = msg.role === "user" ? "👤 Usuario" : "🤖 Asistente";
         const bgColor = msg.role === "user" ? "#e3f2fd" : "#f5f5f5";
         const time = new Date(msg.timestamp).toLocaleTimeString();
@@ -827,7 +850,8 @@ function exportAsHTML(chat) {
       <strong>${role}</strong> <small style="color:#888">${time}</small>
       <div style="margin-top:8px;white-space:pre-wrap;">${contentEscaped}</div>
     </div>`;
-    }).join("\n");
+    })
+        .join("\n");
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
