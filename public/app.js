@@ -434,6 +434,29 @@ function addCopyButton(wrapper) {
     btn.addEventListener("click", () => copyMessageToClipboard(btn, wrapper));
     wrapper.querySelector(".message-content").appendChild(btn);
 }
+function injectCodeCopyButtons(container) {
+    container.querySelectorAll("pre").forEach((pre) => {
+        if (pre.querySelector(".code-copy-btn"))
+            return;
+        const btn = document.createElement("button");
+        btn.className = "code-copy-btn";
+        btn.type = "button";
+        btn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copiar</span>`;
+        btn.addEventListener("click", () => {
+            const code = pre.querySelector("code");
+            const text = code ? code.textContent || "" : pre.textContent || "";
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add("copied");
+                btn.querySelector("span").textContent = "¡Copiado!";
+                setTimeout(() => {
+                    btn.classList.remove("copied");
+                    btn.querySelector("span").textContent = "Copiar";
+                }, 1500);
+            });
+        });
+        pre.appendChild(btn);
+    });
+}
 function addMessageToUI(role, content) {
     const wrapper = document.createElement("div");
     wrapper.className = `message ${role}`;
@@ -445,6 +468,7 @@ function addMessageToUI(role, content) {
     chatMessages.appendChild(wrapper);
     if (role === "assistant") {
         addCopyButton(wrapper);
+        injectCodeCopyButtons(wrapper);
     }
     scrollToBottom();
     return wrapper;
@@ -474,6 +498,7 @@ function updateStreamingMessage(wrapper, text) {
     if (span) {
         span.style.display = "";
         span.innerHTML = formatMarkdown(text);
+        injectCodeCopyButtons(span);
     }
     scrollToBottom();
 }

@@ -539,6 +539,7 @@ body::before {
 }
 
 .message-content pre {
+  position: relative;
   background: #23241f !important;
   padding: 16px;
   border-radius: 8px;
@@ -546,6 +547,41 @@ body::before {
   margin: 12px 0;
   border: 1px solid #3e3d32;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 11px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  z-index: 2;
+  line-height: 1;
+}
+
+.message-content pre:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.code-copy-btn.copied {
+  color: #4ade80;
+  opacity: 1;
 }
 
 /* Botón copiar mensaje */
