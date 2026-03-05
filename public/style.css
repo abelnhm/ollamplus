@@ -255,6 +255,35 @@ body::before {
   margin-top: 4px;
 }
 
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-sm.btn-primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-sm.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-sm.btn-secondary {
+  background: transparent;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+.btn-sm.btn-secondary:hover {
+  background: hsl(var(--muted));
+}
+
 /* Messages - Liquid Glass */
 .chat-messages {
   flex: 1;
@@ -264,6 +293,26 @@ body::before {
   flex-direction: column;
   gap: 16px;
   scroll-behavior: smooth;
+}
+
+/* Thinking indicator inside assistant message */
+.thinking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+}
+
+.thinking-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid hsl(var(--border));
+  border-top-color: hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
 .message {
@@ -344,6 +393,38 @@ body::before {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Botón copiar mensaje */
+.message-content {
+  position: relative;
+}
+
+.copy-msg-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 4px;
+  cursor: pointer;
+  color: hsl(var(--muted-foreground));
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.message-content:hover .copy-msg-btn {
+  opacity: 1;
+}
+
+.copy-msg-btn:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--accent));
+}
+
 .message-content pre code {
   background: none !important;
   padding: 0;
@@ -419,6 +500,34 @@ body::before {
 .send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Stop button */
+.stop-btn {
+  background: hsl(var(--destructive));
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px;
+  color: hsl(var(--destructive-foreground));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.stop-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.stop-btn:hover {
+  opacity: 0.85;
+}
+
+.stop-btn:active {
+  transform: scale(0.95);
 }
 
 /* Spinner dentro del botón enviar */
@@ -649,12 +758,6 @@ body::before {
   border-top-color: hsl(var(--primary));
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* ====================================

@@ -109,6 +109,9 @@
         <select id="modelSelector" class="model-selector">
           <option value="">Cargando modelos...</option>
         </select>
+        <button id="loadModelBtn" class="btn-primary btn-sm" title="Cargar modelo">
+          Cargar
+        </button>
         <span class="model-status" id="modelStatus"></span>
       </div>
     </div>
@@ -131,6 +134,11 @@
         </svg>
         <div class="spinner" id="sendSpinner"></div>
         <span id="sendText">Enviar</span>
+      </button>
+      <button id="stopBtn" class="stop-btn" style="display:none" title="Detener respuesta">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+          <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+        </svg>
       </button>
     </div>
   </div>
@@ -182,7 +190,29 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <!-- Modal de confirmación de cambio de modelo -->
+  <div class="modal" id="modelChangeModal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h2>Cambiar modelo</h2>
+        <button class="modal-close" id="closeModelChangeModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modelChangeModalText" style="font-size:14px; line-height:1.6; color: hsl(var(--foreground));"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modelChangeCancelBtn">Cancelar</button>
+        <button class="btn-primary" id="modelChangeAcceptBtn">Aceptar y crear chat</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=6"></script>
 </body>
 
 </html>

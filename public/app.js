@@ -1,7 +1,9 @@
 "use strict";
 // ─── Estado global ───────────────────────────────────────
 let currentChatId = null;
+let currentChatModel = null;
 let isStreaming = false;
+let abortController = null;
 // ─── Elementos del DOM ──────────────────────────────────
 const $ = (id) => document.getElementById(id);
 const chatMessages = $("chatMessages");
@@ -32,6 +34,15 @@ const testResult = $("testResult");
 const saveSettingsBtn = $("saveSettings");
 const cancelSettingsBtn = $("cancelSettings");
 const closeSettingsModal = $("closeSettingsModal");
+// Barra de cambio de modelo
+const loadModelBtn = $("loadModelBtn");
+const modelChangeModal = $("modelChangeModal");
+const modelChangeModalText = $("modelChangeModalText");
+const modelChangeAcceptBtn = $("modelChangeAcceptBtn");
+const modelChangeCancelBtn = $("modelChangeCancelBtn");
+const closeModelChangeModal = $("closeModelChangeModal");
+// Botón de parar
+const stopBtn = $("stopBtn");
 // ─── Helpers ─────────────────────────────────────────────
 function getOllamaUrl() {
     const host = localStorage.getItem("ollamaHost") || "localhost";
@@ -126,6 +137,27 @@ async function loadModels() {
     }
 }
 // ─── Renderizado de mensajes ─────────────────────────────
+function copyMessageToClipboard(btn, wrapper) {
+    const text = wrapper.querySelector(".streaming-text")?.textContent
+        || wrapper.querySelector(".message-content")?.textContent?.replace(/^🤖 Asistente:/, "").trim()
+        || "";
+    navigator.clipboard.writeText(text).then(() => {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        btn.title = "¡Copiado!";
+        setTimeout(() => {
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            btn.title = "Copiar al portapapeles";
+        }, 1500);
+    });
+}
+function addCopyButton(wrapper) {
+    const btn = document.createElement("button");
+    btn.className = "copy-msg-btn";
+    btn.title = "Copiar al portapapeles";
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    btn.addEventListener("click", () => copyMessageToClipboard(btn, wrapper));
+    wrapper.querySelector(".message-content").appendChild(btn);
+}
 function addMessageToUI(role, content) {
     const wrapper = document.createElement("div");
     wrapper.className = `message ${role}`;
@@ -135,6 +167,9 @@ function addMessageToUI(role, content) {
     inner.innerHTML = `<strong>${label}:</strong>${formatMarkdown(content)}`;
     wrapper.appendChild(inner);
     chatMessages.appendChild(wrapper);
+    if (role === "assistant") {
+        addCopyButton(wrapper);
+    }
     scrollToBottom();
     return wrapper;
 }
@@ -143,15 +178,25 @@ function createStreamingMessage() {
     wrapper.className = "message assistant";
     const inner = document.createElement("div");
     inner.className = "message-content";
-    inner.innerHTML = "<strong>🤖 Asistente:</strong><span class='streaming-text'></span>";
+    inner.innerHTML = `<strong>🤖 Asistente:</strong>
+    <div class="thinking-indicator">
+      <div class="thinking-spinner"></div>
+      <span>Pensando…</span>
+    </div>
+    <span class='streaming-text' style='display:none'></span>`;
     wrapper.appendChild(inner);
     chatMessages.appendChild(wrapper);
     scrollToBottom();
     return wrapper;
 }
 function updateStreamingMessage(wrapper, text) {
+    const thinking = wrapper.querySelector(".thinking-indicator");
     const span = wrapper.querySelector(".streaming-text");
+    if (thinking) {
+        thinking.remove();
+    }
     if (span) {
+        span.style.display = "";
         span.innerHTML = formatMarkdown(text);
     }
     scrollToBottom();
@@ -188,7 +233,10 @@ async function sendMessage() {
     messageInput.style.height = "auto";
     // Estado de streaming
     isStreaming = true;
+    abortController = new AbortController();
     sendBtn.disabled = true;
+    sendBtn.style.display = "none";
+    stopBtn.style.display = "flex";
     sendBtn.classList.add("loading");
     sendText.textContent = "Pensando…";
     const streamWrapper = createStreamingMessage();
@@ -198,6 +246,7 @@ async function sendMessage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ content, ollamaUrl: getOllamaUrl() }),
+            signal: abortController.signal,
         });
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -235,14 +284,23 @@ async function sendMessage() {
         }
     }
     catch (err) {
-        fullText += `\n\n**Error de conexión:** ${err.message}`;
+        if (err.name === "AbortError") {
+            fullText += "\n\n*Respuesta detenida por el usuario.*";
+        }
+        else {
+            fullText += `\n\n**Error de conexión:** ${err.message}`;
+        }
         updateStreamingMessage(streamWrapper, fullText);
     }
     finally {
         isStreaming = false;
+        abortController = null;
         sendBtn.disabled = false;
+        sendBtn.style.display = "";
+        stopBtn.style.display = "none";
         sendBtn.classList.remove("loading");
         sendText.textContent = "Enviar";
+        addCopyButton(streamWrapper);
         refreshChatList();
     }
 }
@@ -279,6 +337,7 @@ async function loadChat(chatId) {
     try {
         const data = await apiGet(`/api/chats/${chatId}`);
         currentChatId = chatId;
+        currentChatModel = data.chat.model;
         // Seleccionar el modelo del chat
         modelSelector.value = data.chat.model;
         // Limpiar mensajes y renderizar los existentes
@@ -294,6 +353,7 @@ async function loadChat(chatId) {
 // ─── Acciones de cabecera ────────────────────────────────
 function newChat() {
     currentChatId = null;
+    currentChatModel = null;
     const selectedModel = modelSelector.value;
     const modelInfo = selectedModel
         ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. ¿En qué puedo ayudarte?`
@@ -419,11 +479,52 @@ saveSettingsBtn.addEventListener("click", saveSettings);
 testConnectionBtn.addEventListener("click", testConnection);
 ollamaHostInput.addEventListener("input", updateUrlPreview);
 ollamaPortInput.addEventListener("input", updateUrlPreview);
+// Botón de parar streaming
+stopBtn.addEventListener("click", () => {
+    if (abortController) {
+        abortController.abort();
+    }
+});
+// Cambio de modelo con botón Cargar + modal de confirmación
+let pendingModel = null;
+loadModelBtn.addEventListener("click", () => {
+    const newModel = modelSelector.value;
+    if (!newModel)
+        return;
+    // Si no hay chat activo, o el modelo es el mismo, simplemente aplicar
+    if (!currentChatId || !currentChatModel || newModel === currentChatModel) {
+        currentChatModel = newModel;
+        newChat();
+        return;
+    }
+    // Hay chat activo y el modelo es diferente → mostrar modal
+    pendingModel = newModel;
+    modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirá un nuevo chat. La conversación actual se mantendrá guardada. ¿Deseas continuar?`;
+    modelChangeModal.classList.add("active");
+});
+modelChangeAcceptBtn.addEventListener("click", () => {
+    modelChangeModal.classList.remove("active");
+    if (pendingModel) {
+        modelSelector.value = pendingModel;
+        pendingModel = null;
+        newChat();
+    }
+});
+function closeModelChange() {
+    modelChangeModal.classList.remove("active");
+    if (currentChatModel) {
+        modelSelector.value = currentChatModel;
+    }
+    pendingModel = null;
+}
+modelChangeCancelBtn.addEventListener("click", closeModelChange);
+closeModelChangeModal.addEventListener("click", closeModelChange);
 // Cerrar modal con Escape
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         closeSettings();
         closeSidebar();
+        closeModelChange();
     }
 });
 // ─── Inicialización ──────────────────────────────────────
