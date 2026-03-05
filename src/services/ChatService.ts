@@ -50,4 +50,15 @@ export class ChatService {
     chat.addMessage(message);
     return message;
   }
+
+  removeLastMessage(chatId: string): void {
+    const chat = this.getById(chatId);
+    if (!chat) {
+      throw new Error(`Chat con ID ${chatId} no encontrado`);
+    }
+    if (chat.messages.length === 0) {
+      throw new Error("El chat no tiene mensajes");
+    }
+    chat.messages.pop();
+  }
 }

@@ -567,6 +567,15 @@ function addCopyButton(wrapper: HTMLDivElement): void {
   wrapper.querySelector(".message-content")!.appendChild(btn);
 }
 
+function addRegenerateButton(wrapper: HTMLDivElement): void {
+  const btn = document.createElement("button");
+  btn.className = "regenerate-msg-btn";
+  btn.title = "Regenerar respuesta";
+  btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`;
+  btn.addEventListener("click", () => regenerateLastResponse());
+  wrapper.querySelector(".message-content")!.appendChild(btn);
+}
+
 function injectCodeCopyButtons(container: HTMLElement): void {
   container.querySelectorAll("pre").forEach((pre) => {
     if (pre.querySelector(".code-copy-btn")) return;
@@ -603,6 +612,7 @@ function addMessageToUI(role: string, content: string): HTMLDivElement {
   chatMessages.appendChild(wrapper);
   if (role === "assistant") {
     addCopyButton(wrapper);
+    addRegenerateButton(wrapper);
     injectCodeCopyButtons(wrapper);
   }
   scrollToBottom();
@@ -641,6 +651,107 @@ function updateStreamingMessage(wrapper: HTMLDivElement, text: string): void {
     injectCodeCopyButtons(span);
   }
   scrollToBottom();
+}
+
+// ─── Regenerar última respuesta ──────────────────────────
+async function regenerateLastResponse(): Promise<void> {
+  if (!currentChatId || isStreaming) return;
+
+  // Eliminar último mensaje assistant del backend
+  try {
+    await apiDelete(`/api/chats/${currentChatId}/last-message`);
+  } catch (err) {
+    console.error("Error eliminando último mensaje:", err);
+    return;
+  }
+
+  // Eliminar el último div assistant del DOM
+  const allAssistant = chatMessages.querySelectorAll(".message.assistant");
+  const lastAssistant = allAssistant[allAssistant.length - 1];
+  if (lastAssistant) lastAssistant.remove();
+
+  // Re-enviar el historial existente (sin nuevo mensaje de usuario)
+  isStreaming = true;
+  abortController = new AbortController();
+  sendBtn.disabled = true;
+  sendBtn.style.display = "none";
+  stopBtn.style.display = "flex";
+  sendBtn.classList.add("loading");
+  sendText.textContent = "Pensando…";
+
+  const streamWrapper = createStreamingMessage();
+  let fullText = "";
+
+  try {
+    const res = await fetch(`/api/chat/${currentChatId}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: null,
+        ollamaUrl: getOllamaUrl(),
+        options: getModelOptions(),
+        systemPrompt: getSystemPrompt(),
+      }),
+      signal: abortController.signal,
+    });
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6);
+        try {
+          const data = JSON.parse(jsonStr);
+          if (data.error) {
+            fullText += `\n\n**Error:** ${data.error}`;
+            updateStreamingMessage(streamWrapper, fullText);
+          } else if (data.done) {
+            fullText = data.fullResponse || fullText;
+            updateStreamingMessage(streamWrapper, fullText);
+            if (data.tokenUsage) {
+              updateTokenUsage(
+                data.tokenUsage.promptTokens,
+                data.tokenUsage.responseTokens,
+              );
+            }
+          } else if (data.chunk) {
+            fullText += data.chunk;
+            updateStreamingMessage(streamWrapper, fullText);
+          }
+        } catch {
+          // ignorar líneas no JSON
+        }
+      }
+    }
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      fullText += "\n\n*Respuesta detenida por el usuario.*";
+    } else {
+      fullText += `\n\n**Error de conexión:** ${(err as Error).message}`;
+    }
+    updateStreamingMessage(streamWrapper, fullText);
+  } finally {
+    isStreaming = false;
+    abortController = null;
+    sendBtn.disabled = false;
+    sendBtn.style.display = "";
+    stopBtn.style.display = "none";
+    sendBtn.classList.remove("loading");
+    sendText.textContent = "Enviar";
+    addCopyButton(streamWrapper);
+    addRegenerateButton(streamWrapper);
+    refreshChatList();
+  }
 }
 
 // ─── Envío de mensaje (streaming SSE) ────────────────────
@@ -754,6 +865,7 @@ async function sendMessage(): Promise<void> {
     sendBtn.classList.remove("loading");
     sendText.textContent = "Enviar";
     addCopyButton(streamWrapper);
+    addRegenerateButton(streamWrapper);
     refreshChatList();
   }
 }

@@ -53,8 +53,10 @@ export function createChatRoutes(
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      // Agregar mensaje del usuario al chat
-      chatService.addMessage(chatId as string, "user", content);
+      // Agregar mensaje del usuario al chat (solo si hay contenido — null en regeneración)
+      if (content) {
+        chatService.addMessage(chatId as string, "user", content);
+      }
 
       // Enviar historial al modelo y recibir respuesta en streaming
       const history = chat.getHistory();
@@ -125,10 +127,15 @@ export function createChatRoutes(
         res.status(400).json({ error: "El título es requerido" });
         return;
       }
-      const chat = chatService.rename(req.params.chatId as string, title.trim());
+      const chat = chatService.rename(
+        req.params.chatId as string,
+        title.trim(),
+      );
       res.json({ success: true, chat: chat.toJSON() });
     } catch (error) {
-      const status = (error as Error).message.includes("no encontrado") ? 404 : 500;
+      const status = (error as Error).message.includes("no encontrado")
+        ? 404
+        : 500;
       res.status(status).json({ error: (error as Error).message });
     }
   });
@@ -145,6 +152,24 @@ export function createChatRoutes(
       res.status(status).json({ error: (error as Error).message });
     }
   });
+
+  // Eliminar el último mensaje de un chat (para regenerar respuesta)
+  router.delete(
+    "/chats/:chatId/last-message",
+    (req: Request, res: Response) => {
+      try {
+        const chat = chatService.getById(req.params.chatId as string);
+        if (!chat) {
+          res.status(404).json({ error: "Chat no encontrado" });
+          return;
+        }
+        chatService.removeLastMessage(req.params.chatId as string);
+        res.json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: (error as Error).message });
+      }
+    },
+  );
 
   return router;
 }
