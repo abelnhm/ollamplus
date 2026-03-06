@@ -493,6 +493,20 @@
           <button class="btn-secondary export-format-btn" data-format="html">HTML (.html)</button>
           <button class="btn-secondary export-format-btn" data-format="pdf">PDF (imprimir)</button>
         </div>
+        <div
+          style="margin-top:16px;padding:10px 12px;background:var(--bg-secondary, #f0f4ff);border-radius:8px;font-size:0.85rem;color:var(--text-secondary, #555);line-height:1.5;">
+          💡 <strong>¿Quieres importar chats de otras IAs?</strong> Puedes usar el botón <strong>Importar</strong> con
+          archivos .json o .md exportados desde:<br>
+          <ul style="margin:6px 0 0 18px;padding:0;list-style:disc;">
+            <li><a href="https://www.noussave.com/" target="_blank" rel="noopener noreferrer"
+                style="color:var(--primary-color, #4f46e5);">NousSave AI Chat Exporter</a> — ChatGPT, Claude, DeepSeek,
+              Gemini</li>
+            <li><a
+                href="https://chromewebstore.google.com/detail/exportar-conversaci%C3%B3n-de/fegaelkfhlnjeidcbgljpkpjpokihmml?hl=es&amp;utm_source=ext_sidebar"
+                target="_blank" rel="noopener noreferrer" style="color:var(--primary-color, #4f46e5);">Exportar
+                conversación de ChatGPT</a> — ChatGPT</li>
+          </ul>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" id="cancelExportBtn">Cancelar</button>
@@ -513,7 +527,12 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Selecciona un archivo <strong>.md</strong> o <strong>.json</strong> exportado previamente:</p>
+        <p>Selecciona un archivo <strong>.md</strong> o <strong>.json</strong> exportado desde OllamaUI, <a
+            href="https://www.noussave.com/" target="_blank" rel="noopener noreferrer"
+            style="color:var(--primary-color, #4f46e5);">NousSave</a> (ChatGPT, Claude, DeepSeek, Gemini) o <a
+            href="https://chromewebstore.google.com/detail/exportar-conversaci%C3%B3n-de/fegaelkfhlnjeidcbgljpkpjpokihmml?hl=es&amp;utm_source=ext_sidebar"
+            target="_blank" rel="noopener noreferrer" style="color:var(--primary-color, #4f46e5);">Exportar conversación
+            de ChatGPT</a>:</p>
         <div class="import-drop-zone" id="importDropZone">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
