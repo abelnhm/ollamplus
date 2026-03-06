@@ -541,7 +541,9 @@ async function confirmEditMessage(wrapper, newContent) {
         return;
     // Truncar en el servidor
     try {
-        await apiPut(`/api/chats/${currentChatId}/messages/${msgId}`, { content: newContent });
+        await apiPut(`/api/chats/${currentChatId}/messages/${msgId}`, {
+            content: newContent,
+        });
     }
     catch (err) {
         console.error("Error editando mensaje:", err);
@@ -984,15 +986,11 @@ function createChatItem(chat) {
     item
         .querySelector(".chat-item-content")
         .addEventListener("click", () => loadChat(chat.id));
-    item
-        .querySelector(".pin-chat-btn")
-        .addEventListener("click", (e) => {
+    item.querySelector(".pin-chat-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         togglePinChat(chat.id);
     });
-    item
-        .querySelector(".rename-chat-btn")
-        .addEventListener("click", (e) => {
+    item.querySelector(".rename-chat-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         startRenameChat(item, chat.id, chat.title);
     });
@@ -1317,14 +1315,54 @@ function saveSettings() {
     loadModels();
 }
 const DEFAULT_TEMPLATES = [
-    { id: "builtin-1", name: "Explicar código", text: "Explica este código paso a paso: ", builtin: true },
-    { id: "builtin-2", name: "Traducir al inglés", text: "Traduce al inglés: ", builtin: true },
-    { id: "builtin-3", name: "Resumir texto", text: "Resume el siguiente texto: ", builtin: true },
-    { id: "builtin-4", name: "Encontrar errores", text: "Encuentra errores en: ", builtin: true },
-    { id: "builtin-5", name: "Tests unitarios", text: "Genera tests unitarios para: ", builtin: true },
-    { id: "builtin-6", name: "Refactorizar", text: "Refactoriza el siguiente código para mejorar su legibilidad: ", builtin: true },
-    { id: "builtin-7", name: "Documentar función", text: "Genera documentación para la siguiente función: ", builtin: true },
-    { id: "builtin-8", name: "Explicar error", text: "Explica este error y cómo solucionarlo: ", builtin: true },
+    {
+        id: "builtin-1",
+        name: "Explicar código",
+        text: "Explica este código paso a paso: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-2",
+        name: "Traducir al inglés",
+        text: "Traduce al inglés: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-3",
+        name: "Resumir texto",
+        text: "Resume el siguiente texto: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-4",
+        name: "Encontrar errores",
+        text: "Encuentra errores en: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-5",
+        name: "Tests unitarios",
+        text: "Genera tests unitarios para: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-6",
+        name: "Refactorizar",
+        text: "Refactoriza el siguiente código para mejorar su legibilidad: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-7",
+        name: "Documentar función",
+        text: "Genera documentación para la siguiente función: ",
+        builtin: true,
+    },
+    {
+        id: "builtin-8",
+        name: "Explicar error",
+        text: "Explica este error y cómo solucionarlo: ",
+        builtin: true,
+    },
 ];
 let slashHighlightIndex = -1;
 function loadTemplates() {
@@ -1387,7 +1425,9 @@ function renderTemplatesList(filter) {
       ${t.builtin ? '<span class="template-badge">predefinido</span>' : '<span class="template-badge">personalizado</span>'}
     </div>`)
         .join("");
-    promptTemplatesList.querySelectorAll(".prompt-template-item").forEach((el) => {
+    promptTemplatesList
+        .querySelectorAll(".prompt-template-item")
+        .forEach((el) => {
         el.addEventListener("click", () => {
             const id = el.dataset.templateId;
             const tmpl = templates.find((t) => t.id === id);
@@ -1462,9 +1502,12 @@ function navigateSlashDropdown(direction) {
     if (items.length === 0)
         return;
     items.forEach((el) => el.classList.remove("highlighted"));
-    slashHighlightIndex = (slashHighlightIndex + direction + items.length) % items.length;
+    slashHighlightIndex =
+        (slashHighlightIndex + direction + items.length) % items.length;
     items[slashHighlightIndex].classList.add("highlighted");
-    items[slashHighlightIndex].scrollIntoView({ block: "nearest" });
+    items[slashHighlightIndex].scrollIntoView({
+        block: "nearest",
+    });
 }
 function confirmSlashSelection() {
     if (!slashDropdown)
@@ -1498,7 +1541,8 @@ function closeTemplateModal() {
 function renderTemplateManageList() {
     const templates = loadTemplates();
     if (templates.length === 0) {
-        templateManageList.innerHTML = '<div class="no-templates">No hay templates</div>';
+        templateManageList.innerHTML =
+            '<div class="no-templates">No hay templates</div>';
         return;
     }
     templateManageList.innerHTML = templates
