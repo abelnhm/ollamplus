@@ -655,6 +655,97 @@ body::before {
   background: hsl(var(--accent));
 }
 
+/* Botón editar mensaje de usuario */
+.edit-msg-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 4px;
+  cursor: pointer;
+  color: hsl(var(--muted-foreground));
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.message-content:hover .edit-msg-btn {
+  opacity: 1;
+}
+
+.edit-msg-btn:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--accent));
+}
+
+/* Textarea de edición de mensaje */
+.edit-msg-textarea {
+  width: 100%;
+  min-height: 60px;
+  max-height: 200px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.edit-msg-textarea:focus {
+  border-color: hsl(var(--ring));
+}
+
+.edit-msg-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.edit-msg-confirm,
+.edit-msg-cancel {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid hsl(var(--border));
+  transition: all 0.2s;
+}
+
+.edit-msg-confirm {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+.edit-msg-confirm:hover {
+  opacity: 0.9;
+}
+
+.edit-msg-cancel {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.edit-msg-cancel:hover {
+  background: hsl(var(--accent));
+}
+
 .message-content pre code {
   background: none !important;
   padding: 0;
@@ -893,6 +984,23 @@ body::before {
   font-size: 14px;
 }
 
+.chats-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  padding: 8px 4px 6px;
+  margin-top: 4px;
+}
+
+.chats-section-header svg {
+  flex-shrink: 0;
+}
+
 .chat-item {
   background: hsl(var(--background));
   border: 1px solid hsl(var(--border));
@@ -981,6 +1089,69 @@ body::before {
 
 .rename-chat-btn:hover svg {
   stroke: hsl(var(--foreground));
+}
+
+.pin-chat-btn {
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.pin-chat-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: hsl(var(--muted-foreground));
+}
+
+.pin-chat-btn:hover {
+  background: hsl(var(--accent));
+}
+
+.pin-chat-btn:hover svg {
+  stroke: hsl(var(--primary));
+}
+
+.pin-chat-btn.active {
+  opacity: 1;
+}
+
+.pin-chat-btn.active svg {
+  stroke: hsl(var(--primary));
+  fill: hsl(var(--primary));
+}
+
+.chat-item.active .pin-chat-btn.active svg {
+  stroke: hsl(var(--primary-foreground));
+  fill: hsl(var(--primary-foreground));
+}
+
+.chat-item.active .pin-chat-btn:hover svg {
+  stroke: hsl(var(--primary-foreground));
+}
+
+.chat-item.pinned .pin-chat-btn {
+  opacity: 1;
+}
+
+.chat-item.pinned .chat-item-actions {
+  opacity: 1;
+}
+
+.chat-item.pinned .chat-item-actions .rename-chat-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-item.pinned:hover .chat-item-actions .rename-chat-btn {
+  opacity: 1;
 }
 
 .rename-input {

@@ -304,6 +304,30 @@ async function apiDelete(path) {
         throw new Error(err.error || res.statusText);
     }
 }
+async function apiPut(path, body) {
+    const res = await fetch(path, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || res.statusText);
+    }
+    return res.json();
+}
+async function apiPatch(path, body = {}) {
+    const res = await fetch(path, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || res.statusText);
+    }
+    return res.json();
+}
 function formatBytes(bytes) {
     if (bytes === 0)
         return "0 B";
@@ -448,6 +472,158 @@ function addRegenerateButton(wrapper) {
     btn.addEventListener("click", () => regenerateLastResponse());
     wrapper.querySelector(".message-content").appendChild(btn);
 }
+function addEditButton(wrapper, originalContent) {
+    const btn = document.createElement("button");
+    btn.className = "edit-msg-btn";
+    btn.title = "Editar mensaje";
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>`;
+    btn.addEventListener("click", () => startEditMessage(wrapper, originalContent));
+    wrapper.querySelector(".message-content").appendChild(btn);
+}
+function startEditMessage(wrapper, originalContent) {
+    if (isStreaming || wrapper.querySelector(".edit-msg-textarea"))
+        return;
+    const contentEl = wrapper.querySelector(".message-content");
+    const savedHtml = contentEl.innerHTML;
+    // Build edit UI
+    contentEl.innerHTML = `<strong>👤 Tú:</strong>`;
+    const textarea = document.createElement("textarea");
+    textarea.className = "edit-msg-textarea";
+    textarea.value = originalContent;
+    contentEl.appendChild(textarea);
+    const actions = document.createElement("div");
+    actions.className = "edit-msg-actions";
+    const confirmBtn = document.createElement("button");
+    confirmBtn.className = "edit-msg-confirm";
+    confirmBtn.textContent = "Confirmar";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "edit-msg-cancel";
+    cancelBtn.textContent = "Cancelar";
+    actions.appendChild(confirmBtn);
+    actions.appendChild(cancelBtn);
+    contentEl.appendChild(actions);
+    textarea.focus();
+    textarea.style.height = "auto";
+    textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
+    cancelBtn.addEventListener("click", () => {
+        contentEl.innerHTML = savedHtml;
+    });
+    confirmBtn.addEventListener("click", () => {
+        const newContent = textarea.value.trim();
+        if (!newContent)
+            return;
+        confirmEditMessage(wrapper, newContent);
+    });
+    textarea.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            contentEl.innerHTML = savedHtml;
+        }
+    });
+}
+async function confirmEditMessage(wrapper, newContent) {
+    if (!currentChatId)
+        return;
+    const msgId = wrapper.dataset.msgId;
+    if (!msgId)
+        return;
+    // Truncar en el servidor
+    try {
+        await apiPut(`/api/chats/${currentChatId}/messages/${msgId}`, { content: newContent });
+    }
+    catch (err) {
+        console.error("Error editando mensaje:", err);
+        return;
+    }
+    // Eliminar del DOM todos los nodos posteriores a este mensaje
+    while (wrapper.nextElementSibling) {
+        wrapper.nextElementSibling.remove();
+    }
+    // Re-renderizar el mensaje editado
+    const contentEl = wrapper.querySelector(".message-content");
+    contentEl.innerHTML = `<strong>👤 Tú:</strong>${formatMarkdown(newContent)}`;
+    addEditButton(wrapper, newContent);
+    // Re-enviar al modelo desde el historial truncado
+    isStreaming = true;
+    abortController = new AbortController();
+    sendBtn.disabled = true;
+    sendBtn.style.display = "none";
+    stopBtn.style.display = "flex";
+    sendBtn.classList.add("loading");
+    sendText.textContent = "Pensando…";
+    const streamWrapper = createStreamingMessage();
+    let fullText = "";
+    try {
+        const res = await fetch(`/api/chat/${currentChatId}/message`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                content: null,
+                ollamaUrl: getOllamaUrl(),
+                options: getModelOptions(),
+                systemPrompt: getSystemPrompt(),
+            }),
+            signal: abortController.signal,
+        });
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done)
+                break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n\n");
+            buffer = lines.pop() || "";
+            for (const line of lines) {
+                if (!line.startsWith("data: "))
+                    continue;
+                const jsonStr = line.slice(6);
+                try {
+                    const data = JSON.parse(jsonStr);
+                    if (data.error) {
+                        fullText += `\n\n**Error:** ${data.error}`;
+                        updateStreamingMessage(streamWrapper, fullText);
+                    }
+                    else if (data.done) {
+                        fullText = data.fullResponse || fullText;
+                        updateStreamingMessage(streamWrapper, fullText);
+                        if (data.tokenUsage) {
+                            updateTokenUsage(data.tokenUsage.promptTokens, data.tokenUsage.responseTokens);
+                        }
+                    }
+                    else if (data.chunk) {
+                        fullText += data.chunk;
+                        updateStreamingMessage(streamWrapper, fullText);
+                    }
+                }
+                catch {
+                    // ignorar líneas no JSON
+                }
+            }
+        }
+    }
+    catch (err) {
+        if (err.name === "AbortError") {
+            fullText += "\n\n*Respuesta detenida por el usuario.*";
+        }
+        else {
+            fullText += `\n\n**Error de conexión:** ${err.message}`;
+        }
+        updateStreamingMessage(streamWrapper, fullText);
+    }
+    finally {
+        isStreaming = false;
+        abortController = null;
+        sendBtn.disabled = false;
+        sendBtn.style.display = "";
+        stopBtn.style.display = "none";
+        sendBtn.classList.remove("loading");
+        sendText.textContent = "Enviar";
+        addCopyButton(streamWrapper);
+        addRegenerateButton(streamWrapper);
+        refreshChatList();
+    }
+}
 function injectCodeCopyButtons(container) {
     container.querySelectorAll("pre").forEach((pre) => {
         if (pre.querySelector(".code-copy-btn"))
@@ -471,15 +647,20 @@ function injectCodeCopyButtons(container) {
         pre.appendChild(btn);
     });
 }
-function addMessageToUI(role, content) {
+function addMessageToUI(role, content, messageId) {
     const wrapper = document.createElement("div");
     wrapper.className = `message ${role}`;
+    if (messageId)
+        wrapper.dataset.msgId = messageId;
     const inner = document.createElement("div");
     inner.className = "message-content";
     const label = role === "user" ? "👤 Tú" : "🤖 Asistente";
     inner.innerHTML = `<strong>${label}:</strong>${formatMarkdown(content)}`;
     wrapper.appendChild(inner);
     chatMessages.appendChild(wrapper);
+    if (role === "user" && messageId) {
+        addEditButton(wrapper, content);
+    }
     if (role === "assistant") {
         addCopyButton(wrapper);
         addRegenerateButton(wrapper);
@@ -643,7 +824,7 @@ async function sendMessage() {
         }
     }
     // Mostrar mensaje del usuario
-    addMessageToUI("user", content);
+    const userWrapper = addMessageToUI("user", content);
     messageInput.value = "";
     messageInput.style.height = "auto";
     // Estado de streaming
@@ -691,6 +872,10 @@ async function sendMessage() {
                     else if (data.done) {
                         fullText = data.fullResponse || fullText;
                         updateStreamingMessage(streamWrapper, fullText);
+                        if (data.userMessageId && userWrapper) {
+                            userWrapper.dataset.msgId = data.userMessageId;
+                            addEditButton(userWrapper, content);
+                        }
                         if (data.tokenUsage) {
                             updateTokenUsage(data.tokenUsage.promptTokens, data.tokenUsage.responseTokens);
                         }
@@ -738,41 +923,75 @@ async function refreshChatList() {
             return;
         }
         chatsList.innerHTML = "";
-        // Ordenar por fecha descendente
-        data.chats
-            .sort((a, b) => new Date(b.lastMessageAt).getTime() -
-            new Date(a.lastMessageAt).getTime())
-            .forEach((chat) => {
-            const item = document.createElement("div");
-            item.className = `chat-item${chat.id === currentChatId ? " active" : ""}`;
-            item.innerHTML = `
-          <div class="chat-item-content">
-            <div class="chat-item-title">${escapeHtml(chat.title)}</div>
-            <div class="chat-item-meta">${chat.model} · ${chat.messageCount} msgs</div>
-          </div>
-          <div class="chat-item-actions">
-            <button class="rename-chat-btn" title="Renombrar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                <path d="m15 5 4 4"></path>
-              </svg>
-            </button>
-          </div>
-        `;
-            item
-                .querySelector(".chat-item-content")
-                .addEventListener("click", () => loadChat(chat.id));
-            item
-                .querySelector(".rename-chat-btn")
-                .addEventListener("click", (e) => {
-                e.stopPropagation();
-                startRenameChat(item, chat.id, chat.title);
-            });
-            chatsList.appendChild(item);
-        });
+        // Separar chats anclados y normales
+        const sortByDate = (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+        const pinned = data.chats.filter((c) => c.pinned).sort(sortByDate);
+        const unpinned = data.chats.filter((c) => !c.pinned).sort(sortByDate);
+        if (pinned.length > 0) {
+            const pinnedHeader = document.createElement("div");
+            pinnedHeader.className = "chats-section-header";
+            pinnedHeader.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Anclados`;
+            chatsList.appendChild(pinnedHeader);
+            pinned.forEach((chat) => chatsList.appendChild(createChatItem(chat)));
+        }
+        if (unpinned.length > 0 && pinned.length > 0) {
+            const recentHeader = document.createElement("div");
+            recentHeader.className = "chats-section-header";
+            recentHeader.textContent = "Recientes";
+            chatsList.appendChild(recentHeader);
+        }
+        unpinned.forEach((chat) => chatsList.appendChild(createChatItem(chat)));
     }
     catch (err) {
         console.error("Error cargando chats:", err);
+    }
+}
+function createChatItem(chat) {
+    const item = document.createElement("div");
+    item.className = `chat-item${chat.id === currentChatId ? " active" : ""}${chat.pinned ? " pinned" : ""}`;
+    item.innerHTML = `
+    <div class="chat-item-content">
+      <div class="chat-item-title">${escapeHtml(chat.title)}</div>
+      <div class="chat-item-meta">${chat.model} · ${chat.messageCount} msgs</div>
+    </div>
+    <div class="chat-item-actions">
+      <button class="pin-chat-btn${chat.pinned ? " active" : ""}" title="${chat.pinned ? "Desanclar" : "Anclar"}">
+        <svg viewBox="0 0 24 24" fill="${chat.pinned ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+      </button>
+      <button class="rename-chat-btn" title="Renombrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+          <path d="m15 5 4 4"></path>
+        </svg>
+      </button>
+    </div>
+  `;
+    item
+        .querySelector(".chat-item-content")
+        .addEventListener("click", () => loadChat(chat.id));
+    item
+        .querySelector(".pin-chat-btn")
+        .addEventListener("click", (e) => {
+        e.stopPropagation();
+        togglePinChat(chat.id);
+    });
+    item
+        .querySelector(".rename-chat-btn")
+        .addEventListener("click", (e) => {
+        e.stopPropagation();
+        startRenameChat(item, chat.id, chat.title);
+    });
+    return item;
+}
+async function togglePinChat(chatId) {
+    try {
+        await apiPatch(`/api/chats/${chatId}/pin`);
+        await refreshChatList();
+    }
+    catch (err) {
+        console.error("Error al anclar/desanclar chat:", err);
     }
 }
 function startRenameChat(item, chatId, currentTitle) {
@@ -836,7 +1055,7 @@ async function loadChat(chatId) {
         loadModelInfo(data.chat.model);
         // Limpiar mensajes y renderizar los existentes
         chatMessages.innerHTML = "";
-        data.chat.messages.forEach((msg) => addMessageToUI(msg.role, msg.content));
+        data.chat.messages.forEach((msg) => addMessageToUI(msg.role, msg.content, msg.id));
         closeSidebar();
         refreshChatList();
     }

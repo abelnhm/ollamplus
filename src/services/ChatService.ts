@@ -51,6 +51,15 @@ export class ChatService {
     return message;
   }
 
+  togglePin(chatId: string): Chat {
+    const chat = this.getById(chatId);
+    if (!chat) {
+      throw new Error(`Chat con ID ${chatId} no encontrado`);
+    }
+    chat.pinned = !chat.pinned;
+    return chat;
+  }
+
   removeLastMessage(chatId: string): void {
     const chat = this.getById(chatId);
     if (!chat) {
@@ -60,5 +69,25 @@ export class ChatService {
       throw new Error("El chat no tiene mensajes");
     }
     chat.messages.pop();
+  }
+
+  truncateAtMessage(
+    chatId: string,
+    messageId: string,
+    newContent: string,
+  ): Message {
+    const chat = this.getById(chatId);
+    if (!chat) {
+      throw new Error(`Chat con ID ${chatId} no encontrado`);
+    }
+    const idx = chat.messages.findIndex((m) => m.id === messageId);
+    if (idx === -1) {
+      throw new Error(`Mensaje con ID ${messageId} no encontrado`);
+    }
+    // Truncar: conservar mensajes hasta el editado (inclusive) y descartar el resto
+    chat.messages = chat.messages.slice(0, idx + 1);
+    // Actualizar contenido del mensaje editado
+    chat.messages[idx].content = newContent;
+    return chat.messages[idx];
   }
 }

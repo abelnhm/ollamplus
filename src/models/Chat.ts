@@ -13,6 +13,7 @@ export interface ChatData {
   messages?: Message[];
   createdAt?: Date;
   lastMessageAt?: Date;
+  pinned?: boolean;
 }
 
 export class Chat {
@@ -22,6 +23,7 @@ export class Chat {
   messages: Message[];
   createdAt: Date;
   lastMessageAt: Date;
+  pinned: boolean;
 
   constructor({
     id,
@@ -30,6 +32,7 @@ export class Chat {
     messages = [],
     createdAt,
     lastMessageAt,
+    pinned,
   }: ChatData) {
     this.id = id || randomUUID();
     this.model = model;
@@ -37,6 +40,7 @@ export class Chat {
     this.messages = messages;
     this.createdAt = createdAt || new Date();
     this.lastMessageAt = lastMessageAt || new Date();
+    this.pinned = pinned || false;
   }
 
   addMessage(message: Message): void {
@@ -60,6 +64,7 @@ export class Chat {
       createdAt: this.createdAt.toISOString(),
       lastMessageAt: this.lastMessageAt.toISOString(),
       messageCount: this.messages.length,
+      pinned: this.pinned,
     };
   }
 }

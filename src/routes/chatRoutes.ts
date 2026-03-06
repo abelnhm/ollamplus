@@ -54,8 +54,14 @@ export function createChatRoutes(
       res.setHeader("Connection", "keep-alive");
 
       // Agregar mensaje del usuario al chat (solo si hay contenido — null en regeneración)
+      let userMessageId: string | null = null;
       if (content) {
-        chatService.addMessage(chatId as string, "user", content);
+        const userMsg = chatService.addMessage(
+          chatId as string,
+          "user",
+          content,
+        );
+        userMessageId = userMsg.id;
       }
 
       // Enviar historial al modelo y recibir respuesta en streaming
@@ -79,6 +85,7 @@ export function createChatRoutes(
         `data: ${JSON.stringify({
           done: true,
           fullResponse: result.response,
+          userMessageId,
           tokenUsage: {
             promptTokens: result.promptTokens,
             responseTokens: result.responseTokens,
@@ -116,6 +123,19 @@ export function createChatRoutes(
       res.json({ success: true, chat: chat.toJSON() });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Alternar pin/anclar un chat
+  router.patch("/chats/:chatId/pin", (req: Request, res: Response) => {
+    try {
+      const chat = chatService.togglePin(req.params.chatId as string);
+      res.json({ success: true, chat: chat.toJSON() });
+    } catch (error) {
+      const status = (error as Error).message.includes("no encontrado")
+        ? 404
+        : 500;
+      res.status(status).json({ error: (error as Error).message });
     }
   });
 
@@ -167,6 +187,31 @@ export function createChatRoutes(
         res.json({ success: true });
       } catch (error) {
         res.status(500).json({ error: (error as Error).message });
+      }
+    },
+  );
+
+  // Truncar historial en un mensaje y actualizar su contenido (edición)
+  router.put(
+    "/chats/:chatId/messages/:msgId",
+    (req: Request, res: Response) => {
+      try {
+        const { content } = req.body;
+        if (!content || !content.trim()) {
+          res.status(400).json({ error: "El contenido es requerido" });
+          return;
+        }
+        const message = chatService.truncateAtMessage(
+          req.params.chatId as string,
+          req.params.msgId as string,
+          content.trim(),
+        );
+        res.json({ success: true, message: message.toJSON() });
+      } catch (error) {
+        const status = (error as Error).message.includes("no encontrado")
+          ? 404
+          : 500;
+        res.status(status).json({ error: (error as Error).message });
       }
     },
   );
