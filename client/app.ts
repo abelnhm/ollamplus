@@ -505,6 +505,24 @@ function resetTokenUsage(): void {
   updateTokenDisplay();
 }
 
+async function countChatTokens(chatId: string): Promise<void> {
+  try {
+    const data = await apiPost<{ promptTokens: number }>(
+      `/api/chat/${chatId}/count-tokens`,
+      {
+        ollamaUrl: getOllamaUrl(),
+        systemPrompt: getSystemPrompt(),
+      },
+    );
+    totalTokensUsed = data.promptTokens;
+    tokenPromptCount.textContent = formatTokenCount(data.promptTokens);
+    tokenResponseCount.textContent = "0";
+    updateTokenDisplay();
+  } catch (err) {
+    console.error("Error contando tokens:", err);
+  }
+}
+
 async function loadModelInfo(modelName: string): Promise<void> {
   modelInfoPanel.style.display = "none";
   if (!modelName) return;
@@ -1299,11 +1317,19 @@ async function loadChat(chatId: string): Promise<void> {
           Selecciona un modelo local en el desplegable superior y pulsa <strong>Cargar</strong> para continuar la conversaci\u00F3n con un modelo de Ollama.</p>
         </div>`;
       chatMessages.appendChild(banner);
+      resetTokenUsage();
     }
 
     data.chat.messages.forEach((msg) =>
       addMessageToUI(msg.role, msg.content, msg.id),
     );
+
+    // Calcular consumo de tokens con el modelo local si está disponible
+    if (isLocalModel && data.chat.messages.length > 0) {
+      countChatTokens(chatId);
+    } else if (isLocalModel) {
+      resetTokenUsage();
+    }
 
     closeSidebar();
     refreshChatList();
@@ -1408,8 +1434,41 @@ async function getChatData(): Promise<ChatJSON | null> {
     );
     return data.chat;
   } catch {
-    return null;
+    // Fallback: reconstruir datos del chat desde la UI
+    return buildChatFromUI();
   }
+}
+
+function buildChatFromUI(): ChatJSON | null {
+  const messageDivs = chatMessages.querySelectorAll(".message[data-msg-id]");
+  if (messageDivs.length === 0 && !currentChatModel) return null;
+
+  const messages: MessageJSON[] = [];
+  messageDivs.forEach((div) => {
+    const el = div as HTMLElement;
+    const id = el.dataset.msgId || "";
+    const role = el.classList.contains("user") ? "user" : "assistant";
+    const contentEl = el.querySelector(".message-content");
+    const content = contentEl ? contentEl.textContent || "" : "";
+    messages.push({
+      id,
+      role,
+      content: content.trim(),
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  const now = new Date().toISOString();
+  return {
+    id: currentChatId || "",
+    model: currentChatModel || modelSelector.value || "desconocido",
+    title: `Chat exportado`,
+    messages,
+    createdAt: now,
+    lastMessageAt: now,
+    messageCount: messages.length,
+    pinned: false,
+  };
 }
 
 function exportAsMarkdown(chat: ChatJSON): string {

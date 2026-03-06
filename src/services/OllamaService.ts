@@ -92,6 +92,34 @@ export class OllamaService {
     }
   }
 
+  async countTokens(
+    model: string,
+    messages: { role: string; content: string }[],
+    url: string,
+    systemPrompt?: string,
+  ): Promise<{ promptTokens: number }> {
+    try {
+      const client = this.createClient(url);
+
+      const finalMessages = systemPrompt
+        ? [{ role: "system", content: systemPrompt }, ...messages]
+        : messages;
+
+      const response = await client.chat({
+        model,
+        messages: finalMessages,
+        stream: false,
+        options: { num_predict: 0 },
+      } as any);
+
+      return {
+        promptTokens: (response as any).prompt_eval_count || 0,
+      };
+    } catch (error) {
+      throw new Error(`Error al contar tokens: ${(error as Error).message}`);
+    }
+  }
+
   async sendMessage(
     model: string,
     messages: { role: string; content: string }[],

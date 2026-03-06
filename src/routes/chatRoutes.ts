@@ -225,6 +225,37 @@ export function createChatRoutes(
     },
   );
 
+  // Contar tokens del historial de un chat con el modelo cargado
+  router.post(
+    "/chat/:chatId/count-tokens",
+    async (req: Request, res: Response) => {
+      try {
+        const chat = chatService.getById(req.params.chatId as string);
+        if (!chat) {
+          res.status(404).json({ error: "Chat no encontrado" });
+          return;
+        }
+
+        const { ollamaUrl, systemPrompt } = req.body;
+        const history = chat.getHistory();
+
+        const result = await ollamaService.countTokens(
+          chat.model,
+          history,
+          ollamaUrl || "http://localhost:11434",
+          systemPrompt,
+        );
+
+        res.json({
+          success: true,
+          promptTokens: result.promptTokens,
+        });
+      } catch (error) {
+        res.status(500).json({ error: (error as Error).message });
+      }
+    },
+  );
+
   // Importar una conversación
   router.post("/import-chat", (req: Request, res: Response) => {
     try {
