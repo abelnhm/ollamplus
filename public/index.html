@@ -89,6 +89,13 @@
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
         </button>
+        <button id="importBtn" class="icon-btn" title="Importar conversación">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </button>
         <button id="clearBtn" class="icon-btn" title="Limpiar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"></polyline>
@@ -489,6 +496,54 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" id="cancelExportBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de importación -->
+  <div class="modal" id="importModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>Importar conversación</h2>
+        <button class="modal-close" id="closeImportModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Selecciona un archivo <strong>.md</strong> o <strong>.json</strong> exportado previamente:</p>
+        <div class="import-drop-zone" id="importDropZone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Arrastra un archivo aquí o haz clic para seleccionar</span>
+          <input type="file" id="importFileInput" accept=".md,.json" hidden>
+        </div>
+        <div id="importPreview" class="import-preview" style="display:none;">
+          <div class="import-preview-header">
+            <strong id="importFileName"></strong>
+            <button class="icon-btn" id="importRemoveFile" title="Quitar archivo" style="width:24px;height:24px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="import-preview-info">
+            <span id="importPreviewTitle"></span>
+            <span id="importPreviewModel"></span>
+            <span id="importPreviewMessages"></span>
+          </div>
+        </div>
+        <div id="importError" class="import-error" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelImportBtn">Cancelar</button>
+        <button class="btn-primary" id="confirmImportBtn" disabled>Importar</button>
       </div>
     </div>
   </div>

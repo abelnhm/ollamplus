@@ -49,6 +49,7 @@ const toggleSidebarBtn = $<HTMLButtonElement>("toggleSidebarBtn");
 const closeSidebarBtn = $<HTMLButtonElement>("closeSidebarBtn");
 const newChatBtn = $<HTMLButtonElement>("newChatBtn");
 const exportBtn = $<HTMLButtonElement>("exportBtn");
+const importBtn = $<HTMLButtonElement>("importBtn");
 const clearBtn = $<HTMLButtonElement>("clearBtn");
 const settingsBtn = $<HTMLButtonElement>("settingsBtn");
 const darkModeToggle = $<HTMLButtonElement>("darkModeToggle");
@@ -1473,6 +1474,183 @@ async function exportChat(format: string): Promise<void> {
   closeExportModal();
 }
 
+// ─── Modal de importación ─────────────────────────────────
+const importModal = $("importModal") as HTMLDivElement;
+const closeImportModalBtn = $("closeImportModal") as HTMLButtonElement;
+const cancelImportBtn = $("cancelImportBtn") as HTMLButtonElement;
+const confirmImportBtn = $("confirmImportBtn") as HTMLButtonElement;
+const importDropZone = $("importDropZone") as HTMLDivElement;
+const importFileInput = $("importFileInput") as HTMLInputElement;
+const importPreview = $("importPreview") as HTMLDivElement;
+const importFileName = $("importFileName") as HTMLElement;
+const importPreviewTitle = $("importPreviewTitle") as HTMLElement;
+const importPreviewModel = $("importPreviewModel") as HTMLElement;
+const importPreviewMessages = $("importPreviewMessages") as HTMLElement;
+const importRemoveFile = $("importRemoveFile") as HTMLButtonElement;
+const importError = $("importError") as HTMLDivElement;
+
+interface ImportedChat {
+  model: string;
+  title: string;
+  messages: { role: string; content: string }[];
+}
+
+let pendingImport: ImportedChat | null = null;
+
+function openImportModal(): void {
+  resetImportModal();
+  importModal.classList.add("active");
+}
+
+function closeImportModal(): void {
+  importModal.classList.remove("active");
+  resetImportModal();
+}
+
+function resetImportModal(): void {
+  pendingImport = null;
+  importFileInput.value = "";
+  importPreview.style.display = "none";
+  importError.style.display = "none";
+  importDropZone.style.display = "";
+  confirmImportBtn.disabled = true;
+}
+
+function showImportError(msg: string): void {
+  importError.textContent = msg;
+  importError.style.display = "block";
+  importPreview.style.display = "none";
+  importDropZone.style.display = "";
+  confirmImportBtn.disabled = true;
+  pendingImport = null;
+}
+
+function parseImportJSON(text: string): ImportedChat {
+  const data = JSON.parse(text);
+  if (!data.model || !data.title || !Array.isArray(data.messages)) {
+    throw new Error("El archivo JSON no tiene el formato esperado.");
+  }
+  const messages = data.messages
+    .filter((m: { role?: string; content?: string }) => m.role && m.content)
+    .map((m: { role: string; content: string }) => ({
+      role: m.role,
+      content: m.content,
+    }));
+  return { model: data.model, title: data.title, messages };
+}
+
+function parseImportMarkdown(text: string): ImportedChat {
+  const lines = text.split("\n");
+  let title = "Chat importado";
+  let model = "desconocido";
+  const messages: { role: string; content: string }[] = [];
+
+  // Extraer título de la primera línea "# ..."
+  const titleMatch = lines[0]?.match(/^#\s+(.+)/);
+  if (titleMatch) title = titleMatch[1].trim();
+
+  // Extraer modelo de "**Modelo:** ..."
+  const modelLine = lines.find((l) => l.startsWith("**Modelo:**"));
+  if (modelLine) {
+    const m = modelLine.match(/\*\*Modelo:\*\*\s*(.+)/);
+    if (m) model = m[1].trim();
+  }
+
+  // Dividir por secciones "### 👤 Usuario" / "### 🤖 Asistente"
+  const sectionRegex = /^###\s+(👤\s*Usuario|🤖\s*Asistente)/;
+  let currentRole: string | null = null;
+  let currentContent: string[] = [];
+
+  for (const line of lines) {
+    const sectionMatch = line.match(sectionRegex);
+    if (sectionMatch) {
+      // Guardar sección anterior
+      if (currentRole && currentContent.length > 0) {
+        messages.push({
+          role: currentRole,
+          content: currentContent.join("\n").trim(),
+        });
+      }
+      currentRole = sectionMatch[1].includes("Usuario") ? "user" : "assistant";
+      currentContent = [];
+    } else if (currentRole) {
+      // Ignorar separadores "---"
+      if (line.trim() === "---") continue;
+      currentContent.push(line);
+    }
+  }
+  // Última sección
+  if (currentRole && currentContent.length > 0) {
+    messages.push({
+      role: currentRole,
+      content: currentContent.join("\n").trim(),
+    });
+  }
+
+  if (messages.length === 0) {
+    throw new Error("No se encontraron mensajes en el archivo Markdown.");
+  }
+
+  return { model, title, messages };
+}
+
+function handleImportFile(file: File): void {
+  importError.style.display = "none";
+
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext !== "json" && ext !== "md") {
+    showImportError("Formato no soportado. Usa archivos .md o .json.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = reader.result as string;
+      const parsed =
+        ext === "json" ? parseImportJSON(text) : parseImportMarkdown(text);
+
+      pendingImport = parsed;
+
+      // Mostrar preview
+      importFileName.textContent = file.name;
+      importPreviewTitle.textContent = `Título: ${parsed.title}`;
+      importPreviewModel.textContent = `Modelo: ${parsed.model}`;
+      importPreviewMessages.textContent = `Mensajes: ${parsed.messages.length}`;
+      importPreview.style.display = "block";
+      importDropZone.style.display = "none";
+      confirmImportBtn.disabled = false;
+    } catch (err) {
+      showImportError((err as Error).message || "Error al leer el archivo.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function confirmImport(): Promise<void> {
+  if (!pendingImport) return;
+
+  confirmImportBtn.disabled = true;
+  confirmImportBtn.textContent = "Importando…";
+
+  try {
+    const data = await apiPost<{ chat: ChatJSON }>("/api/import-chat", {
+      model: pendingImport.model,
+      title: pendingImport.title,
+      messages: pendingImport.messages,
+    });
+    closeImportModal();
+    await loadChat(data.chat.id);
+  } catch (err) {
+    showImportError(
+      (err as Error).message || "Error al importar la conversación.",
+    );
+  } finally {
+    confirmImportBtn.textContent = "Importar";
+    confirmImportBtn.disabled = !pendingImport;
+  }
+}
+
 // ─── Sidebar toggle ──────────────────────────────────────
 function openSidebar(): void {
   sidebar.classList.add("open");
@@ -1960,6 +2138,32 @@ document.querySelectorAll(".export-format-btn").forEach((btn) => {
   });
 });
 
+// Importación de conversaciones
+importBtn.addEventListener("click", openImportModal);
+closeImportModalBtn.addEventListener("click", closeImportModal);
+cancelImportBtn.addEventListener("click", closeImportModal);
+confirmImportBtn.addEventListener("click", confirmImport);
+importRemoveFile.addEventListener("click", resetImportModal);
+
+importDropZone.addEventListener("click", () => importFileInput.click());
+importFileInput.addEventListener("change", () => {
+  const file = importFileInput.files?.[0];
+  if (file) handleImportFile(file);
+});
+importDropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  importDropZone.classList.add("dragover");
+});
+importDropZone.addEventListener("dragleave", () => {
+  importDropZone.classList.remove("dragover");
+});
+importDropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  importDropZone.classList.remove("dragover");
+  const file = e.dataTransfer?.files[0];
+  if (file) handleImportFile(file);
+});
+
 darkModeToggle.addEventListener("click", toggleTheme);
 
 settingsBtn.addEventListener("click", openSettings);
@@ -2091,6 +2295,7 @@ document.addEventListener("keydown", (e) => {
     closeSidebar();
     closeModelChange();
     closeExportModal();
+    closeImportModal();
     closeTemplatesDropdown();
     closeSlashDropdown();
     closeTemplateModal();

@@ -105,7 +105,7 @@ export function createChatRoutes(
   // Buscar chats por título o contenido de mensajes
   router.get("/chats/search", (req: Request, res: Response) => {
     try {
-      const q = (req.query.q as string || "").trim();
+      const q = ((req.query.q as string) || "").trim();
       if (!q) {
         res.status(400).json({ error: "El parámetro 'q' es requerido" });
         return;
@@ -205,6 +205,31 @@ export function createChatRoutes(
       }
     },
   );
+
+  // Importar una conversación
+  router.post("/import-chat", (req: Request, res: Response) => {
+    try {
+      const { model, title, messages } = req.body;
+
+      if (!model || !title || !Array.isArray(messages)) {
+        res
+          .status(400)
+          .json({ error: "model, title y messages son requeridos" });
+        return;
+      }
+
+      const chat = chatService.create(model, title);
+
+      for (const msg of messages) {
+        if (!msg.role || !msg.content) continue;
+        chatService.addMessage(chat.id, msg.role, msg.content);
+      }
+
+      res.json({ success: true, chat: chat.toJSON() });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
 
   // Truncar historial en un mensaje y actualizar su contenido (edición)
   router.put(

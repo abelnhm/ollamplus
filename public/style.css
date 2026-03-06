@@ -2102,6 +2102,72 @@ body::before {
   border-top: 1px solid hsl(var(--border));
 }
 
+/* ─── Import modal ────────────────────────────────────── */
+.import-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  border: 2px dashed hsl(var(--border));
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+}
+
+.import-drop-zone:hover,
+.import-drop-zone.dragover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.06);
+  color: hsl(var(--primary));
+}
+
+.import-drop-zone span {
+  font-size: 0.85rem;
+}
+
+.import-preview {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--muted));
+}
+
+.import-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.import-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.import-error {
+  margin-top: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius);
+  background: hsl(0 84% 60% / 0.12);
+  color: hsl(0 84% 60%);
+  font-size: 0.825rem;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-test {
