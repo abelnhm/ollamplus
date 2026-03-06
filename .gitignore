@@ -33,10 +33,17 @@ coverage
 # nyc test coverage
 .nyc_output
 
-# Build output
+# Build output - servidor
 dist/
 build/
 out/
+
+# Build output - cliente (generados por tsc -p client)
+# Solo index.html y style.css son manuales, el resto se compila desde client/
+public/*.js
+public/*.js.map
+public/ui/
+public/services/
 
 # IDE - VSCode
 .vscode/*

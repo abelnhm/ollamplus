@@ -71,14 +71,57 @@ IAS-PROJECT/
 │       ├── logger.ts           #   → Registra cada petición en consola
 │       └── errorHandler.ts     #   → Captura errores y responde JSON
 │
-├── client/                     # === FRONTEND (TypeScript del cliente) ===
-│   ├── app.ts                  # Código fuente TS del frontend
-│   └── tsconfig.json           # Configuración TypeScript del cliente
+├── client/                     # === FRONTEND (TypeScript modular) ===
+│   ├── app.ts                  # Entry point: imports, eventos, inicialización
+│   ├── types.ts                # Interfaces compartidas (ChatJSON, MessageJSON, etc.)
+│   ├── state.ts                # Estado global reactivo de la aplicación
+│   ├── api.ts                  # Cliente HTTP genérico (apiGet, apiPost, apiPut, etc.)
+│   ├── utils.ts                # Utilidades puras (formatMarkdown, escapeHtml, etc.)
+│   ├── tsconfig.json           # Configuración TypeScript del cliente (ES modules)
+│   │
+│   ├── ui/                     # Capa de presentación (DOM)
+│   │   ├── elements.ts         #   → Referencias a elementos DOM + helpers
+│   │   ├── messages.ts         #   → Renderizado de mensajes y streaming
+│   │   ├── sidebar.ts          #   → Apertura/cierre del sidebar
+│   │   ├── theme.ts            #   → Modo oscuro/claro
+│   │   └── settings.ts         #   → Modal de configuración de Ollama
+│   │
+│   └── services/               # Capa de lógica de negocio (cliente)
+│       ├── chatService.ts      #   → Envío de mensajes, CRUD de chats, streaming
+│       ├── modelService.ts     #   → Carga de modelos e información del modelo
+│       ├── modelParams.ts      #   → Parámetros del modelo (temperature, top_p, etc.)
+│       ├── systemPrompt.ts     #   → System prompt (get/save/load)
+│       ├── tokenService.ts     #   → Conteo y visualización de tokens
+│       ├── exportService.ts    #   → Exportar a Markdown/JSON/HTML/PDF
+│       ├── importService.ts    #   → Importar desde ChatGPT/NousSave/OllamaUI
+│       └── templateService.ts  #   → Prompt templates y slash commands
 │
 ├── public/                     # === ARCHIVOS ESTÁTICOS (servidos por Express) ===
-│   ├── index.html              # Página principal
-│   ├── app.js                  # ← Compilado automáticamente desde client/app.ts
-│   └── style.css               # Estilos (diseño responsivo, dark mode)
+│   ├── index.html              # Página principal (carga app.js como ES module)
+│   ├── style.css               # Estilos (diseño responsivo, dark mode)
+│   │
+│   ├── app.js                  # ← Compilado desde client/app.ts (entry point)
+│   ├── types.js                # ← Compilado desde client/types.ts
+│   ├── state.js                # ← Compilado desde client/state.ts
+│   ├── api.js                  # ← Compilado desde client/api.ts
+│   ├── utils.js                # ← Compilado desde client/utils.ts
+│   │
+│   ├── ui/                     # ← Compilados desde client/ui/
+│   │   ├── elements.js         #     → DOM refs + helpers
+│   │   ├── messages.js         #     → Renderizado de mensajes
+│   │   ├── sidebar.js          #     → Sidebar
+│   │   ├── theme.js            #     → Tema oscuro/claro
+│   │   └── settings.js         #     → Modal de configuración
+│   │
+│   └── services/               # ← Compilados desde client/services/
+│       ├── chatService.js      #     → Lógica de chat + streaming
+│       ├── modelService.js     #     → Modelos de Ollama
+│       ├── modelParams.js      #     → Parámetros del modelo
+│       ├── systemPrompt.js     #     → System prompt
+│       ├── tokenService.js     #     → Tokens
+│       ├── exportService.js    #     → Exportar chats
+│       ├── importService.js    #     → Importar chats
+│       └── templateService.js  #     → Templates + slash commands
 │
 └── dist/                       # ← Compilado del servidor (generado por tsc)
     ├── index.js
@@ -102,12 +145,12 @@ TypeScript añade **tipado estático** a JavaScript. Esto permite:
 
 El proyecto tiene **dos archivos `tsconfig.json`** porque servidor y cliente tienen necesidades diferentes:
 
-| Aspecto      | Servidor (`tsconfig.json`) | Cliente (`client/tsconfig.json`)       |
-| ------------ | -------------------------- | -------------------------------------- |
-| **Módulos**  | `Node16` (ESM con Node.js) | `None` (script global en el navegador) |
-| **Libs**     | Predeterminadas de Node.js | `DOM`, `DOM.Iterable`, `ES2022`        |
-| **Salida**   | `dist/`                    | `public/`                              |
-| **Archivos** | `src/**/*`, `index.ts`     | `client/**/*`                          |
+| Aspecto      | Servidor (`tsconfig.json`) | Cliente (`client/tsconfig.json`)              |
+| ------------ | -------------------------- | --------------------------------------------- |
+| **Módulos**  | `Node16` (ESM con Node.js) | `ES2022` (ES modules nativos en el navegador) |
+| **Libs**     | Predeterminadas de Node.js | `DOM`, `DOM.Iterable`, `ES2022`               |
+| **Salida**   | `dist/`                    | `public/` (incluyendo `ui/` y `services/`)    |
+| **Archivos** | `src/**/*`, `index.ts`     | `client/**/*` (17 módulos en 3 capas)         |
 
 ### Interfaces y tipos
 
@@ -202,7 +245,7 @@ const data = await apiPost<{ chat: ChatJSON }>("/api/new-chat", {
 data.chat.id; // ← TypeScript sabe que esto es string
 ```
 
-Se compila a `public/app.js` con `module: "None"` porque se ejecuta directamente en el navegador como script global (sin bundler).
+Se compila a `public/` con `module: "ES2022"` usando ES modules nativos del navegador (sin bundler).
 
 ---
 
@@ -370,29 +413,132 @@ export function createServer(port: number = 3000): Express {
 
 ## ¿Cómo funciona el Frontend?
 
-El frontend vive en dos lugares:
+El frontend usa **arquitectura en capas** con módulos ES nativos del navegador. Cada módulo tiene una responsabilidad única.
 
-- **`client/app.ts`** → Código fuente TypeScript
-- **`public/`** → Archivos estáticos servidos por Express (HTML, CSS, y el `app.js` compilado)
+### Arquitectura del Cliente
 
-### `client/app.ts`
+```
+┌─────────────────────────────────────────────────────────┐
+│              ENTRY POINT: app.ts                        │
+│     Importa todos los módulos, conecta eventos,         │
+│     resuelve dependencias circulares, inicializa        │
+├─────────────────────────────────────────────────────────┤
+│           CAPA SERVICIOS: services/                     │
+│  chatService · modelService · modelParams               │
+│  systemPrompt · tokenService · exportService            │
+│  importService · templateService                        │
+│  → Lógica de negocio del cliente                        │
+├─────────────────────────────────────────────────────────┤
+│           CAPA UI: ui/                                  │
+│  elements · messages · sidebar · theme · settings       │
+│  → Presentación, DOM, renderizado                       │
+├─────────────────────────────────────────────────────────┤
+│           CAPA BASE                                     │
+│  types.ts · state.ts · api.ts · utils.ts                │
+│  → Tipos, estado, HTTP, utilidades puras                │
+└─────────────────────────────────────────────────────────┘
+```
 
-Toda la lógica del frontend en un solo archivo TypeScript:
+### Módulos del cliente
 
-- **Interfaces** (`ChatJSON`, `MessageJSON`, `OllamaModel`) para tipar los datos del backend
-- **Helpers genéricos** (`apiPost<T>`, `apiGet<T>`, `apiDelete`) para peticiones HTTP tipadas
-- **Streaming con ReadableStream**: Lee la respuesta SSE del servidor palabra por palabra
-- **Renderizado Markdown**: Usa `marked.js` y `highlight.js` (cargados desde CDN, accedidos via `window as any`)
-- **Dark mode**: Alterna entre temas con `localStorage`
-- **Configuración de Ollama**: Permite cambiar host/puerto de conexión
+| Capa          | Módulo                        | Responsabilidad                                                                  |
+| ------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| **Base**      | `types.ts`                    | Interfaces compartidas (`ChatJSON`, `MessageJSON`, `OllamaModel`, etc.)          |
+| **Base**      | `state.ts`                    | Estado global reactivo (chat actual, streaming, tokens)                          |
+| **Base**      | `api.ts`                      | Cliente HTTP genérico con tipado (`apiPost<T>`, `apiGet<T>`, etc.)               |
+| **Base**      | `utils.ts`                    | Funciones puras (`formatMarkdown`, `escapeHtml`, `formatBytes`)                  |
+| **UI**        | `ui/elements.ts`              | Referencias a todos los elementos DOM + helpers (`scrollToBottom`, `autoResize`) |
+| **UI**        | `ui/messages.ts`              | Renderizado de mensajes, streaming en tiempo real, botones copy/edit/regenerar   |
+| **UI**        | `ui/sidebar.ts`               | Apertura y cierre del sidebar de chats                                           |
+| **UI**        | `ui/theme.ts`                 | Modo oscuro/claro con `localStorage`                                             |
+| **UI**        | `ui/settings.ts`              | Modal de configuración de conexión a Ollama                                      |
+| **Servicios** | `services/chatService.ts`     | Core: envío de mensajes, streaming SSE, CRUD de chats, cambio de modelo          |
+| **Servicios** | `services/modelService.ts`    | Carga de modelos disponibles e info detallada del modelo                         |
+| **Servicios** | `services/modelParams.ts`     | Parámetros del modelo (temperature, top_p, num_ctx, etc.)                        |
+| **Servicios** | `services/systemPrompt.ts`    | System prompt: lectura, persistencia en localStorage                             |
+| **Servicios** | `services/tokenService.ts`    | Conteo de tokens, barra de uso de contexto                                       |
+| **Servicios** | `services/exportService.ts`   | Exportar conversaciones a Markdown, JSON, HTML, PDF                              |
+| **Servicios** | `services/importService.ts`   | Importar desde ChatGPT, NousSave y formato nativo                                |
+| **Servicios** | `services/templateService.ts` | Prompt templates predefinidos/personalizados + slash commands                    |
 
-### `public/index.html`
+### ¿Por qué módulos ES nativos?
 
-Estructura HTML con sidebar de chats, selector de modelos, área de mensajes, input de texto y modal de configuración.
+El cliente usa `<script type="module">` en el HTML y `module: "ES2022"` en el tsconfig. Esto permite:
 
-### `public/style.css`
+- **Imports/exports** nativos sin bundler (Webpack, Vite, etc.)
+- **Carga bajo demanda**: el navegador solo carga los módulos necesarios
+- **Tree shaking** natural: los exports no usados no se ejecutan
+- **Dependencias explícitas**: cada módulo declara exactamente lo que necesita
 
-Diseño responsivo mobile-first con variables CSS. Soporta modo claro y oscuro.
+### Patrón de callbacks para dependencias circulares
+
+`messages.ts` necesita llamar a `chatService.ts` (para regenerar), y `chatService.ts` necesita llamar a `messages.ts` (para renderizar). Se resuelve con un patrón de callbacks:
+
+```typescript
+// ui/messages.ts — define el hook
+export function setMessageCallbacks(callbacks: {
+  onRegenerate: () => void;
+  onEditConfirm: (wrapper: HTMLDivElement, newContent: string) => Promise<void>;
+}): void {
+  /* ... */
+}
+
+// app.ts — conecta las dependencias
+setMessageCallbacks({
+  onRegenerate: regenerateLastResponse,
+  onEditConfirm: confirmEditMessage,
+});
+```
+
+### Estructura de `public/` (archivos estáticos)
+
+La carpeta `public/` es servida directamente por Express con `express.static('public')`. Contiene los archivos que el navegador descarga:
+
+```
+public/
+├── index.html              ← Escrito a mano (HTML de la app)
+├── style.css               ← Escrito a mano (estilos)
+│
+├── app.js                  ← Generado por tsc desde client/app.ts
+├── types.js                ← Generado por tsc desde client/types.ts
+├── state.js                ← Generado por tsc desde client/state.ts
+├── api.js                  ← Generado por tsc desde client/api.ts
+├── utils.js                ← Generado por tsc desde client/utils.ts
+│
+├── ui/                     ← Generados desde client/ui/
+│   ├── elements.js
+│   ├── messages.js
+│   ├── sidebar.js
+│   ├── theme.js
+│   └── settings.js
+│
+├── services/               ← Generados desde client/services/
+│   ├── chatService.js
+│   ├── modelService.js
+│   ├── modelParams.js
+│   ├── systemPrompt.js
+│   ├── tokenService.js
+│   ├── exportService.js
+│   ├── importService.js
+│   └── templateService.js
+│
+└── *.js.map                ← Source maps (para depurar TS desde el navegador)
+```
+
+**Archivos manuales** (se editan directamente):
+
+- **`index.html`**: Página principal de la app. Contiene el layout completo: sidebar de chats, selector de modelos, área de mensajes, input de texto, modales de configuración/exportación/importación. Carga `app.js` como módulo ES con `<script type="module" src="app.js">`. También carga `marked.js` y `highlight.js` desde CDN para renderizar Markdown.
+- **`style.css`**: Diseño responsivo mobile-first con variables CSS. Soporta modo claro y oscuro mediante la clase `.dark-mode` en el `<body>`. Incluye estilos para el sidebar, mensajes con Markdown, bloques de código con highlight, modales y animaciones.
+
+**Archivos generados** (NO editar — se sobreescriben al compilar):
+
+- **`app.js`**: Entry point compilado. Importa todos los módulos, registra event listeners e inicializa la app.
+- **`types.js`, `state.js`, `api.js`, `utils.js`**: Capa base compilada — tipos, estado global, cliente HTTP y utilidades.
+- **`ui/*.js`**: Capa de presentación compilada — elementos DOM, mensajes, sidebar, tema, configuración.
+- **`services/*.js`**: Capa de servicios compilada — chat, modelos, parámetros, tokens, export/import, templates.
+- **`*.js.map`**: Source maps generados por TypeScript. Permiten depurar el código `.ts` original directamente en las DevTools del navegador.
+
+> **Nota**: Cada archivo `.js` tiene su correspondiente `.js.map`. Estos mapas conectan el JavaScript compilado con el TypeScript fuente, así cuando abres las DevTools del navegador puedes ver y depurar los archivos `.ts` originales.
 
 ---
 
@@ -588,6 +734,14 @@ npm run dev
 ### Flujo de compilación
 
 ```
-client/app.ts  ──tsc -p client──►  public/app.js    (navegador)
-index.ts + src/**/*.ts  ──tsc──►  dist/**/*.js      (Node.js)
+client/                              public/
+  app.ts          ──tsc -p client──►   app.js
+  types.ts                             types.js
+  state.ts                             state.js
+  api.ts                               api.js
+  utils.ts                             utils.js
+  ui/*.ts                              ui/*.js
+  services/*.ts                        services/*.js
+
+index.ts + src/**/*.ts  ──tsc──►     dist/**/*.js     (Node.js)
 ```
