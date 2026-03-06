@@ -35,6 +35,13 @@
         </svg>
       </button>
     </div>
+    <div class="sidebar-search">
+      <svg class="sidebar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="chatSearchInput" class="chat-search-input" placeholder="Buscar chats...">
+    </div>
     <div class="chats-list" id="chatsList">
       <div class="no-chats">No hay chats guardados</div>
     </div>
@@ -92,6 +99,7 @@
     </div>
 
     <div class="model-selector-container" id="modelSelectorContainer">
+      <span class="model-status" id="modelStatus"></span>
       <div class="model-selector-header">
         <svg class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
@@ -109,7 +117,192 @@
         <select id="modelSelector" class="model-selector">
           <option value="">Cargando modelos...</option>
         </select>
-        <span class="model-status" id="modelStatus"></span>
+        <!-- Paneles de parámetros y system prompt -->
+        <div class="panels-toolbar">
+          <button id="modelParamsToggle" class="panel-toggle-btn" title="Parámetros del modelo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span class="panel-toggle-text">Parámetros</span>
+          </button>
+          <button id="systemPromptToggle" class="panel-toggle-btn" title="Instrucciones del sistema">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span class="panel-toggle-text">Instrucciones</span>
+          </button>
+        </div>
+        <button id="loadModelBtn" class="load-model-btn" title="Aplicar modelo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span class="load-model-text">Cargar</span>
+        </button>
+
+      </div>
+      <!-- Panel de parámetros del modelo -->
+      <div id="modelParamsPanel" class="collapsible-panel" style="display:none">
+        <div class="panel-header">
+          <label class="toggle-label"><input type="checkbox" id="enableModelParams"> Habilitar parámetros
+            personalizados</label>
+        </div>
+        <div id="modelParamsForm" class="params-form">
+          <div class="param-group">
+            <label>Temperature <button class="param-help-btn"
+                data-tooltip="Controla la aleatoriedad. Valores más altos = más creativo, más bajos = más determinista.">?</button></label>
+            <div class="param-row">
+              <input type="range" id="param_temperature" min="0" max="2" step="0.1" value="0.8">
+              <input type="number" id="param_temperature_val" min="0" max="2" step="0.1" value="0.8">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Top P <button class="param-help-btn"
+                data-tooltip="Muestreo nucleus. Limita a tokens cuya probabilidad acumulada supera este valor.">?</button></label>
+            <div class="param-row">
+              <input type="range" id="param_top_p" min="0" max="1" step="0.05" value="0.9">
+              <input type="number" id="param_top_p_val" min="0" max="1" step="0.05" value="0.9">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Top K <button class="param-help-btn"
+                data-tooltip="Limita el muestreo a los K tokens más probables.">?</button></label>
+            <input type="number" id="param_top_k" min="1" value="40">
+          </div>
+          <div class="param-group">
+            <label>Contexto (num_ctx) <button class="param-help-btn"
+                data-tooltip="Tamaño de la ventana de contexto en tokens.">?</button></label>
+            <select id="param_num_ctx">
+              <option value="512">512</option>
+              <option value="1024">1024</option>
+              <option value="2048" selected>2048</option>
+              <option value="4096">4096</option>
+              <option value="8192">8192</option>
+              <option value="16384">16384</option>
+              <option value="32768">32768</option>
+              <option value="65536">65536</option>
+              <option value="131072">131072</option>
+            </select>
+          </div>
+          <div class="param-group">
+            <label>Repeat Penalty <button class="param-help-btn"
+                data-tooltip="Penaliza la repetición de tokens. Mayor = menos repetitivo.">?</button></label>
+            <div class="param-row">
+              <input type="range" id="param_repeat_penalty" min="0.5" max="2" step="0.1" value="1.1">
+              <input type="number" id="param_repeat_penalty_val" min="0.5" max="2" step="0.1" value="1.1">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Seed <button class="param-help-btn"
+                data-tooltip="Semilla para reproducibilidad. Vacío = aleatorio.">?</button></label>
+            <input type="number" id="param_seed" placeholder="Aleatorio">
+          </div>
+          <div class="param-group">
+            <label>Max Tokens (num_predict) <button class="param-help-btn"
+                data-tooltip="Máximo de tokens a generar. -1 = sin límite.">?</button></label>
+            <input type="number" id="param_num_predict" value="-1">
+          </div>
+          <div class="param-group">
+            <label>Stop <button class="param-help-btn"
+                data-tooltip="Secuencias de parada separadas por comas.">?</button></label>
+            <input type="text" id="param_stop" placeholder="Secuencias separadas por coma">
+          </div>
+          <div class="param-group">
+            <label>Mirostat <button class="param-help-btn"
+                data-tooltip="Algoritmo de muestreo Mirostat. 0=desactivado, 1=v1, 2=v2.">?</button></label>
+            <select id="param_mirostat">
+              <option value="0" selected>0 — Desactivado</option>
+              <option value="1">1 — Mirostat v1</option>
+              <option value="2">2 — Mirostat v2</option>
+            </select>
+          </div>
+          <div class="param-group">
+            <label>Mirostat Tau <button class="param-help-btn"
+                data-tooltip="Controla la perplejidad objetivo de Mirostat.">?</button></label>
+            <div class="param-row">
+              <input type="range" id="param_mirostat_tau" min="0" max="10" step="0.1" value="5.0">
+              <input type="number" id="param_mirostat_tau_val" min="0" max="10" step="0.1" value="5.0">
+            </div>
+          </div>
+          <div class="param-group">
+            <label>Mirostat Eta <button class="param-help-btn"
+                data-tooltip="Tasa de aprendizaje de Mirostat.">?</button></label>
+            <div class="param-row">
+              <input type="range" id="param_mirostat_eta" min="0" max="1" step="0.01" value="0.1">
+              <input type="number" id="param_mirostat_eta_val" min="0" max="1" step="0.01" value="0.1">
+            </div>
+          </div>
+          <button id="resetParamsBtn" class="btn-secondary" style="margin-top:8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="width:14px;height:14px;flex-shrink:0;">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Restablecer valores
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel de instrucciones del sistema -->
+      <div id="systemPromptPanel" class="collapsible-panel" style="display:none">
+        <div class="panel-header">
+          <label class="toggle-label"><input type="checkbox" id="enableSystemPrompt"> Habilitar instrucciones del
+            sistema</label>
+        </div>
+        <div id="systemPromptForm" class="system-prompt-form">
+          <textarea id="systemPromptInput" class="system-prompt-input"
+            placeholder="Escribe las instrucciones del sistema aquí..." rows="4"></textarea>
+          <button id="clearSystemPrompt" class="btn-secondary" style="margin-top:4px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="width:14px;height:14px;flex-shrink:0;">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+      <!-- Panel de información del modelo -->
+      <div id="modelInfoPanel" class="model-info-panel" style="display:none">
+        <div class="model-info-item"><span class="model-info-label">Familia:</span> <span class="model-info-value"
+            id="modelInfoFamily"></span></div>
+        <span class="model-info-sep">·</span>
+        <div class="model-info-item"><span class="model-info-label">Tamaño:</span> <span class="model-info-value"
+            id="modelInfoSize"></span></div>
+        <span class="model-info-sep">·</span>
+        <div class="model-info-item"><span class="model-info-label">Cuantización:</span> <span class="model-info-value"
+            id="modelInfoQuant"></span></div>
+        <span class="model-info-sep">·</span>
+        <div class="model-info-item"><span class="model-info-label">Formato:</span> <span class="model-info-value"
+            id="modelInfoFormat"></span></div>
+        <span class="model-info-sep">·</span>
+        <div class="model-info-item" id="modelInfoVramItem"><span class="model-info-label">VRAM:</span> <span
+            class="model-info-value" id="modelInfoVram"></span></div>
+      </div>
+
+      <!-- Indicador de tokens -->
+      <div id="tokenUsageContainer" class="token-usage-container" style="display:none">
+        <div class="token-usage-row">
+          <span id="tokenUsageSummary" class="token-usage-summary"></span>
+          <div class="token-bar-container">
+            <div id="tokenUsageBar" class="token-usage-bar"></div>
+          </div>
+          <div class="token-details">
+            <span class="token-detail">Prompt: <strong id="tokenPromptCount">0</strong></span>
+            <span class="token-detail">Respuesta: <strong id="tokenResponseCount">0</strong></span>
+            <span class="token-detail">Contexto: <strong id="tokenContextLimit">—</strong></span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -123,7 +316,21 @@
     </div>
 
     <div class="chat-input-container">
-      <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+      <div id="resizeHandle" class="resize-handle"></div>
+      <div class="input-row">
+        <button id="promptTemplatesBtn" class="icon-btn prompt-templates-btn" title="Plantillas de prompt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </button>
+        <div id="promptTemplatesDropdown" class="prompt-templates-dropdown">
+          <input type="text" id="templateSearchInput" class="template-search-input" placeholder="Buscar plantilla...">
+          <div id="promptTemplatesList" class="prompt-templates-list"></div>
+          <button id="manageTemplatesBtn" class="btn-secondary" style="width:100%;margin-top:8px;">Gestionar
+            plantillas</button>
+        </div>
+        <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+      </div>
       <button id="sendBtn" class="send-btn">
         <svg id="sendIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -131,6 +338,12 @@
         </svg>
         <div class="spinner" id="sendSpinner"></div>
         <span id="sendText">Enviar</span>
+      </button>
+      <button id="stopBtn" class="stop-btn" style="display:none" title="Detener generación">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+        </svg>
+        <span class="stop-text">Detener</span>
       </button>
     </div>
   </div>
@@ -178,6 +391,104 @@
       <div class="modal-footer">
         <button class="btn-secondary" id="cancelSettings">Cancelar</button>
         <button class="btn-primary" id="saveSettings">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de cambio de modelo -->
+  <div class="modal" id="modelChangeModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Cambiar modelo</h2>
+        <button class="modal-close" id="closeModelChangeModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modelChangeModalText"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modelChangeCancelBtn">Cancelar</button>
+        <button class="btn-primary" id="modelChangeAcceptBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de plantillas de prompt -->
+  <div class="modal" id="templateModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Gestionar plantillas</h2>
+        <button class="modal-close" id="closeTemplateModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="template-form">
+          <input type="text" id="templateNameInput" class="settings-input" placeholder="Nombre de la plantilla">
+          <textarea id="templateTextInput" class="settings-input" placeholder="Texto de la plantilla..." rows="3"
+            style="margin-top:8px;"></textarea>
+          <button id="saveTemplateBtn" class="btn-primary" style="margin-top:8px;">Guardar plantilla</button>
+        </div>
+        <div id="templateManageList" class="template-manage-list" style="margin-top:12px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTemplateBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminar chat -->
+  <div class="modal" id="deleteChatModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Eliminar conversación</h2>
+        <button class="modal-close" id="closeDeleteChatModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar esta conversación? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="deleteChatCancelBtn">Cancelar</button>
+        <button class="btn-primary" id="deleteChatAcceptBtn" style="background:#e53935;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de exportación -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h2>Exportar conversación</h2>
+        <button class="modal-close" id="closeExportModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Selecciona el formato de exportación:</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+          <button class="btn-secondary export-format-btn" data-format="markdown">Markdown (.md)</button>
+          <button class="btn-secondary export-format-btn" data-format="json">JSON (.json)</button>
+          <button class="btn-secondary export-format-btn" data-format="html">HTML (.html)</button>
+          <button class="btn-secondary export-format-btn" data-format="pdf">PDF (imprimir)</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelExportBtn">Cancelar</button>
       </div>
     </div>
   </div>

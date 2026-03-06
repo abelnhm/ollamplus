@@ -1975,6 +1975,7 @@ ollamaPortInput.addEventListener("input", updateUrlPreview);
 modelParamsToggle.addEventListener("click", () => {
   const isVisible = modelParamsPanel.style.display !== "none";
   modelParamsPanel.style.display = isVisible ? "none" : "block";
+  modelParamsToggle.classList.toggle("active", !isVisible);
 });
 
 enableModelParams.addEventListener("change", () => {
@@ -1987,6 +1988,7 @@ resetParamsBtn.addEventListener("click", resetModelParams);
 systemPromptToggle.addEventListener("click", () => {
   const isVisible = systemPromptPanel.style.display !== "none";
   systemPromptPanel.style.display = isVisible ? "none" : "block";
+  systemPromptToggle.classList.toggle("active", !isVisible);
 });
 
 enableSystemPrompt.addEventListener("change", () => {
