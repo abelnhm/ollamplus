@@ -174,7 +174,26 @@ export function createChatRoutes(
       res.status(status).json({ error: (error as Error).message });
     }
   });
-
+  // Cambiar el modelo de un chat
+  router.patch("/chats/:chatId/model", (req: Request, res: Response) => {
+    try {
+      const { model } = req.body;
+      if (!model || !model.trim()) {
+        res.status(400).json({ error: "El modelo es requerido" });
+        return;
+      }
+      const chat = chatService.changeModel(
+        req.params.chatId as string,
+        model.trim(),
+      );
+      res.json({ success: true, chat: chat.toJSON() });
+    } catch (error) {
+      const status = (error as Error).message.includes("no encontrado")
+        ? 404
+        : 500;
+      res.status(status).json({ error: (error as Error).message });
+    }
+  });
   // Eliminar un chat
   router.delete("/chats/:chatId", (req: Request, res: Response) => {
     try {

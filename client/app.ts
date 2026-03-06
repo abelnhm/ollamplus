@@ -993,6 +993,26 @@ async function sendMessage(): Promise<void> {
     return;
   }
 
+  // Si el chat activo tiene un modelo no local (importado), asignar el modelo seleccionado
+  if (currentChatId && currentChatModel && model !== currentChatModel) {
+    const modelOptions = Array.from(modelSelector.options).map((o) => o.value);
+    if (!modelOptions.includes(currentChatModel)) {
+      try {
+        await apiPatch(`/api/chats/${currentChatId}/model`, { model });
+        currentChatModel = model;
+        // Quitar banner de aviso si existe
+        const banner = chatMessages.querySelector(
+          ".message.assistant:first-child",
+        );
+        if (banner?.textContent?.includes("Conversación importada")) {
+          banner.remove();
+        }
+      } catch (err) {
+        console.error("Error actualizando modelo del chat:", err);
+      }
+    }
+  }
+
   // Si no hay chat activo, crear uno
   if (!currentChatId) {
     const title = content.substring(0, 40) + (content.length > 40 ? "…" : "");
@@ -1251,12 +1271,36 @@ async function loadChat(chatId: string): Promise<void> {
     currentChatId = chatId;
     currentChatModel = data.chat.model;
 
-    // Seleccionar el modelo del chat
-    modelSelector.value = data.chat.model;
-    loadModelInfo(data.chat.model);
+    // Comprobar si el modelo del chat existe en la lista local
+    const modelOptions = Array.from(modelSelector.options).map((o) => o.value);
+    const isLocalModel = modelOptions.includes(data.chat.model);
+
+    if (isLocalModel) {
+      modelSelector.value = data.chat.model;
+      loadModelInfo(data.chat.model);
+    } else {
+      // Modelo no local (chat importado) — mantener selección actual
+      if (!modelSelector.value && modelOptions.length > 0) {
+        modelSelector.value = modelOptions[0];
+      }
+    }
 
     // Limpiar mensajes y renderizar los existentes
     chatMessages.innerHTML = "";
+
+    // Si el modelo no es local, mostrar aviso para seleccionar modelo
+    if (!isLocalModel) {
+      const banner = document.createElement("div");
+      banner.className = "message assistant";
+      banner.innerHTML = `
+        <div class="message-content" style="background:var(--warning-bg, #fff8e1);border:1px solid var(--warning-border, #ffe082);border-radius:8px;">
+          <strong>\u26A0\uFE0F Conversaci\u00F3n importada</strong>
+          <p>Este chat fue importado con el modelo <strong>${escapeHtml(data.chat.model)}</strong>, que no est\u00E1 disponible localmente.
+          Selecciona un modelo local en el desplegable superior y pulsa <strong>Cargar</strong> para continuar la conversaci\u00F3n con un modelo de Ollama.</p>
+        </div>`;
+      chatMessages.appendChild(banner);
+    }
+
     data.chat.messages.forEach((msg) =>
       addMessageToUI(msg.role, msg.content, msg.id),
     );
@@ -2451,20 +2495,58 @@ loadModelBtn.addEventListener("click", () => {
     return;
   }
 
-  // Hay chat activo y el modelo es diferente → mostrar modal
+  // Comprobar si el modelo actual del chat NO es local (chat importado)
+  const modelOptions = Array.from(modelSelector.options).map((o) => o.value);
+  const currentIsLocal = modelOptions.includes(currentChatModel);
+
+  if (!currentIsLocal) {
+    // Chat importado: ofrecer cambiar el modelo del chat actual
+    pendingModel = newModel;
+    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${currentChatModel}". ¿Deseas asignarle el modelo local "${newModel}" para continuar la conversación?`;
+    modelChangeModal.classList.add("active");
+    return;
+  }
+
+  // Hay chat activo con modelo local y el modelo es diferente → mostrar modal
   pendingModel = newModel;
   modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirá un nuevo chat. La conversación actual se mantendrá guardada. ¿Deseas continuar?`;
   modelChangeModal.classList.add("active");
 });
 
-modelChangeAcceptBtn.addEventListener("click", () => {
+modelChangeAcceptBtn.addEventListener("click", async () => {
   modelChangeModal.classList.remove("active");
-  if (pendingModel) {
-    modelSelector.value = pendingModel;
-    loadModelInfo(pendingModel);
+  if (!pendingModel) return;
+
+  // Comprobar si estamos cambiando modelo en un chat importado
+  const modelOptions = Array.from(modelSelector.options).map((o) => o.value);
+  const currentIsLocal = currentChatModel
+    ? modelOptions.includes(currentChatModel)
+    : true;
+
+  if (!currentIsLocal && currentChatId) {
+    // Cambiar el modelo del chat importado actual
+    try {
+      await apiPatch(`/api/chats/${currentChatId}/model`, {
+        model: pendingModel,
+      });
+      currentChatModel = pendingModel;
+      modelSelector.value = pendingModel;
+      loadModelInfo(pendingModel);
+      // Recargar el chat para quitar el banner de aviso
+      await loadChat(currentChatId);
+    } catch (err) {
+      console.error("Error cambiando modelo:", err);
+      alert("No se pudo cambiar el modelo del chat.");
+    }
     pendingModel = null;
-    newChat();
+    return;
   }
+
+  // Flujo normal: nuevo chat con el modelo seleccionado
+  modelSelector.value = pendingModel;
+  loadModelInfo(pendingModel);
+  pendingModel = null;
+  newChat();
 });
 
 function closeModelChange(): void {

@@ -34,6 +34,15 @@ export class ChatService {
     return chat;
   }
 
+  changeModel(chatId: string, newModel: string): Chat {
+    const chat = this.getById(chatId);
+    if (!chat) {
+      throw new Error(`Chat con ID ${chatId} no encontrado`);
+    }
+    chat.model = newModel;
+    return chat;
+  }
+
   delete(chatId: string): void {
     if (!this.#chats.has(chatId)) {
       throw new Error(`Chat con ID ${chatId} no encontrado`);
