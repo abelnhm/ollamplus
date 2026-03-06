@@ -102,6 +102,21 @@ export function createChatRoutes(
     }
   });
 
+  // Buscar chats por título o contenido de mensajes
+  router.get("/chats/search", (req: Request, res: Response) => {
+    try {
+      const q = (req.query.q as string || "").trim();
+      if (!q) {
+        res.status(400).json({ error: "El parámetro 'q' es requerido" });
+        return;
+      }
+      const chats = chatService.search(q).map((chat) => chat.toJSON());
+      res.json({ success: true, chats });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   // Obtener todos los chats
   router.get("/chats", (req: Request, res: Response) => {
     try {

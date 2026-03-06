@@ -96,6 +96,9 @@ const closeDeleteChatModalBtn = $<HTMLButtonElement>("closeDeleteChatModal");
 const deleteChatAcceptBtn = $<HTMLButtonElement>("deleteChatAcceptBtn");
 const deleteChatCancelBtn = $<HTMLButtonElement>("deleteChatCancelBtn");
 
+// Búsqueda de chats en sidebar
+const chatSearchInput = $<HTMLInputElement>("chatSearchInput");
+
 // Panel de información del modelo
 const modelInfoPanel = $<HTMLDivElement>("modelInfoPanel");
 const modelInfoFamily = $<HTMLSpanElement>("modelInfoFamily");
@@ -1101,10 +1104,15 @@ async function sendMessage(): Promise<void> {
 // ─── Sidebar: lista de chats ─────────────────────────────
 async function refreshChatList(): Promise<void> {
   try {
-    const data = await apiGet<{ chats: ChatJSON[] }>("/api/chats");
+    const query = chatSearchInput.value.trim();
+    const endpoint = query
+      ? `/api/chats/search?q=${encodeURIComponent(query)}`
+      : "/api/chats";
+    const data = await apiGet<{ chats: ChatJSON[] }>(endpoint);
     if (data.chats.length === 0) {
-      chatsList.innerHTML =
-        '<div class="no-chats">No hay chats guardados</div>';
+      chatsList.innerHTML = query
+        ? '<div class="no-chats">Sin resultados</div>'
+        : '<div class="no-chats">No hay chats guardados</div>';
       return;
     }
 
@@ -1930,6 +1938,13 @@ messageInput.addEventListener("input", () => {
 toggleSidebarBtn.addEventListener("click", openSidebar);
 closeSidebarBtn.addEventListener("click", closeSidebar);
 sidebarOverlay.addEventListener("click", closeSidebar);
+
+// Búsqueda de chats con debounce
+let chatSearchTimer: ReturnType<typeof setTimeout>;
+chatSearchInput.addEventListener("input", () => {
+  clearTimeout(chatSearchTimer);
+  chatSearchTimer = setTimeout(() => refreshChatList(), 300);
+});
 
 newChatBtn.addEventListener("click", newChat);
 clearBtn.addEventListener("click", clearChat);

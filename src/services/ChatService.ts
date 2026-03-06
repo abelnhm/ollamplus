@@ -60,6 +60,14 @@ export class ChatService {
     return chat;
   }
 
+  search(query: string): Chat[] {
+    const q = query.toLowerCase();
+    return this.getAll().filter((chat) => {
+      if (chat.title.toLowerCase().includes(q)) return true;
+      return chat.messages.some((msg) => msg.content.toLowerCase().includes(q));
+    });
+  }
+
   removeLastMessage(chatId: string): void {
     const chat = this.getById(chatId);
     if (!chat) {

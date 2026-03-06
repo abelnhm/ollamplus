@@ -1256,6 +1256,43 @@ body::before {
   background: hsl(var(--accent));
 }
 
+.sidebar-search {
+  padding: 10px 12px;
+  border-bottom: 1px solid hsl(var(--border));
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-search-icon {
+  position: absolute;
+  left: 20px;
+  width: 15px;
+  height: 15px;
+  stroke: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+
+.chat-search-input {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.chat-search-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.chat-search-input:focus {
+  border-color: hsl(var(--primary));
+}
+
 .chats-list {
   flex: 1;
   overflow-y: auto;
