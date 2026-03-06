@@ -398,7 +398,25 @@
 
     <div class="chat-input-container" id="chatInputContainer">
       <div class="resize-handle" id="resizeHandle"><span class="resize-handle-bar"></span></div>
-      <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+      <div class="input-row">
+        <button id="promptTemplatesBtn" class="prompt-templates-btn" title="Prompt templates (/)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </button>
+        <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí... (/ para templates)" rows="1"></textarea>
+        <!-- Dropdown de templates -->
+        <div class="prompt-templates-dropdown" id="promptTemplatesDropdown">
+          <div class="prompt-templates-header">
+            <span class="prompt-templates-title">Prompt Templates</span>
+            <button id="manageTemplatesBtn" class="btn-sm btn-secondary" title="Gestionar templates">+ Crear</button>
+          </div>
+          <div class="prompt-templates-search">
+            <input type="text" id="templateSearchInput" class="template-search-input" placeholder="Buscar template...">
+          </div>
+          <div class="prompt-templates-list" id="promptTemplatesList"></div>
+        </div>
+      </div>
       <button id="sendBtn" class="send-btn">
         <svg id="sendIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -546,6 +564,34 @@
     </div>
   </div>
 
+  <!-- Modal de gestión de templates -->
+  <div class="modal" id="templateModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Gestionar Templates</h2>
+        <button class="modal-close" id="closeTemplateModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="template-form">
+          <label for="templateNameInput">Nombre</label>
+          <input type="text" id="templateNameInput" class="settings-input" placeholder="Ej: Resumir texto">
+          <label for="templateTextInput">Texto del template</label>
+          <input type="text" id="templateTextInput" class="settings-input" placeholder="Ej: Resume el siguiente texto: ">
+        </div>
+        <div class="template-manage-list" id="templateManageList"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTemplateBtn">Cerrar</button>
+        <button class="btn-primary" id="saveTemplateBtn">Guardar template</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de confirmación de cambio de modelo -->
   <div class="modal" id="modelChangeModal">
     <div class="modal-content" style="max-width: 420px;">
@@ -568,7 +614,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 
 </html>
