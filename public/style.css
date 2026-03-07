@@ -118,7 +118,7 @@ body::before {
   content: none;
 }
 
-/* AnimaciÃ³n spin para loading */
+/* Animacion spin para loading */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -391,7 +391,7 @@ body::before {
   white-space: nowrap;
 }
 
-/* Panel de informaciÃ³n del modelo */
+/* Panel de informacion del modelo */
 .model-info-panel {
   display: flex;
   flex-wrap: wrap;
@@ -718,7 +718,7 @@ body::before {
   opacity: 1;
 }
 
-/* BotÃ³n copiar mensaje */
+/* Boton copiar mensaje */
 .message-content {
   position: relative;
 }
@@ -753,7 +753,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* BotÃ³n regenerar respuesta */
+/* Boton regenerar respuesta */
 .regenerate-msg-btn {
   position: absolute;
   top: 8px;
@@ -784,7 +784,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* BotÃ³n editar mensaje de usuario */
+/* Boton editar mensaje de usuario */
 .edit-msg-btn {
   position: absolute;
   top: 8px;
@@ -815,7 +815,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* Textarea de ediciÃ³n de mensaje */
+/* Textarea de edicion de mensaje */
 .edit-msg-textarea {
   width: 100%;
   min-height: 60px;
@@ -1020,7 +1020,7 @@ body::before {
   transform: scale(0.95);
 }
 
-/* Spinner dentro del botÃ³n enviar */
+/* Spinner dentro del boton enviar */
 .send-btn .spinner {
   display: none;
   width: 18px;
@@ -1043,7 +1043,7 @@ body::before {
   display: none;
 }
 
-/* â”€â”€â”€ Prompt Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Prompt Templates */
 .input-row {
   flex: 1;
   display: flex;
@@ -1936,7 +1936,7 @@ body::before {
 }
 
 /* ====================================
-   MODAL DE CONFIGURACIÃ“N
+   MODAL DE CONFIGURACION
    ==================================== */
 .modal {
   display: none;
@@ -2102,7 +2102,7 @@ body::before {
   border-top: 1px solid hsl(var(--border));
 }
 
-/* â”€â”€â”€ Import modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Import modal */
 .import-drop-zone {
   display: flex;
   flex-direction: column;
@@ -2353,7 +2353,7 @@ body::before {
 }
 
 /* ====================================
-   PANEL DE PARÃMETROS DEL MODELO
+   PANEL DE PARAMETROS DEL MODELO
    ==================================== */
 .model-params-panel {
   border-top: 1px solid hsl(var(--border));
@@ -2577,7 +2577,7 @@ body::before {
   }
 }
 
-/* â”€â”€â”€ Export modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Export modal */
 .export-formats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2623,7 +2623,7 @@ body::before {
   color: hsl(var(--muted-foreground));
 }
 
-/* â”€â”€â”€ Collapsible Panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Collapsible Panels */
 .collapsible-panel {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
@@ -2775,14 +2775,14 @@ body::before {
   box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
 }
 
-/* â”€â”€â”€ Stop button shape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Stop button shape */
 .stop-btn {
   padding: 10px 16px;
   width: auto;
   height: 44px;
 }
 
-/* â”€â”€â”€ Responsive: toggle buttons, load btn, panels â”€â”€â”€â”€â”€â”€â”€ */
+/* Responsive: toggle buttons, load btn, panels */
 @media (min-width: 480px) {
   .panel-toggle-btn {
     width: auto;
@@ -2869,3 +2869,4 @@ body::before {
 .message.user .message-meta {
   color: hsl(var(--primary-foreground) / 0.8);
 }
+

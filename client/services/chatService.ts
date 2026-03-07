@@ -49,7 +49,7 @@ function startStreamingUI(): void {
   sendBtn.style.display = "none";
   stopBtn.style.display = "flex";
   sendBtn.classList.add("loading");
-  sendText.textContent = "Pensandoâ€¦";
+  sendText.textContent = "Pensando...";
 }
 
 function endStreamingUI(streamWrapper: HTMLDivElement): void {
@@ -163,7 +163,7 @@ async function readSSEStream(
     if ((err as Error).name === "AbortError") {
       fullText += "\n\n*Respuesta detenida por el usuario.*";
     } else {
-      fullText += `\n\n**Error de conexiÃ³n:** ${(err as Error).message}`;
+      fullText += `\n\n**Error de conexi\u00F3n:** ${(err as Error).message}`;
     }
     updateStreamingMessage(streamWrapper, fullText);
   }
@@ -433,7 +433,7 @@ function createChatItem(chat: ChatJSON): HTMLDivElement {
   item.innerHTML = `
     <div class="chat-item-content">
       <div class="chat-item-title">${escapeHtml(chat.title)}</div>
-      <div class="chat-item-meta">${chat.model} Â· ${chat.messageCount} msgs</div>
+      <div class="chat-item-meta">${chat.model} - ${chat.messageCount} msgs</div>
     </div>
     <div class="chat-item-actions">
       <button class="pin-chat-btn${chat.pinned ? " active" : ""}" title="${chat.pinned ? "Desanclar" : "Anclar"}">
@@ -592,13 +592,13 @@ export function newChat(): void {
     modelInfoPanel.style.display = "none";
   }
   const modelInfo = selectedModel
-    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. Â¿En quÃ© puedo ayudarte?`
-    : `Selecciona un modelo y Â¿en quÃ© puedo ayudarte hoy?`;
+    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. \u00BFEn qu\u00E9 puedo ayudarte?`
+    : `Selecciona un modelo y \u00BFen qu\u00E9 puedo ayudarte hoy?`;
   chatMessages.innerHTML = `
     <div class="message assistant">
       <div class="message-content">
-        <strong>ðŸ¤– Asistente:</strong>
-        <p>Â¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
+        <strong>\u{1F916} Asistente:</strong>
+        <p>\u00A1Hola! Soy tu asistente de IA. ${modelInfo}</p>
       </div>
     </div>`;
   messageInput.value = "";
@@ -654,13 +654,13 @@ export function handleLoadModelClick(): void {
 
   if (!currentIsLocal) {
     state.pendingModel = newModel;
-    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". Â¿Deseas asignarle el modelo local "${newModel}" para continuar la conversaciÃ³n?`;
+    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". \u00BFDeseas asignarle el modelo local "${newModel}" para continuar la conversaci\u00F3n?`;
     modelChangeModal.classList.add("active");
     return;
   }
 
   state.pendingModel = newModel;
-  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirÃ¡ un nuevo chat. La conversaciÃ³n actual se mantendrÃ¡ guardada. Â¿Deseas continuar?`;
+  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrir\u00E1 un nuevo chat. La conversaci\u00F3n actual se mantendr\u00E1 guardada. \u00BFDeseas continuar?`;
   modelChangeModal.classList.add("active");
 }
 
@@ -703,6 +703,8 @@ export function closeModelChange(): void {
   }
   state.pendingModel = null;
 }
+
+
 
 
 
