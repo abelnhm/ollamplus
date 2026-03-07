@@ -1553,6 +1553,33 @@ body::before {
   stroke: hsl(var(--foreground));
 }
 
+.delete-chat-btn {
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.delete-chat-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: hsl(var(--muted-foreground));
+}
+
+.delete-chat-btn:hover {
+  background: hsl(var(--accent));
+}
+
+.delete-chat-btn:hover svg {
+  stroke: hsl(var(--destructive));
+}
 .pin-chat-btn {
   background: hsl(var(--secondary));
   border: 1px solid hsl(var(--border));
@@ -2869,4 +2896,5 @@ body::before {
 .message.user .message-meta {
   color: hsl(var(--primary-foreground) / 0.8);
 }
+
 
