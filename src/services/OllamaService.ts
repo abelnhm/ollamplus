@@ -1,11 +1,11 @@
-import { Ollama } from "ollama";
+﻿import { Ollama } from "ollama";
 
 /**
  * Servicio: OllamaService
  * Se comunica con la API de Ollama para obtener modelos y enviar mensajes.
  *
  * Ollama es un servidor local que ejecuta modelos de IA.
- * Este servicio usa la librería 'ollama' de npm para interactuar con él.
+ * Este servicio usa la librerÃ­a 'ollama' de npm para interactuar con Ã©l.
  */
 
 export interface OllamaModel {
@@ -131,6 +131,8 @@ export class OllamaService {
     response: string;
     promptTokens: number;
     responseTokens: number;
+    totalDurationMs: number;
+    tokensPerSecond: number;
   }> {
     try {
       const client = this.createClient(url);
@@ -150,9 +152,11 @@ export class OllamaService {
       }
       const response = await client.chat(chatParams as any);
 
+      const startedAt = Date.now();
       let fullResponse = "";
       let promptTokens = 0;
       let responseTokens = 0;
+      let evalDurationNs = 0;
 
       for await (const part of response) {
         const content = part.message.content;
@@ -164,10 +168,26 @@ export class OllamaService {
         if ((part as any).done) {
           promptTokens = (part as any).prompt_eval_count || 0;
           responseTokens = (part as any).eval_count || 0;
+          evalDurationNs = Number((part as any).eval_duration) || 0;
         }
       }
 
-      return { response: fullResponse, promptTokens, responseTokens };
+      const totalDurationMs = Math.max(Date.now() - startedAt, 0);
+      const evalDurationMs =
+        evalDurationNs > 0 ? Math.max(evalDurationNs / 1_000_000, 0) : 0;
+      const durationForSpeedMs = evalDurationMs > 0 ? evalDurationMs : totalDurationMs;
+      const tokensPerSecond =
+        durationForSpeedMs > 0
+          ? responseTokens / (durationForSpeedMs / 1000)
+          : 0;
+
+      return {
+        response: fullResponse,
+        promptTokens,
+        responseTokens,
+        totalDurationMs,
+        tokensPerSecond,
+      };
     } catch (error) {
       throw new Error(
         `Error al enviar mensaje a Ollama: ${(error as Error).message}`,
@@ -175,3 +195,4 @@ export class OllamaService {
     }
   }
 }
+

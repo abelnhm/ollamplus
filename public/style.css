@@ -1,4 +1,4 @@
-/* ====================================
+﻿/* ====================================
    SHADCN/UI DESIGN - MOBILE FIRST
    ==================================== */
 
@@ -118,7 +118,7 @@ body::before {
   content: none;
 }
 
-/* Animación spin para loading */
+/* AnimaciÃ³n spin para loading */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -391,7 +391,7 @@ body::before {
   white-space: nowrap;
 }
 
-/* Panel de información del modelo */
+/* Panel de informaciÃ³n del modelo */
 .model-info-panel {
   display: flex;
   flex-wrap: wrap;
@@ -718,7 +718,7 @@ body::before {
   opacity: 1;
 }
 
-/* Botón copiar mensaje */
+/* BotÃ³n copiar mensaje */
 .message-content {
   position: relative;
 }
@@ -753,7 +753,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* Botón regenerar respuesta */
+/* BotÃ³n regenerar respuesta */
 .regenerate-msg-btn {
   position: absolute;
   top: 8px;
@@ -784,7 +784,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* Botón editar mensaje de usuario */
+/* BotÃ³n editar mensaje de usuario */
 .edit-msg-btn {
   position: absolute;
   top: 8px;
@@ -815,7 +815,7 @@ body::before {
   background: hsl(var(--accent));
 }
 
-/* Textarea de edición de mensaje */
+/* Textarea de ediciÃ³n de mensaje */
 .edit-msg-textarea {
   width: 100%;
   min-height: 60px;
@@ -1020,7 +1020,7 @@ body::before {
   transform: scale(0.95);
 }
 
-/* Spinner dentro del botón enviar */
+/* Spinner dentro del botÃ³n enviar */
 .send-btn .spinner {
   display: none;
   width: 18px;
@@ -1043,7 +1043,7 @@ body::before {
   display: none;
 }
 
-/* ─── Prompt Templates ─────────────────────────────────── */
+/* â”€â”€â”€ Prompt Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .input-row {
   flex: 1;
   display: flex;
@@ -1936,7 +1936,7 @@ body::before {
 }
 
 /* ====================================
-   MODAL DE CONFIGURACIÓN
+   MODAL DE CONFIGURACIÃ“N
    ==================================== */
 .modal {
   display: none;
@@ -2102,7 +2102,7 @@ body::before {
   border-top: 1px solid hsl(var(--border));
 }
 
-/* ─── Import modal ────────────────────────────────────── */
+/* â”€â”€â”€ Import modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .import-drop-zone {
   display: flex;
   flex-direction: column;
@@ -2353,7 +2353,7 @@ body::before {
 }
 
 /* ====================================
-   PANEL DE PARÁMETROS DEL MODELO
+   PANEL DE PARÃMETROS DEL MODELO
    ==================================== */
 .model-params-panel {
   border-top: 1px solid hsl(var(--border));
@@ -2577,7 +2577,7 @@ body::before {
   }
 }
 
-/* ─── Export modal ───────────────────────────────────────── */
+/* â”€â”€â”€ Export modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .export-formats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2623,7 +2623,7 @@ body::before {
   color: hsl(var(--muted-foreground));
 }
 
-/* ─── Collapsible Panels ─────────────────────────────────── */
+/* â”€â”€â”€ Collapsible Panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .collapsible-panel {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
@@ -2775,14 +2775,14 @@ body::before {
   box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
 }
 
-/* ─── Stop button shape ─────────────────────────────────── */
+/* â”€â”€â”€ Stop button shape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .stop-btn {
   padding: 10px 16px;
   width: auto;
   height: 44px;
 }
 
-/* ─── Responsive: toggle buttons, load btn, panels ─────── */
+/* â”€â”€â”€ Responsive: toggle buttons, load btn, panels â”€â”€â”€â”€â”€â”€â”€ */
 @media (min-width: 480px) {
   .panel-toggle-btn {
     width: auto;
@@ -2847,4 +2847,25 @@ body::before {
   .collapsible-panel {
     padding: 16px;
   }
+}
+
+
+.message-body > *:first-child {
+  margin-top: 0;
+}
+
+.message-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.message-meta {
+  margin-top: 8px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.message.user .message-meta {
+  color: hsl(var(--primary-foreground) / 0.8);
 }

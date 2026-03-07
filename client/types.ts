@@ -1,4 +1,4 @@
-export interface ChatJSON {
+﻿export interface ChatJSON {
   id: string;
   model: string;
   title: string;
@@ -14,6 +14,13 @@ export interface MessageJSON {
   role: string;
   content: string;
   timestamp: string;
+  metrics?: MessageMetrics;
+}
+
+export interface MessageMetrics {
+  tokenCount?: number;
+  durationMs?: number;
+  tokensPerSecond?: number;
 }
 
 export interface OllamaModel {
@@ -48,3 +55,4 @@ export interface ImportedChat {
   title: string;
   messages: { role: string; content: string }[];
 }
+

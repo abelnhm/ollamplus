@@ -1,4 +1,4 @@
-import { state } from "../state.js";
+﻿import { state } from "../state.js";
 import type { ChatJSON, MessageJSON } from "../types.js";
 import { apiGet } from "../api.js";
 import { escapeHtml } from "../utils.js";
@@ -6,7 +6,7 @@ import { chatMessages, modelSelector, exportModal } from "../ui/elements.js";
 
 export function openExportModal(): void {
   if (!state.currentChatId) {
-    alert("No hay conversación activa para exportar.");
+    alert("No hay conversaciÃ³n activa para exportar.");
     return;
   }
   exportModal.classList.add("active");
@@ -51,13 +51,14 @@ function buildChatFromUI(): ChatJSON | null {
     const el = div as HTMLElement;
     const id = el.dataset.msgId || "";
     const role = el.classList.contains("user") ? "user" : "assistant";
-    const contentEl = el.querySelector(".message-content");
-    const content = contentEl ? contentEl.textContent || "" : "";
+    const bodyEl = el.querySelector(".message-body");
+    const content = bodyEl ? bodyEl.textContent || "" : "";
+    const timestamp = el.dataset.timestamp || new Date().toISOString();
     messages.push({
       id,
       role,
       content: content.trim(),
-      timestamp: new Date().toISOString(),
+      timestamp,
     });
   });
 
@@ -82,7 +83,7 @@ function exportAsMarkdown(chat: ChatJSON): string {
   md += `**Mensajes:** ${chat.messageCount}\n\n---\n\n`;
 
   for (const msg of chat.messages) {
-    const role = msg.role === "user" ? "👤 Usuario" : "🤖 Asistente";
+    const role = msg.role === "user" ? "ðŸ‘¤ Usuario" : "ðŸ¤– Asistente";
     const time = new Date(msg.timestamp).toLocaleTimeString();
     md += `### ${role} _(${time})_\n\n${msg.content}\n\n---\n\n`;
   }
@@ -97,7 +98,7 @@ function exportAsHTML(chat: ChatJSON): string {
   const dateStr = new Date(chat.createdAt).toLocaleString();
   const messagesHtml = chat.messages
     .map((msg) => {
-      const role = msg.role === "user" ? "👤 Usuario" : "🤖 Asistente";
+      const role = msg.role === "user" ? "ðŸ‘¤ Usuario" : "ðŸ¤– Asistente";
       const bgColor = msg.role === "user" ? "#e3f2fd" : "#f5f5f5";
       const time = new Date(msg.timestamp).toLocaleTimeString();
       const contentEscaped = escapeHtml(msg.content).replace(/\n/g, "<br>");
@@ -113,7 +114,7 @@ function exportAsHTML(chat: ChatJSON): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(chat.title)} — OllamaUI</title>
+  <title>${escapeHtml(chat.title)} â€” OllamaUI</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 24px; background: #fff; color: #222; }
     h1 { font-size: 1.5rem; margin-bottom: 4px; }
@@ -123,7 +124,7 @@ function exportAsHTML(chat: ChatJSON): string {
 </head>
 <body>
   <h1>${escapeHtml(chat.title)}</h1>
-  <div class="meta">Modelo: ${escapeHtml(chat.model)} · ${dateStr} · ${chat.messageCount} mensajes</div>
+  <div class="meta">Modelo: ${escapeHtml(chat.model)} Â· ${dateStr} Â· ${chat.messageCount} mensajes</div>
   <hr>
   ${messagesHtml}
 </body>
@@ -135,7 +136,7 @@ function exportAsPDF(chat: ChatJSON): void {
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
     alert(
-      "No se pudo abrir la ventana de impresión. Permite las ventanas emergentes.",
+      "No se pudo abrir la ventana de impresiÃ³n. Permite las ventanas emergentes.",
     );
     return;
   }
@@ -179,3 +180,4 @@ export async function exportChat(format: string): Promise<void> {
   }
   closeExportModal();
 }
+

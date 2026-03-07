@@ -1,5 +1,12 @@
-import { state } from "../state.js";
-import { escapeHtml, formatMarkdown } from "../utils.js";
+﻿import { state } from "../state.js";
+import type { MessageMetrics } from "../types.js";
+import {
+  estimateTokensFromText,
+  formatDateTime,
+  formatDuration,
+  formatMarkdown,
+  formatTokenCount,
+} from "../utils.js";
 import { chatMessages, scrollToBottom } from "./elements.js";
 
 // Callbacks para romper dependencias circulares con chatService
@@ -7,6 +14,12 @@ let onRegenerateCallback: (() => void) | null = null;
 let onEditConfirmCallback:
   | ((wrapper: HTMLDivElement, newContent: string) => Promise<void>)
   | null = null;
+
+export interface MessageRenderMeta {
+  id?: string;
+  timestamp?: string;
+  metrics?: MessageMetrics;
+}
 
 export function setMessageCallbacks(callbacks: {
   onRegenerate: () => void;
@@ -16,17 +29,88 @@ export function setMessageCallbacks(callbacks: {
   onEditConfirmCallback = callbacks.onEditConfirm;
 }
 
+function getMessageTokenCount(content: string, metrics?: MessageMetrics): number {
+  if (typeof metrics?.tokenCount === "number") {
+    return Math.max(0, Math.round(metrics.tokenCount));
+  }
+  return estimateTokensFromText(content);
+}
+
+function buildMessageMetaText(
+  role: string,
+  content: string,
+  metadata: MessageRenderMeta,
+): string {
+  const parts: string[] = [];
+
+  if (metadata.timestamp) {
+    const dateTime = formatDateTime(metadata.timestamp);
+    if (dateTime) parts.push(dateTime);
+  }
+
+  const tokenCount = getMessageTokenCount(content, metadata.metrics);
+  if (tokenCount > 0) {
+    parts.push(`Tokens: ${formatTokenCount(tokenCount)}`);
+  }
+
+  if (role === "assistant") {
+    if (typeof metadata.metrics?.durationMs === "number") {
+      parts.push(`Tiempo: ${formatDuration(metadata.metrics.durationMs)}`);
+    }
+
+    if (typeof metadata.metrics?.tokensPerSecond === "number") {
+      const speed = Math.max(0, metadata.metrics.tokensPerSecond);
+      if (speed > 0) {
+        parts.push(`Velocidad: ${speed.toFixed(2)} tok/s`);
+      }
+    }
+  }
+
+  return parts.join(" · ");
+}
+
+export function updateMessageMetadata(
+  wrapper: HTMLDivElement,
+  role: string,
+  content: string,
+  metadata: MessageRenderMeta = {},
+): void {
+  if (metadata.id) wrapper.dataset.msgId = metadata.id;
+  if (metadata.timestamp) wrapper.dataset.timestamp = metadata.timestamp;
+
+  const contentEl = wrapper.querySelector(".message-content") as
+    | HTMLDivElement
+    | null;
+  if (!contentEl) return;
+
+  const metaText = buildMessageMetaText(role, content, metadata);
+  const existingMeta = contentEl.querySelector(".message-meta") as
+    | HTMLDivElement
+    | null;
+
+  if (!metaText) {
+    if (existingMeta) existingMeta.remove();
+    return;
+  }
+
+  const metaEl = existingMeta || document.createElement("div");
+  metaEl.className = "message-meta";
+  metaEl.textContent = metaText;
+
+  if (!existingMeta) {
+    contentEl.appendChild(metaEl);
+  }
+}
+
 function copyMessageToClipboard(
   btn: HTMLButtonElement,
   wrapper: HTMLDivElement,
 ): void {
   const text =
     wrapper.querySelector(".streaming-text")?.textContent ||
-    wrapper
-      .querySelector(".message-content")
-      ?.textContent?.replace(/^🤖 Asistente:/, "")
-      .trim() ||
+    wrapper.querySelector(".message-body")?.textContent ||
     "";
+
   navigator.clipboard.writeText(text).then(() => {
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     btn.title = "¡Copiado!";
@@ -146,20 +230,23 @@ export function injectCodeCopyButtons(container: HTMLElement): void {
 export function addMessageToUI(
   role: string,
   content: string,
-  messageId?: string,
+  metadata: MessageRenderMeta = {},
 ): HTMLDivElement {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${role}`;
-  if (messageId) wrapper.dataset.msgId = messageId;
+  if (metadata.id) wrapper.dataset.msgId = metadata.id;
+  if (metadata.timestamp) wrapper.dataset.timestamp = metadata.timestamp;
 
   const inner = document.createElement("div");
   inner.className = "message-content";
 
   const label = role === "user" ? "👤 Tú" : "🤖 Asistente";
-  inner.innerHTML = `<strong>${label}:</strong>${formatMarkdown(content)}`;
+  inner.innerHTML = `<strong>${label}:</strong><div class="message-body">${formatMarkdown(content)}</div>`;
   wrapper.appendChild(inner);
+  updateMessageMetadata(wrapper, role, content, metadata);
+
   chatMessages.appendChild(wrapper);
-  if (role === "user" && messageId) {
+  if (role === "user") {
     addEditButton(wrapper, content);
   }
   if (role === "assistant") {
@@ -180,9 +267,9 @@ export function createStreamingMessage(): HTMLDivElement {
   inner.innerHTML = `<strong>🤖 Asistente:</strong>
     <div class="thinking-indicator">
       <div class="thinking-spinner"></div>
-      <span>Pensando…</span>
+      <span>Pensando...</span>
     </div>
-    <span class='streaming-text' style='display:none'></span>`;
+    <div class='streaming-text message-body' style='display:none'></div>`;
   wrapper.appendChild(inner);
   chatMessages.appendChild(wrapper);
   scrollToBottom();
@@ -196,14 +283,16 @@ export function updateStreamingMessage(
   const thinking = wrapper.querySelector(
     ".thinking-indicator",
   ) as HTMLElement | null;
-  const span = wrapper.querySelector(".streaming-text") as HTMLElement | null;
+  const streamEl = wrapper.querySelector(".streaming-text") as
+    | HTMLElement
+    | null;
   if (thinking) {
     thinking.remove();
   }
-  if (span) {
-    span.style.display = "";
-    span.innerHTML = formatMarkdown(text);
-    injectCodeCopyButtons(span);
+  if (streamEl) {
+    streamEl.style.display = "";
+    streamEl.innerHTML = formatMarkdown(text);
+    injectCodeCopyButtons(streamEl);
   }
   scrollToBottom();
 }

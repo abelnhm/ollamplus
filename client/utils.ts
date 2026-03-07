@@ -1,4 +1,4 @@
-export function getOllamaUrl(): string {
+﻿export function getOllamaUrl(): string {
   const host = localStorage.getItem("ollamaHost") || "localhost";
   const port = localStorage.getItem("ollamaPort") || "11434";
   return `http://${host}:${port}`;
@@ -40,4 +40,21 @@ export function formatBytes(bytes: number): string {
 export function formatTokenCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1) + "k";
   return String(n);
+}
+export function formatDateTime(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+export function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "0 ms";
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return `${(ms / 1000).toFixed(2)} s`;
+}
+
+export function estimateTokensFromText(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return Math.max(1, Math.round(trimmed.length / 4));
 }

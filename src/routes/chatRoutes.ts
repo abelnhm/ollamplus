@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+﻿import { Router, Request, Response } from "express";
 import { ChatService } from "../services/ChatService.js";
 import { OllamaService } from "../services/OllamaService.js";
 
@@ -7,11 +7,11 @@ import { OllamaService } from "../services/OllamaService.js";
  * Define los endpoints HTTP para operaciones de chat.
  *
  * Endpoints:
- *   POST   /api/new-chat              → Crear un chat nuevo
- *   POST   /api/chat/:chatId/message  → Enviar mensaje (streaming SSE)
- *   GET    /api/chats                 → Listar todos los chats
- *   GET    /api/chats/:chatId         → Obtener un chat por ID
- *   DELETE /api/chats/:chatId         → Eliminar un chat
+ *   POST   /api/new-chat              â†’ Crear un chat nuevo
+ *   POST   /api/chat/:chatId/message  â†’ Enviar mensaje (streaming SSE)
+ *   GET    /api/chats                 â†’ Listar todos los chats
+ *   GET    /api/chats/:chatId         â†’ Obtener un chat por ID
+ *   DELETE /api/chats/:chatId         â†’ Eliminar un chat
  */
 export function createChatRoutes(
   chatService: ChatService,
@@ -53,15 +53,10 @@ export function createChatRoutes(
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      // Agregar mensaje del usuario al chat (solo si hay contenido — null en regeneración)
-      let userMessageId: string | null = null;
+      // Agregar mensaje del usuario al chat (solo si hay contenido; null en regeneracion)
+      let userMessage: ReturnType<ChatService["addMessage"]> | null = null;
       if (content) {
-        const userMsg = chatService.addMessage(
-          chatId as string,
-          "user",
-          content,
-        );
-        userMessageId = userMsg.id;
+        userMessage = chatService.addMessage(chatId as string, "user", content);
       }
 
       // Enviar historial al modelo y recibir respuesta en streaming
@@ -77,15 +72,26 @@ export function createChatRoutes(
         systemPrompt,
       );
 
-      // Guardar respuesta del asistente en el chat
-      chatService.addMessage(chatId as string, "assistant", result.response);
+      // Guardar respuesta del asistente en el chat junto a sus metricas
+      const assistantMessage = chatService.addMessage(
+        chatId as string,
+        "assistant",
+        result.response,
+        {
+          tokenCount: result.responseTokens,
+          durationMs: result.totalDurationMs,
+          tokensPerSecond: result.tokensPerSecond,
+        },
+      );
 
-      // Enviar señal de finalización con token usage
+      // Enviar seÃ±al de finalizaciÃ³n con token usage
       res.write(
         `data: ${JSON.stringify({
           done: true,
           fullResponse: result.response,
-          userMessageId,
+          userMessageId: userMessage?.id || null,
+          userMessage: userMessage?.toJSON() || null,
+          assistantMessage: assistantMessage.toJSON(),
           tokenUsage: {
             promptTokens: result.promptTokens,
             responseTokens: result.responseTokens,
@@ -102,12 +108,12 @@ export function createChatRoutes(
     }
   });
 
-  // Buscar chats por título o contenido de mensajes
+  // Buscar chats por tÃ­tulo o contenido de mensajes
   router.get("/chats/search", (req: Request, res: Response) => {
     try {
       const q = ((req.query.q as string) || "").trim();
       if (!q) {
-        res.status(400).json({ error: "El parámetro 'q' es requerido" });
+        res.status(400).json({ error: "El parÃ¡metro 'q' es requerido" });
         return;
       }
       const chats = chatService.search(q).map((chat) => chat.toJSON());
@@ -159,7 +165,7 @@ export function createChatRoutes(
     try {
       const { title } = req.body;
       if (!title || !title.trim()) {
-        res.status(400).json({ error: "El título es requerido" });
+        res.status(400).json({ error: "El tÃ­tulo es requerido" });
         return;
       }
       const chat = chatService.rename(
@@ -207,7 +213,7 @@ export function createChatRoutes(
     }
   });
 
-  // Eliminar el último mensaje de un chat (para regenerar respuesta)
+  // Eliminar el Ãºltimo mensaje de un chat (para regenerar respuesta)
   router.delete(
     "/chats/:chatId/last-message",
     (req: Request, res: Response) => {
@@ -256,7 +262,7 @@ export function createChatRoutes(
     },
   );
 
-  // Importar una conversación
+  // Importar una conversaciÃ³n
   router.post("/import-chat", (req: Request, res: Response) => {
     try {
       const { model, title, messages } = req.body;
@@ -281,7 +287,7 @@ export function createChatRoutes(
     }
   });
 
-  // Truncar historial en un mensaje y actualizar su contenido (edición)
+  // Truncar historial en un mensaje y actualizar su contenido (ediciÃ³n)
   router.put(
     "/chats/:chatId/messages/:msgId",
     (req: Request, res: Response) => {
@@ -308,3 +314,4 @@ export function createChatRoutes(
 
   return router;
 }
+

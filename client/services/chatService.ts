@@ -1,7 +1,12 @@
-import { state } from "../state.js";
-import type { ChatJSON } from "../types.js";
+﻿import { state } from "../state.js";
+import type { ChatJSON, MessageJSON } from "../types.js";
 import { apiPost, apiGet, apiDelete, apiPatch, apiPut } from "../api.js";
-import { getOllamaUrl, escapeHtml, formatMarkdown } from "../utils.js";
+import {
+  getOllamaUrl,
+  escapeHtml,
+  formatMarkdown,
+  estimateTokensFromText,
+} from "../utils.js";
 import {
   chatMessages,
   messageInput,
@@ -23,6 +28,8 @@ import {
   addCopyButton,
   addRegenerateButton,
   addEditButton,
+  updateMessageMetadata,
+  type MessageRenderMeta,
 } from "../ui/messages.js";
 import { closeSidebar } from "../ui/sidebar.js";
 import {
@@ -34,7 +41,7 @@ import { loadModelInfo } from "./modelService.js";
 import { getModelOptions } from "./modelParams.js";
 import { getSystemPrompt } from "./systemPrompt.js";
 
-// ─── Streaming helpers ───────────────────────────────────
+// â”€â”€â”€ Streaming helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function startStreamingUI(): void {
   state.isStreaming = true;
   state.abortController = new AbortController();
@@ -42,7 +49,7 @@ function startStreamingUI(): void {
   sendBtn.style.display = "none";
   stopBtn.style.display = "flex";
   sendBtn.classList.add("loading");
-  sendText.textContent = "Pensando…";
+  sendText.textContent = "Pensandoâ€¦";
 }
 
 function endStreamingUI(streamWrapper: HTMLDivElement): void {
@@ -60,8 +67,35 @@ function endStreamingUI(streamWrapper: HTMLDivElement): void {
 
 interface SSEResult {
   fullText: string;
-  tokenUsage?: { promptTokens: number; responseTokens: number };
+  tokenUsage?: {
+    promptTokens: number;
+    responseTokens: number;
+    totalTokens?: number;
+  };
   userMessageId?: string;
+  userMessage?: MessageJSON | null;
+  assistantMessage?: MessageJSON | null;
+}
+
+function buildAssistantFallbackMeta(
+  result: SSEResult,
+  startedAtMs: number,
+): MessageRenderMeta {
+  const durationMs = Math.max(Date.now() - startedAtMs, 0);
+  const responseTokens = result.tokenUsage?.responseTokens;
+  const speed =
+    typeof responseTokens === "number" && durationMs > 0
+      ? responseTokens / (durationMs / 1000)
+      : undefined;
+
+  return {
+    timestamp: new Date().toISOString(),
+    metrics: {
+      tokenCount: responseTokens,
+      durationMs,
+      tokensPerSecond: speed,
+    },
+  };
 }
 
 async function readSSEStream(
@@ -73,6 +107,8 @@ async function readSSEStream(
   let fullText = "";
   let tokenUsage: SSEResult["tokenUsage"];
   let userMessageId: string | undefined;
+  let userMessage: MessageJSON | null = null;
+  let assistantMessage: MessageJSON | null = null;
 
   try {
     const res = await fetch(`/api/chat/${chatId}/message`, {
@@ -111,13 +147,15 @@ async function readSSEStream(
             fullText = data.fullResponse || fullText;
             updateStreamingMessage(streamWrapper, fullText);
             if (data.userMessageId) userMessageId = data.userMessageId;
+            if (data.userMessage) userMessage = data.userMessage;
+            if (data.assistantMessage) assistantMessage = data.assistantMessage;
             if (data.tokenUsage) tokenUsage = data.tokenUsage;
           } else if (data.chunk) {
             fullText += data.chunk;
             updateStreamingMessage(streamWrapper, fullText);
           }
         } catch {
-          // ignorar líneas no JSON
+          // ignorar lÃ­neas no JSON
         }
       }
     }
@@ -125,15 +163,15 @@ async function readSSEStream(
     if ((err as Error).name === "AbortError") {
       fullText += "\n\n*Respuesta detenida por el usuario.*";
     } else {
-      fullText += `\n\n**Error de conexión:** ${(err as Error).message}`;
+      fullText += `\n\n**Error de conexiÃ³n:** ${(err as Error).message}`;
     }
     updateStreamingMessage(streamWrapper, fullText);
   }
 
-  return { fullText, tokenUsage, userMessageId };
+  return { fullText, tokenUsage, userMessageId, userMessage, assistantMessage };
 }
 
-// ─── Envío de mensaje ────────────────────────────────────
+// â”€â”€â”€ EnvÃ­o de mensaje â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function sendMessage(): Promise<void> {
   const content = messageInput.value.trim();
   if (!content || state.isStreaming) return;
@@ -184,12 +222,16 @@ export async function sendMessage(): Promise<void> {
   }
 
   // Mostrar mensaje del usuario
-  const userWrapper = addMessageToUI("user", content);
+  const userWrapper = addMessageToUI("user", content, {
+    timestamp: new Date().toISOString(),
+    metrics: { tokenCount: estimateTokensFromText(content) },
+  });
   messageInput.value = "";
   messageInput.style.height = "auto";
 
   startStreamingUI();
   const streamWrapper = createStreamingMessage();
+  const streamStartedAt = Date.now();
 
   const result = await readSSEStream(
     state.currentChatId!,
@@ -198,10 +240,30 @@ export async function sendMessage(): Promise<void> {
     state.abortController!.signal,
   );
 
-  if (result.userMessageId && userWrapper) {
-    userWrapper.dataset.msgId = result.userMessageId;
-    addEditButton(userWrapper, content);
+  if (result.userMessage) {
+    updateMessageMetadata(userWrapper, "user", content, {
+      id: result.userMessage.id,
+      timestamp: result.userMessage.timestamp,
+      metrics: result.userMessage.metrics || {
+        tokenCount: estimateTokensFromText(content),
+      },
+    });
+  } else if (result.userMessageId) {
+    updateMessageMetadata(userWrapper, "user", content, {
+      id: result.userMessageId,
+    });
   }
+
+  const assistantMeta: MessageRenderMeta = result.assistantMessage
+    ? {
+        id: result.assistantMessage.id,
+        timestamp: result.assistantMessage.timestamp,
+        metrics: result.assistantMessage.metrics,
+      }
+    : buildAssistantFallbackMeta(result, streamStartedAt);
+
+  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
+
   if (result.tokenUsage) {
     updateTokenUsage(
       result.tokenUsage.promptTokens,
@@ -211,8 +273,6 @@ export async function sendMessage(): Promise<void> {
 
   endStreamingUI(streamWrapper);
 }
-
-// ─── Regenerar última respuesta ──────────────────────────
 export async function regenerateLastResponse(): Promise<void> {
   if (!state.currentChatId || state.isStreaming) return;
 
@@ -229,6 +289,7 @@ export async function regenerateLastResponse(): Promise<void> {
 
   startStreamingUI();
   const streamWrapper = createStreamingMessage();
+  const streamStartedAt = Date.now();
 
   const result = await readSSEStream(
     state.currentChatId,
@@ -236,6 +297,16 @@ export async function regenerateLastResponse(): Promise<void> {
     streamWrapper,
     state.abortController!.signal,
   );
+
+  const assistantMeta: MessageRenderMeta = result.assistantMessage
+    ? {
+        id: result.assistantMessage.id,
+        timestamp: result.assistantMessage.timestamp,
+        metrics: result.assistantMessage.metrics,
+      }
+    : buildAssistantFallbackMeta(result, streamStartedAt);
+
+  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
 
   if (result.tokenUsage) {
     updateTokenUsage(
@@ -246,8 +317,6 @@ export async function regenerateLastResponse(): Promise<void> {
 
   endStreamingUI(streamWrapper);
 }
-
-// ─── Confirmar edición de mensaje ────────────────────────
 export async function confirmEditMessage(
   wrapper: HTMLDivElement,
   newContent: string,
@@ -256,10 +325,16 @@ export async function confirmEditMessage(
   const msgId = wrapper.dataset.msgId;
   if (!msgId) return;
 
+  let updatedUserMessage: MessageJSON | null = null;
+
   try {
-    await apiPut(`/api/chats/${state.currentChatId}/messages/${msgId}`, {
-      content: newContent,
-    });
+    const data = await apiPut<{ message: MessageJSON }>(
+      `/api/chats/${state.currentChatId}/messages/${msgId}`,
+      {
+        content: newContent,
+      },
+    );
+    updatedUserMessage = data.message;
   } catch (err) {
     console.error("Error editando mensaje:", err);
     return;
@@ -272,11 +347,19 @@ export async function confirmEditMessage(
 
   // Re-renderizar el mensaje editado
   const contentEl = wrapper.querySelector(".message-content") as HTMLDivElement;
-  contentEl.innerHTML = `<strong>👤 Tú:</strong>${formatMarkdown(newContent)}`;
+  contentEl.innerHTML = `<strong>👤 Tú:</strong><div class="message-body">${formatMarkdown(newContent)}</div>`;
+  updateMessageMetadata(wrapper, "user", newContent, {
+    id: updatedUserMessage?.id || msgId,
+    timestamp: updatedUserMessage?.timestamp || wrapper.dataset.timestamp,
+    metrics: updatedUserMessage?.metrics || {
+      tokenCount: estimateTokensFromText(newContent),
+    },
+  });
   addEditButton(wrapper, newContent);
 
   startStreamingUI();
   const streamWrapper = createStreamingMessage();
+  const streamStartedAt = Date.now();
 
   const result = await readSSEStream(
     state.currentChatId,
@@ -284,6 +367,16 @@ export async function confirmEditMessage(
     streamWrapper,
     state.abortController!.signal,
   );
+
+  const assistantMeta: MessageRenderMeta = result.assistantMessage
+    ? {
+        id: result.assistantMessage.id,
+        timestamp: result.assistantMessage.timestamp,
+        metrics: result.assistantMessage.metrics,
+      }
+    : buildAssistantFallbackMeta(result, streamStartedAt);
+
+  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
 
   if (result.tokenUsage) {
     updateTokenUsage(
@@ -294,8 +387,6 @@ export async function confirmEditMessage(
 
   endStreamingUI(streamWrapper);
 }
-
-// ─── Lista de chats (sidebar) ────────────────────────────
 export async function refreshChatList(): Promise<void> {
   try {
     const query = chatSearchInput.value.trim();
@@ -342,7 +433,7 @@ function createChatItem(chat: ChatJSON): HTMLDivElement {
   item.innerHTML = `
     <div class="chat-item-content">
       <div class="chat-item-title">${escapeHtml(chat.title)}</div>
-      <div class="chat-item-meta">${chat.model} · ${chat.messageCount} msgs</div>
+      <div class="chat-item-meta">${chat.model} Â· ${chat.messageCount} msgs</div>
     </div>
     <div class="chat-item-actions">
       <button class="pin-chat-btn${chat.pinned ? " active" : ""}" title="${chat.pinned ? "Desanclar" : "Anclar"}">
@@ -437,7 +528,7 @@ function startRenameChat(
   });
 }
 
-// ─── Cargar chat ─────────────────────────────────────────
+// â”€â”€â”€ Cargar chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function loadChat(chatId: string): Promise<void> {
   try {
     const data = await apiGet<{ chat: ChatJSON }>(`/api/chats/${chatId}`);
@@ -472,7 +563,11 @@ export async function loadChat(chatId: string): Promise<void> {
     }
 
     data.chat.messages.forEach((msg) =>
-      addMessageToUI(msg.role, msg.content, msg.id),
+      addMessageToUI(msg.role, msg.content, {
+        id: msg.id,
+        timestamp: msg.timestamp,
+        metrics: msg.metrics,
+      }),
     );
 
     if (isLocalModel && data.chat.messages.length > 0) {
@@ -488,7 +583,7 @@ export async function loadChat(chatId: string): Promise<void> {
   }
 }
 
-// ─── Acciones de cabecera ────────────────────────────────
+// â”€â”€â”€ Acciones de cabecera â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function newChat(): void {
   state.currentChatId = null;
   state.currentChatModel = null;
@@ -497,13 +592,13 @@ export function newChat(): void {
     modelInfoPanel.style.display = "none";
   }
   const modelInfo = selectedModel
-    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. ¿En qué puedo ayudarte?`
-    : `Selecciona un modelo y ¿en qué puedo ayudarte hoy?`;
+    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. Â¿En quÃ© puedo ayudarte?`
+    : `Selecciona un modelo y Â¿en quÃ© puedo ayudarte hoy?`;
   chatMessages.innerHTML = `
     <div class="message assistant">
       <div class="message-content">
-        <strong>🤖 Asistente:</strong>
-        <p>¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
+        <strong>ðŸ¤– Asistente:</strong>
+        <p>Â¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
       </div>
     </div>`;
   messageInput.value = "";
@@ -538,7 +633,7 @@ export function confirmDeleteChat(): void {
     .catch((err) => console.error("Error eliminando chat:", err));
 }
 
-// ─── Cambio de modelo ────────────────────────────────────
+// â”€â”€â”€ Cambio de modelo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function handleLoadModelClick(): void {
   const newModel = modelSelector.value;
   if (!newModel) return;
@@ -559,13 +654,13 @@ export function handleLoadModelClick(): void {
 
   if (!currentIsLocal) {
     state.pendingModel = newModel;
-    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". ¿Deseas asignarle el modelo local "${newModel}" para continuar la conversación?`;
+    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". Â¿Deseas asignarle el modelo local "${newModel}" para continuar la conversaciÃ³n?`;
     modelChangeModal.classList.add("active");
     return;
   }
 
   state.pendingModel = newModel;
-  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirá un nuevo chat. La conversación actual se mantendrá guardada. ¿Deseas continuar?`;
+  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirÃ¡ un nuevo chat. La conversaciÃ³n actual se mantendrÃ¡ guardada. Â¿Deseas continuar?`;
   modelChangeModal.classList.add("active");
 }
 
@@ -608,3 +703,14 @@ export function closeModelChange(): void {
   }
   state.pendingModel = null;
 }
+
+
+
+
+
+
+
+
+
+
+

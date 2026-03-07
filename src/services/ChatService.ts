@@ -1,12 +1,12 @@
-import { Chat } from "../models/Chat.js";
-import { Message } from "../models/Message.js";
+﻿import { Chat } from "../models/Chat.js";
+import { Message, type MessageMetrics } from "../models/Message.js";
 
 /**
  * Servicio: ChatService
- * Gestiona toda la lógica de negocio relacionada con los chats.
+ * Gestiona toda la lÃ³gica de negocio relacionada con los chats.
  *
  * Almacena los chats en memoria usando un Map.
- * En un proyecto real se reemplazaría por una base de datos.
+ * En un proyecto real se reemplazarÃ­a por una base de datos.
  */
 export class ChatService {
   #chats = new Map<string, Chat>();
@@ -50,12 +50,17 @@ export class ChatService {
     this.#chats.delete(chatId);
   }
 
-  addMessage(chatId: string, role: string, content: string): Message {
+  addMessage(
+    chatId: string,
+    role: string,
+    content: string,
+    metrics?: MessageMetrics,
+  ): Message {
     const chat = this.getById(chatId);
     if (!chat) {
       throw new Error(`Chat con ID ${chatId} no encontrado`);
     }
-    const message = new Message({ role, content });
+    const message = new Message({ role, content, metrics });
     chat.addMessage(message);
     return message;
   }
@@ -108,3 +113,4 @@ export class ChatService {
     return chat.messages[idx];
   }
 }
+
