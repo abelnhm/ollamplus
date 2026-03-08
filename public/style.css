@@ -1517,12 +1517,8 @@ body::before {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
-  opacity: 0;
+  opacity: 1; /* Always visible */
   transition: opacity 0.2s ease;
-}
-
-.chat-item:hover .chat-item-actions {
-  opacity: 1;
 }
 
 .rename-chat-btn {
@@ -1635,11 +1631,11 @@ body::before {
 }
 
 .chat-item.pinned .chat-item-actions .rename-chat-btn {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 
-.chat-item.pinned:hover .chat-item-actions .rename-chat-btn {
+.chat-item.pinned .chat-item-actions:hover .rename-chat-btn {
   opacity: 1;
 }
 
