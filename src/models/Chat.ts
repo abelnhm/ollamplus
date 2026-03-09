@@ -1,15 +1,32 @@
 import { randomUUID } from "crypto";
 import { Message } from "./Message.js";
 
-/**
- * Modelo: Chat
- * Representa una conversación completa con un modelo de IA.
- */
+export interface ChatParameters {
+  temperature?: number;
+  topP?: number;
+  topK?: number;
+  numCtx?: number;
+  numKeep?: number;
+  seed?: number;
+  repeatPenalty?: number;
+  repeatLastN?: number;
+  numGPU?: number;
+  numThread?: number;
+  stop?: string[];
+}
 
 export interface ChatData {
   id?: string;
   model: string;
-  title: string;
+  title?: string;
+  instructions?: string;
+  parameters?: ChatParameters;
+  modelInfo?: {
+    size?: string;
+    family?: string;
+    format?: string;
+    quantization?: string;
+  };
   messages?: Message[];
   createdAt?: Date;
   lastMessageAt?: Date;
@@ -20,6 +37,14 @@ export class Chat {
   id: string;
   model: string;
   title: string;
+  instructions: string;
+  parameters: ChatParameters;
+  modelInfo: {
+    size?: string;
+    family?: string;
+    format?: string;
+    quantization?: string;
+  };
   messages: Message[];
   createdAt: Date;
   lastMessageAt: Date;
@@ -28,7 +53,10 @@ export class Chat {
   constructor({
     id,
     model,
-    title,
+    title = "Nuevo chat",
+    instructions = "",
+    parameters = {},
+    modelInfo = {},
     messages = [],
     createdAt,
     lastMessageAt,
@@ -37,6 +65,9 @@ export class Chat {
     this.id = id || randomUUID();
     this.model = model;
     this.title = title;
+    this.instructions = instructions;
+    this.parameters = parameters;
+    this.modelInfo = modelInfo;
     this.messages = messages;
     this.createdAt = createdAt || new Date();
     this.lastMessageAt = lastMessageAt || new Date();
@@ -60,6 +91,9 @@ export class Chat {
       id: this.id,
       model: this.model,
       title: this.title,
+      instructions: this.instructions,
+      parameters: this.parameters,
+      modelInfo: this.modelInfo,
       messages: this.messages.map((msg) => msg.toJSON()),
       createdAt: this.createdAt.toISOString(),
       lastMessageAt: this.lastMessageAt.toISOString(),

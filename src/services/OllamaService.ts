@@ -137,7 +137,6 @@ export class OllamaService {
     try {
       const client = this.createClient(url);
 
-      // Prepend system prompt if provided
       const finalMessages = systemPrompt
         ? [{ role: "system", content: systemPrompt }, ...messages]
         : messages;
@@ -150,7 +149,6 @@ export class OllamaService {
       if (options && Object.keys(options).length > 0) {
         chatParams.options = options;
       }
-      const response = await client.chat(chatParams as any);
 
       const startedAt = Date.now();
       let fullResponse = "";
@@ -158,17 +156,18 @@ export class OllamaService {
       let responseTokens = 0;
       let evalDurationNs = 0;
 
+      const response = await client.chat(chatParams as any);
+
       for await (const part of response) {
-        const content = part.message.content;
+        const content = part.message?.content || "";
         fullResponse += content;
         if (onChunk) {
           onChunk(content);
         }
-        // Capture token counts from the final chunk
-        if ((part as any).done) {
-          promptTokens = (part as any).prompt_eval_count || 0;
-          responseTokens = (part as any).eval_count || 0;
-          evalDurationNs = Number((part as any).eval_duration) || 0;
+        if (part.done) {
+          promptTokens = part.prompt_eval_count || 0;
+          responseTokens = part.eval_count || 0;
+          evalDurationNs = Number(part.eval_duration) || 0;
         }
       }
 
