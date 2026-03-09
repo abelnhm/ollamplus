@@ -1,6 +1,13 @@
 import express, { Express } from "express";
 import cors from "cors";
-import { logger } from "./middlewares/logger.js";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import { config_ } from "./config.js";
+import { logger, expressLogger } from "./middlewares/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { ChatService } from "./services/ChatService.js";
 import { OllamaService } from "./services/OllamaService.js";
@@ -17,17 +24,17 @@ import { createModelRoutes } from "./routes/modelRoutes.js";
  *   3. Se registran middlewares, rutas y manejo de errores
  *   4. Se inicia el servidor HTTP
  */
-export function createServer(port: number = 3000): Express {
+export function createServer(port: number = config_.port): Express {
   const app = express();
 
   // --- Middlewares generales ---
   app.use(cors());
   app.use(express.json({ limit: "10mb" }));
-  app.use(logger);
+  app.use(expressLogger);
 
   // --- Archivos estáticos (frontend, sin caché en desarrollo) ---
   app.use(
-    express.static("public", {
+    express.static(join(__dirname, "..", "..", "public"), {
       etag: false,
       lastModified: false,
       setHeaders: (res) => {
@@ -49,8 +56,10 @@ export function createServer(port: number = 3000): Express {
 
   // --- Iniciar servidor ---
   app.listen(port, () => {
-    console.log(`Servidor iniciado en http://localhost:${port}`);
+    logger.info({ port }, "Servidor iniciado");
   });
 
   return app;
 }
+
+createServer();

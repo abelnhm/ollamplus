@@ -576,7 +576,7 @@ export async function loadChat(chatId: string): Promise<void> {
       resetTokenUsage();
     }
 
-    data.chat.messages.forEach((msg) =>
+    data.chat.messages.forEach((msg: MessageJSON) =>
       addMessageToUI(msg.role, msg.content, {
         id: msg.id,
         timestamp: msg.timestamp,

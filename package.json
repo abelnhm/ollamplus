@@ -4,12 +4,13 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && tsc -p client",
-    "build:server": "tsc",
+    "build": "npm run build:shared && npm run build:server && npm run build:client",
+    "build:shared": "tsc -p shared",
+    "build:server": "tsc -p server",
     "build:client": "tsc -p client",
-    "start": "node dist/index.js",
-    "dev": "concurrently -n server,client -c blue,green \"tsx --watch index.ts\" \"tsc --watch -p client\"",
-    "dev:server": "tsx --watch index.ts",
+    "start": "node server/dist/index.js",
+    "dev": "concurrently -n server,client -c blue,green \"tsx server/src/index.ts\" \"tsc --watch -p client\"",
+    "dev:server": "tsx server/src/index.ts",
     "dev:client": "tsc --watch -p client"
   },
   "keywords": [],
@@ -22,13 +23,16 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "ollama": "^0.6.3",
-    "openai": "^6.16.0"
+    "openai": "^6.16.0",
+    "pino": "^10.3.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.3",
+    "@types/pino": "^7.0.5",
     "concurrently": "^9.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

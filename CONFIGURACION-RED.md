@@ -153,3 +153,26 @@ curl -X POST http://192.168.1.100:11434/api/tags
 - Configurar host: `192.168.1.100`
 - Configurar puerto: `11434`
 - URL completa usada: `http://192.168.1.100:11434`
+
+## Estructura del proyecto
+
+```
+ollamaUI/
+├── server/              # Backend (Node.js + Express + SQLite)
+│   └── src/
+│       ├── index.ts    # Entry point
+│       ├── routes/     # Endpoints API
+│       ├── services/   # ChatService, OllamaService, database
+│       └── models/     # Chat, Message
+│
+├── client/             # Frontend TypeScript
+│   └── src/
+│       ├── app.ts     # Entry point
+│       ├── services/  # Lógica del cliente
+│       └── ui/        # Componentes UI
+│
+├── shared/            # Tipos compartidos
+│   └── types/         # Interfaces comunes
+│
+└── public/           # Archivos estáticos servidos
+```

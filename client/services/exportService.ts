@@ -98,7 +98,7 @@ function exportAsJSON(chat: ChatJSON): string {
 function exportAsHTML(chat: ChatJSON): string {
   const dateStr = new Date(chat.createdAt).toLocaleString();
   const messagesHtml = chat.messages
-    .map((msg) => {
+    .map((msg: MessageJSON) => {
       const role =
         msg.role === "user" ? "\u{1F464} Usuario" : "\u{1F916} Asistente";
       const bgColor = msg.role === "user" ? "#e3f2fd" : "#f5f5f5";

@@ -11,7 +11,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "paths": {
+      "@shared/*": ["../shared/types/*"]
+    },
+    "baseUrl": "."
   },
   "include": ["./**/*"]
 }
