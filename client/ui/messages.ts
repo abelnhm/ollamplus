@@ -29,7 +29,10 @@ export function setMessageCallbacks(callbacks: {
   onEditConfirmCallback = callbacks.onEditConfirm;
 }
 
-function getMessageTokenCount(content: string, metrics?: MessageMetrics): number {
+function getMessageTokenCount(
+  content: string,
+  metrics?: MessageMetrics,
+): number {
   if (typeof metrics?.tokenCount === "number") {
     return Math.max(0, Math.round(metrics.tokenCount));
   }
@@ -78,15 +81,15 @@ export function updateMessageMetadata(
   if (metadata.id) wrapper.dataset.msgId = metadata.id;
   if (metadata.timestamp) wrapper.dataset.timestamp = metadata.timestamp;
 
-  const contentEl = wrapper.querySelector(".message-content") as
-    | HTMLDivElement
-    | null;
+  const contentEl = wrapper.querySelector(
+    ".message-content",
+  ) as HTMLDivElement | null;
   if (!contentEl) return;
 
   const metaText = buildMessageMetaText(role, content, metadata);
-  const existingMeta = contentEl.querySelector(".message-meta") as
-    | HTMLDivElement
-    | null;
+  const existingMeta = contentEl.querySelector(
+    ".message-meta",
+  ) as HTMLDivElement | null;
 
   if (!metaText) {
     if (existingMeta) existingMeta.remove();
@@ -241,7 +244,10 @@ export function addMessageToUI(
   inner.className = "message-content";
 
   const label = role === "user" ? "👤 Tú" : "🤖 Asistente";
-  inner.innerHTML = `<strong>${label}:</strong><div class="message-body">${formatMarkdown(content)}</div>`;
+  // Si el contenido está vacío, mostrar mensaje alternativo
+  const safeContent =
+    content && content.trim() ? content : "No se pudo generar respuesta.";
+  inner.innerHTML = `<strong>${label}:</strong><div class="message-body">${formatMarkdown(safeContent)}</div>`;
   wrapper.appendChild(inner);
   updateMessageMetadata(wrapper, role, content, metadata);
 
@@ -283,15 +289,18 @@ export function updateStreamingMessage(
   const thinking = wrapper.querySelector(
     ".thinking-indicator",
   ) as HTMLElement | null;
-  const streamEl = wrapper.querySelector(".streaming-text") as
-    | HTMLElement
-    | null;
+  const streamEl = wrapper.querySelector(
+    ".streaming-text",
+  ) as HTMLElement | null;
   if (thinking) {
     thinking.remove();
   }
   if (streamEl) {
     streamEl.style.display = "";
-    streamEl.innerHTML = formatMarkdown(text);
+    // Si el texto es vacío, mostrar mensaje alternativo
+    const safeText =
+      text && text.trim() ? text : "No se pudo generar respuesta.";
+    streamEl.innerHTML = formatMarkdown(safeText);
     injectCodeCopyButtons(streamEl);
   }
   scrollToBottom();

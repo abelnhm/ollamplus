@@ -72,11 +72,17 @@ export function createChatRoutes(
         systemPrompt,
       );
 
-      // Guardar respuesta del asistente en el chat junto a sus metricas
+      // Si la respuesta es vacía, usar texto alternativo
+      const safeResponse =
+        result.response && result.response.trim()
+          ? result.response
+          : "No se pudo generar respuesta.";
+
+      // Guardar respuesta del asistente en el chat junto a sus métricas
       const assistantMessage = chatService.addMessage(
         chatId as string,
         "assistant",
-        result.response,
+        safeResponse,
         {
           tokenCount: result.responseTokens,
           durationMs: result.totalDurationMs,
@@ -84,11 +90,11 @@ export function createChatRoutes(
         },
       );
 
-      // Enviar senal de finalizacion con token usage
+      // Enviar señal de finalización con token usage
       res.write(
         `data: ${JSON.stringify({
           done: true,
-          fullResponse: result.response,
+          fullResponse: safeResponse,
           userMessageId: userMessage?.id || null,
           userMessage: userMessage?.toJSON() || null,
           assistantMessage: assistantMessage.toJSON(),
