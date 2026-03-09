@@ -1,4 +1,4 @@
-﻿import { state } from "../state.js";
+import { state } from "../state.js";
 import type { ChatJSON, MessageJSON } from "../types.js";
 import { apiPost, apiGet, apiDelete, apiPatch, apiPut } from "../api.js";
 import {
@@ -41,7 +41,7 @@ import { loadModelInfo } from "./modelService.js";
 import { getModelOptions } from "./modelParams.js";
 import { getSystemPrompt } from "./systemPrompt.js";
 
-// â”€â”€â”€ Streaming helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ==================================== Streaming helpers ====================================
 function startStreamingUI(): void {
   state.isStreaming = true;
   state.abortController = new AbortController();
@@ -155,7 +155,7 @@ async function readSSEStream(
             updateStreamingMessage(streamWrapper, fullText);
           }
         } catch {
-          // ignorar lÃ­neas no JSON
+          // Ignorar líneas no JSON
         }
       }
     }
@@ -163,7 +163,7 @@ async function readSSEStream(
     if ((err as Error).name === "AbortError") {
       fullText += "\n\n*Respuesta detenida por el usuario.*";
     } else {
-      fullText += `\n\n**Error de conexi\u00F3n:** ${(err as Error).message}`;
+      fullText += `\n\n**Error de conexión:** ${(err as Error).message}`;
     }
     updateStreamingMessage(streamWrapper, fullText);
   }
@@ -171,7 +171,7 @@ async function readSSEStream(
   return { fullText, tokenUsage, userMessageId, userMessage, assistantMessage };
 }
 
-// â”€â”€â”€ EnvÃ­o de mensaje â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ==================================== Envío de mensaje ====================================
 export async function sendMessage(): Promise<void> {
   const content = messageInput.value.trim();
   if (!content || state.isStreaming) return;
@@ -347,7 +347,7 @@ export async function confirmEditMessage(
 
   // Re-renderizar el mensaje editado
   const contentEl = wrapper.querySelector(".message-content") as HTMLDivElement;
-  contentEl.innerHTML = `<strong>👤 Tú:</strong><div class="message-body">${formatMarkdown(newContent)}</div>`;
+  contentEl.innerHTML = `<strong>Tú:</strong><div class="message-body">${formatMarkdown(newContent)}</div>`;
   updateMessageMetadata(wrapper, "user", newContent, {
     id: updatedUserMessage?.id || msgId,
     timestamp: updatedUserMessage?.timestamp || wrapper.dataset.timestamp,
@@ -410,7 +410,7 @@ export async function refreshChatList(): Promise<void> {
     if (pinned.length > 0) {
       const pinnedHeader = document.createElement("div");
       pinnedHeader.className = "chats-section-header";
-      pinnedHeader.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Anclados`;
+      pinnedHeader.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Anclados';
       chatsList.appendChild(pinnedHeader);
       pinned.forEach((chat) => chatsList.appendChild(createChatItem(chat)));
     }
@@ -542,7 +542,7 @@ function startRenameChat(
   });
 }
 
-// â”€â”€â”€ Cargar chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ==================================== Cargar chat ====================================
 export async function loadChat(chatId: string): Promise<void> {
   try {
     const data = await apiGet<{ chat: ChatJSON }>(`/api/chats/${chatId}`);
@@ -568,9 +568,9 @@ export async function loadChat(chatId: string): Promise<void> {
       banner.className = "message assistant";
       banner.innerHTML = `
         <div class="message-content" style="background:var(--warning-bg, #fff8e1);border:1px solid var(--warning-border, #ffe082);border-radius:8px;">
-          <strong>\u26A0\uFE0F Conversaci\u00F3n importada</strong>
-          <p>Este chat fue importado con el modelo <strong>${escapeHtml(data.chat.model)}</strong>, que no est\u00E1 disponible localmente.
-          Selecciona un modelo local en el desplegable superior y pulsa <strong>Cargar</strong> para continuar la conversaci\u00F3n con un modelo de Ollama.</p>
+          <strong>⚠️ Conversación importada</strong>
+          <p>Este chat fue importado con el modelo <strong>${escapeHtml(data.chat.model)}</strong>, que no está disponible localmente.
+          Selecciona un modelo local en el desplegable superior y pulsa <strong>Cargar</strong> para continuar la conversación con un modelo de Ollama.</p>
         </div>`;
       chatMessages.appendChild(banner);
       resetTokenUsage();
@@ -597,7 +597,7 @@ export async function loadChat(chatId: string): Promise<void> {
   }
 }
 
-// â”€â”€â”€ Acciones de cabecera â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ==================================== Acciones de cabecera ====================================
 export function newChat(): void {
   state.currentChatId = null;
   state.currentChatModel = null;
@@ -606,13 +606,18 @@ export function newChat(): void {
     modelInfoPanel.style.display = "none";
   }
   const modelInfo = selectedModel
-    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. \u00BFEn qu\u00E9 puedo ayudarte?`
-    : `Selecciona un modelo y \u00BFen qu\u00E9 puedo ayudarte hoy?`;
+    ? `Modelo activo: <strong>${escapeHtml(selectedModel)}</strong>. ¿En qué puedo ayudarte?`
+    : `Selecciona un modelo y ¿en qué puedo ayudarte hoy?`;
   chatMessages.innerHTML = `
     <div class="message assistant">
       <div class="message-content">
-        <strong>\u{1F916} Asistente:</strong>
-        <p>\u00A1Hola! Soy tu asistente de IA. ${modelInfo}</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:inline-block;margin-right:6px;">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 8v8m-4-4h8"></path>
+        </svg>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">Asistente</strong>
+        <p>¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
       </div>
     </div>`;
   messageInput.value = "";
@@ -658,7 +663,7 @@ export function confirmDeleteChat(): void {
     .catch((err) => console.error("Error eliminando chat:", err));
 }
 
-// Cambio de modelo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ==================================== Cambio de modelo ====================================
 export function handleLoadModelClick(): void {
   const newModel = modelSelector.value;
   if (!newModel) return;
@@ -679,13 +684,13 @@ export function handleLoadModelClick(): void {
 
   if (!currentIsLocal) {
     state.pendingModel = newModel;
-    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". \u00BFDeseas asignarle el modelo local "${newModel}" para continuar la conversaci\u00F3n?`;
+    modelChangeModalText.textContent = `Este chat fue importado con el modelo "${state.currentChatModel}". ¿Deseas asignarle el modelo local "${newModel}" para continuar la conversación?`;
     modelChangeModal.classList.add("active");
     return;
   }
 
   state.pendingModel = newModel;
-  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrir\u00E1 un nuevo chat. La conversaci\u00F3n actual se mantendr\u00E1 guardada. \u00BFDeseas continuar?`;
+  modelChangeModalText.textContent = `Al cambiar al modelo "${newModel}" se abrirá un nuevo chat. La conversación actual se mantendrá guardada. ¿Deseas continuar?`;
   modelChangeModal.classList.add("active");
 }
 
@@ -728,21 +733,4 @@ export function closeModelChange(): void {
   }
   state.pendingModel = null;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
