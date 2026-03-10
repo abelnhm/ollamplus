@@ -11,7 +11,10 @@
     "start": "node server/dist/index.js",
     "dev": "concurrently -n server,client -c blue,green \"tsx server/src/index.ts\" \"tsc --watch -p client\"",
     "dev:server": "tsx server/src/index.ts",
-    "dev:client": "tsc --watch -p client"
+    "dev:client": "tsc --watch -p client",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -33,8 +36,11 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^9.2.1",
+    "jsdom": "^28.1.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

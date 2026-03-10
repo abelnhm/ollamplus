@@ -516,6 +516,51 @@ El proyecto usa variables de entorno configuradas en `.env`:
 | `build:server` | `npm run build:server` | Solo servidor |
 | `build:client` | `npm run build:client` | Solo cliente |
 | `start` | `npm start` | Producción (`node server/dist/index.js`) |
+| `test` | `npm test` | Ejecutar tests unitarios |
+| `test:watch` | `npm run test:watch` | Ejecutar tests en modo watch |
+| `test:coverage` | `npm run test:coverage` | Ejecutar tests con cobertura |
+
+---
+
+## Testing
+
+El proyecto incluye tests unitarios con **Vitest**.
+
+### Ejecutar tests
+
+```bash
+# Ejecutar todos los tests
+npm test
+
+# Modo watch (recompila automáticamente)
+npm run test:watch
+
+# Con cobertura de código
+npm run test:coverage
+```
+
+### Estructura de los tests
+
+```
+server/src/test/
+├── Chat.test.ts          # Tests del modelo Chat
+├── Message.test.ts      # Tests del modelo Message
+└── validators.test.ts   # Tests de validadores Zod
+```
+
+### Cobertura actual
+
+Los tests cubren:
+- **Modelos** (Chat, Message): ~100%
+- **Validators** (Zod): 100%
+
+### Añadir nuevos tests
+
+1. Crea un archivo `.test.ts` en `server/src/test/`
+2. Sigue el patrón AAA (Arrange, Act, Assert)
+3. Ejecuta `npm test` para verificar
+
+Consulta [TESTING.md](./TESTING.md) para una guía completa sobre cómo escribir tests.
 
 ---
 
@@ -541,6 +586,9 @@ El proyecto usa variables de entorno configuradas en `.env`:
 | `typescript` | Compilador |
 | `tsx` | Ejecutar TS directamente |
 | `concurrently` | Ejecutar múltiples comandos |
+| `vitest` | Framework de testing |
+| `@vitest/coverage-v8` | Cobertura de código |
+| `jsdom` | Simulación del DOM para tests |
 | `@types/node` | Tipos Node.js |
 | `@types/express` | Tipos Express |
 | `@types/better-sqlite3` | Tipos SQLite |
