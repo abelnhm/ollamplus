@@ -56,11 +56,15 @@ export function createChatRoutes(
       // Agregar mensaje del usuario al chat (solo si hay contenido; null en regeneracion)
       let userMessage: ReturnType<ChatService["addMessage"]> | null = null;
       if (content) {
+        // Guardar en DB
         userMessage = chatService.addMessage(chatId as string, "user", content);
+        // Agregar al objeto chat en memoria para que getHistory() lo incluya
+        chat.addMessage(userMessage);
       }
 
       // Enviar historial al modelo y recibir respuesta en streaming
       const history = chat.getHistory();
+      
       const result = await ollamaService.sendMessage(
         chat.model,
         history,

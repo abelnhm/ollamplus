@@ -1,11 +1,11 @@
-﻿import { Ollama } from "ollama";
+import { Ollama } from "ollama";
 
 /**
  * Servicio: OllamaService
  * Se comunica con la API de Ollama para obtener modelos y enviar mensajes.
  *
  * Ollama es un servidor local que ejecuta modelos de IA.
- * Este servicio usa la librerÃ­a 'ollama' de npm para interactuar con Ã©l.
+ * Este servicio usa la librería 'ollama' de npm para interactuar con él.
  */
 
 export interface OllamaModel {
@@ -37,11 +37,9 @@ export class OllamaService {
       const details = response.details || ({} as any);
       const modelInfo = response.model_info as any;
 
-      // Try to extract VRAM from model_info or estimate from model size
       let sizeVram = 0;
       let contextLength = 0;
       if (modelInfo) {
-        // Some ollama versions expose vram in model_info
         for (const key of Object.keys(modelInfo)) {
           if (
             key.toLowerCase().includes("vram") ||
@@ -134,9 +132,13 @@ export class OllamaService {
     totalDurationMs: number;
     tokensPerSecond: number;
   }> {
-    try {
-      const client = this.createClient(url);
+    const startedAt = Date.now();
+    let fullResponse = "";
+    let promptTokens = 0;
+    let responseTokens = 0;
+    let evalDurationNs = 0;
 
+    try {
       const finalMessages = systemPrompt
         ? [{ role: "system", content: systemPrompt }, ...messages]
         : messages;
@@ -144,31 +146,31 @@ export class OllamaService {
       const chatParams: Record<string, unknown> = {
         model,
         messages: finalMessages,
-        stream: true,
+        stream: false,
       };
       if (options && Object.keys(options).length > 0) {
         chatParams.options = options;
       }
 
-      const startedAt = Date.now();
-      let fullResponse = "";
-      let promptTokens = 0;
-      let responseTokens = 0;
-      let evalDurationNs = 0;
+      const response = await fetch(`${url}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(chatParams),
+      });
 
-      const response = await client.chat(chatParams as any);
+      if (!response.body) {
+        throw new Error("No response body from Ollama");
+      }
 
-      for await (const part of response) {
-        const content = part.message?.content || "";
-        fullResponse += content;
-        if (onChunk) {
-          onChunk(content);
-        }
-        if (part.done) {
-          promptTokens = part.prompt_eval_count || 0;
-          responseTokens = part.eval_count || 0;
-          evalDurationNs = Number(part.eval_duration) || 0;
-        }
+      const data = await response.json();
+      
+      fullResponse = data.message?.content || "";
+      promptTokens = data.prompt_eval_count || 0;
+      responseTokens = data.eval_count || 0;
+      evalDurationNs = Number(data.eval_duration) || 0;
+
+      if (onChunk && fullResponse) {
+        onChunk(fullResponse);
       }
 
       const totalDurationMs = Math.max(Date.now() - startedAt, 0);
@@ -188,10 +190,10 @@ export class OllamaService {
         tokensPerSecond,
       };
     } catch (error) {
+      console.error("[OllamaService] Error:", error);
       throw new Error(
         `Error al enviar mensaje a Ollama: ${(error as Error).message}`,
       );
     }
   }
 }
-
