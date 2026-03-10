@@ -2252,6 +2252,42 @@ body::before {
   font-weight: 600;
 }
 
+.btn-danger {
+  width: 100%;
+  background: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  border-color: #c82333;
+}
+
+.danger-zone {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.danger-zone h3 {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.danger-zone .help-text {
+  color: hsl(var(--muted-foreground));
+}
+
 #testResult.success {
   color: #22c55e;
 }

@@ -324,5 +324,42 @@ export function createChatRoutes(
     },
   );
 
+  // Obtener configuración de la app
+  router.get("/config/:key", (req: Request, res: Response) => {
+    try {
+      const key = req.params.key as string;
+      const value = chatService.getAppConfig(key);
+      res.json({ success: true, value });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Guardar configuración de la app
+  router.put("/config/:key", (req: Request, res: Response) => {
+    try {
+      const key = req.params.key as string;
+      const { value } = req.body;
+      if (value === undefined) {
+        res.status(400).json({ error: "El valor es requerido" });
+        return;
+      }
+      chatService.setAppConfig(key, String(value));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Borrar todos los chats
+  router.delete("/chats", (req: Request, res: Response) => {
+    try {
+      chatService.deleteAllChats();
+      res.json({ success: true, message: "Todos los chats han sido eliminados" });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   return router;
 }

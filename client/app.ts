@@ -44,6 +44,7 @@ import {
   cancelSettingsBtn,
   saveSettingsBtn,
   testConnectionBtn,
+  deleteAllChatsBtn,
   closeExportModalBtn,
   cancelExportBtn,
   closeImportModalBtn,
@@ -69,6 +70,7 @@ import {
   updateUrlPreview,
   testConnection,
   saveSettings,
+  deleteAllChats,
 } from "./ui/settings.js";
 
 // Services
@@ -268,6 +270,7 @@ closeSettingsModal.addEventListener("click", closeSettings);
 cancelSettingsBtn.addEventListener("click", closeSettings);
 saveSettingsBtn.addEventListener("click", saveSettings);
 testConnectionBtn.addEventListener("click", testConnection);
+deleteAllChatsBtn.addEventListener("click", deleteAllChats);
 ollamaHostInput.addEventListener("input", updateUrlPreview);
 ollamaPortInput.addEventListener("input", updateUrlPreview);
 

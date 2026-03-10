@@ -241,4 +241,9 @@ export class ChatService {
       "INSERT OR REPLACE INTO app_config (key, value, updated_at) VALUES (?, ?, ?)"
     ).run(key, value, now);
   }
+
+  deleteAllChats(): void {
+    db.prepare("DELETE FROM messages").run();
+    db.prepare("DELETE FROM chats").run();
+  }
 }

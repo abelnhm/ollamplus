@@ -1,5 +1,5 @@
 import type { OllamaModel } from "../types.js";
-import { apiPost } from "../api.js";
+import { apiGet, apiPost, apiPut, apiDelete } from "../api.js";
 import { getOllamaUrl } from "../utils.js";
 import {
   settingsModal,
@@ -9,12 +9,10 @@ import {
   testResult,
 } from "./elements.js";
 import { loadModels } from "../services/modelService.js";
+import { newChat, refreshChatList } from "../services/chatService.js";
 
 export function openSettings(): void {
-  ollamaHostInput.value = localStorage.getItem("ollamaHost") || "localhost";
-  ollamaPortInput.value = localStorage.getItem("ollamaPort") || "11434";
-  updateUrlPreview();
-  testResult.textContent = "";
+  loadSettingsFromServer();
   settingsModal.classList.add("active");
 }
 
@@ -41,9 +39,50 @@ export async function testConnection(): Promise<void> {
   }
 }
 
-export function saveSettings(): void {
-  localStorage.setItem("ollamaHost", ollamaHostInput.value || "localhost");
-  localStorage.setItem("ollamaPort", ollamaPortInput.value || "11434");
+async function loadSettingsFromServer(): Promise<void> {
+  try {
+    const hostData = await apiGet<{ value: string | null }>("/api/config/ollamaHost");
+    const portData = await apiGet<{ value: string | null }>("/api/config/ollamaPort");
+
+    ollamaHostInput.value = hostData.value || localStorage.getItem("ollamaHost") || "localhost";
+    ollamaPortInput.value = portData.value || localStorage.getItem("ollamaPort") || "11434";
+  } catch {
+    ollamaHostInput.value = localStorage.getItem("ollamaHost") || "localhost";
+    ollamaPortInput.value = localStorage.getItem("ollamaPort") || "11434";
+  }
+  updateUrlPreview();
+  testResult.textContent = "";
+}
+
+export async function saveSettings(): Promise<void> {
+  const host = ollamaHostInput.value || "localhost";
+  const port = ollamaPortInput.value || "11434";
+
+  localStorage.setItem("ollamaHost", host);
+  localStorage.setItem("ollamaPort", port);
+
+  try {
+    await apiPut("/api/config/ollamaHost", { value: host });
+    await apiPut("/api/config/ollamaPort", { value: port });
+  } catch (err) {
+    console.error("Error guardando configuración en servidor:", err);
+  }
+
   closeSettings();
   loadModels();
+}
+
+export async function deleteAllChats(): Promise<void> {
+  const confirmed = confirm("¿Estás seguro de que quieres borrar todos los chats? Esta acción no se puede deshacer.");
+  if (!confirmed) return;
+
+  try {
+    await apiDelete("/api/chats");
+    alert("Todos los chats han sido eliminados.");
+    newChat();
+    refreshChatList();
+  } catch (err) {
+    console.error("Error eliminando chats:", err);
+    alert("No se pudieron eliminar los chats.");
+  }
 }

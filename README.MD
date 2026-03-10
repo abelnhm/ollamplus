@@ -20,6 +20,8 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 - System prompt personalizable
 - Plantillas de prompts
 - Conteo de tokens
+- Configuración de Ollama persistida en SQLite
+- Zona de peligro para borrar todos los chats
 
 ---
 
@@ -216,6 +218,20 @@ CREATE INDEX idx_chats_last_message_at ON chats(last_message_at);
 | `duration_ms` | INTEGER | Duración de la generación (ms) |
 | `tokens_per_second` | REAL | Velocidad de generación |
 
+### Tabla app_config
+
+Almacena configuración global de la aplicación:
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `key` | TEXT | Clave de configuración |
+| `value` | TEXT | Valor guardado |
+| `updated_at` | TEXT | Fecha de última actualización |
+
+**Usos actuales:**
+- `ollamaHost` - Host de Ollama
+- `ollamaPort` - Puerto de Ollama
+
 ---
 
 ## TypeScript en el Proyecto
@@ -357,6 +373,14 @@ const response = await ollamaService.sendMessage(
 | `DELETE` | `/api/chats/:chatId/last-message` | Eliminar último mensaje |
 | `PUT` | `/api/chats/:chatId/messages/:msgId` | Editar mensaje |
 | `POST` | `/api/import-chat` | Importar conversación |
+| `DELETE` | `/api/chats` | Borrar todos los chats |
+
+#### `configRoutes.ts` — API de configuración
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/config/:key` | Obtener valor de configuración |
+| `PUT` | `/api/config/:key` | Guardar valor de configuración |
 
 #### `modelRoutes.ts` — API de modelos
 

@@ -2,11 +2,11 @@
 // Arquitectura en capas: types → state → api/utils → ui → services → app
 import { state } from "./state.js";
 // UI
-import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggle, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
+import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggle, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, deleteAllChatsBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
 import { setMessageCallbacks } from "./ui/messages.js";
 import { openSidebar, closeSidebar } from "./ui/sidebar.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
-import { openSettings, closeSettings, updateUrlPreview, testConnection, saveSettings, } from "./ui/settings.js";
+import { openSettings, closeSettings, updateUrlPreview, testConnection, saveSettings, deleteAllChats, } from "./ui/settings.js";
 // Services
 import { loadSystemPromptFromStorage, saveSystemPromptToStorage, } from "./services/systemPrompt.js";
 import { resetModelParams, initParamSync, initParamTooltips, } from "./services/modelParams.js";
@@ -150,6 +150,7 @@ closeSettingsModal.addEventListener("click", closeSettings);
 cancelSettingsBtn.addEventListener("click", closeSettings);
 saveSettingsBtn.addEventListener("click", saveSettings);
 testConnectionBtn.addEventListener("click", testConnection);
+deleteAllChatsBtn.addEventListener("click", deleteAllChats);
 ollamaHostInput.addEventListener("input", updateUrlPreview);
 ollamaPortInput.addEventListener("input", updateUrlPreview);
 // ─── Event Listeners: Parámetros del modelo ──────────────

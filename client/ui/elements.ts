@@ -35,6 +35,7 @@ export const testResult = $<HTMLElement>("testResult");
 export const saveSettingsBtn = $<HTMLButtonElement>("saveSettings");
 export const cancelSettingsBtn = $<HTMLButtonElement>("cancelSettings");
 export const closeSettingsModal = $<HTMLButtonElement>("closeSettingsModal");
+export const deleteAllChatsBtn = $<HTMLButtonElement>("deleteAllChats");
 
 // ─── Model change modal ─────────────────────────────────
 export const loadModelBtn = $<HTMLButtonElement>("loadModelBtn");
