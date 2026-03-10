@@ -95,6 +95,31 @@ Esto es importante porque:
 
 ---
 
+## Scripts de utilidad
+
+### setup.sh
+
+Script de configuración inicial que:
+1. Verifica Node.js y npm
+2. Crea el directorio `data/`
+3. Copia `.env.example` a `.env`
+4. Instala dependencias
+5. Compila el proyecto
+
+```bash
+./scripts/setup.sh
+```
+
+### reset-db.sh
+
+Elimina la base de datos SQLite para reiniciar desde cero:
+
+```bash
+./scripts/reset-db.sh
+```
+
+---
+
 ## Producción
 
 Para ejecutar en producción:

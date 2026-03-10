@@ -154,6 +154,26 @@ curl -X POST http://192.168.1.100:11434/api/tags
 - Configurar puerto: `11434`
 - URL completa usada: `http://192.168.1.100:11434`
 
+## Variables de entorno
+
+El proyecto usa un archivo `.env` para configuración. Copia `.env.example` a `.env` y ajusta los valores:
+
+```bash
+# Puerto del servidor
+PORT=3000
+
+# URL de Ollama
+OLLAMA_HOST=http://localhost:11434
+
+# Ruta de la base de datos
+DB_PATH=./data/ollama.db
+
+# Entorno
+NODE_ENV=development
+```
+
+Estas variables se cargan automáticamente al iniciar el servidor.
+
 ## Estructura del proyecto
 
 ```
@@ -161,8 +181,11 @@ ollamaUI/
 ├── server/              # Backend (Node.js + Express + SQLite)
 │   └── src/
 │       ├── index.ts    # Entry point
+│       ├── config.ts   # Variables de entorno
 │       ├── routes/     # Endpoints API
 │       ├── services/   # ChatService, OllamaService, database
+│       ├── validators/ # Zod validators
+│       ├── db/        # Migrations
 │       └── models/     # Chat, Message
 │
 ├── client/             # Frontend TypeScript
@@ -173,6 +196,10 @@ ollamaUI/
 │
 ├── shared/            # Tipos compartidos
 │   └── types/         # Interfaces comunes
+│
+├── scripts/           # Scripts de utilidad
+│   ├── setup.sh      # Configuración inicial
+│   └── reset-db.sh   # Resetear base de datos
 │
 └── public/           # Archivos estáticos servidos
 ```

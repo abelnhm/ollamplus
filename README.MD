@@ -458,12 +458,27 @@ export function createChatRoutes(
 # 1. Instalar dependencias
 npm install
 
-# 2. Iniciar en modo desarrollo
+# 2. Copiar archivo de configuración
+cp .env.example .env
+
+# 3. Iniciar en modo desarrollo
 npm run dev
 
-# 3. Abrir en el navegador
+# 4. Abrir en el navegador
 # http://localhost:3000
 ```
+
+### Configuración
+
+El proyecto usa variables de entorno configuradas en `.env`:
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `PORT` | 3000 | Puerto del servidor |
+| `OLLAMA_HOST` | http://localhost:11434 | URL de Ollama |
+| `DB_PATH` | ./data/ollama.db | Ruta de la base de datos |
+| `NODE_ENV` | development | Entorno (development/production) |
+| `LOG_LEVEL` | info | Nivel de logging |
 
 ### Scripts disponibles
 
@@ -491,6 +506,8 @@ npm run dev
 | `ollama` | Cliente de Ollama |
 | `cors` | Cross-Origin |
 | `dotenv` | Variables de entorno |
+| `zod` | Validación de schemas |
+| `pino` | Logging estructurado |
 | `openai` | Integración futura con OpenAI |
 
 ### Desarrollo
