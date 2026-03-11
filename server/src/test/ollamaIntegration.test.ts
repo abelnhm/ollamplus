@@ -1,23 +1,38 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OllamaService } from '../services/OllamaService.js';
 
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+
+const checkOllamaAvailable = async () => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    await fetch(`${OLLAMA_URL}/api/tags`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const isOllamaAvailable = await checkOllamaAvailable();
+
 describe('OllamaService - Integración Real', () => {
   let service: OllamaService;
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
 
   beforeEach(() => {
     service = new OllamaService();
   });
 
-  describe('listModels', () => {
+  (isOllamaAvailable ? describe : describe.skip)('listModels', () => {
     it('should return list of models from running Ollama server', async () => {
-      const models = await service.listModels(ollamaUrl);
+      const models = await service.listModels(OLLAMA_URL);
       
       expect(Array.isArray(models)).toBe(true);
     }, 30000);
 
     it('should have model structure with name, size, modified_at when models exist', async () => {
-      const models = await service.listModels(ollamaUrl);
+      const models = await service.listModels(OLLAMA_URL);
       
       if (models.length > 0) {
         expect(models[0]).toHaveProperty('name');
@@ -36,13 +51,13 @@ describe('OllamaService - Integración Real', () => {
     }, 10000);
   });
 
-  describe('showModel', () => {
+  (isOllamaAvailable ? describe : describe.skip)('showModel', () => {
     it('should return model info from running Ollama server', async () => {
-      const models = await service.listModels(ollamaUrl);
+      const models = await service.listModels(OLLAMA_URL);
       
       if (models.length > 0) {
         const modelName = models[0].name;
-        const info = await service.showModel(ollamaUrl, modelName);
+        const info = await service.showModel(OLLAMA_URL, modelName);
         
         expect(info).toHaveProperty('family');
         expect(info).toHaveProperty('parameter_size');
@@ -51,22 +66,22 @@ describe('OllamaService - Integración Real', () => {
     }, 30000);
 
     it('should extract vram from model_info key', async () => {
-      const models = await service.listModels(ollamaUrl);
+      const models = await service.listModels(OLLAMA_URL);
       
       if (models.length > 0) {
         const modelName = models[0].name;
-        const info = await service.showModel(ollamaUrl, modelName);
+        const info = await service.showModel(OLLAMA_URL, modelName);
         
         expect(typeof info.size_vram).toBe('number');
       }
     }, 30000);
 
     it('should extract context_length from model_info', async () => {
-      const models = await service.listModels(ollamaUrl);
+      const models = await service.listModels(OLLAMA_URL);
       
       if (models.length > 0) {
         const modelName = models[0].name;
-        const info = await service.showModel(ollamaUrl, modelName);
+        const info = await service.showModel(OLLAMA_URL, modelName);
         
         expect(typeof info.context_length).toBe('number');
       }
@@ -74,7 +89,7 @@ describe('OllamaService - Integración Real', () => {
 
     it('should handle error for non-existent model', async () => {
       try {
-        await service.showModel(ollamaUrl, 'non-existent-model-12345');
+        await service.showModel(OLLAMA_URL, 'non-existent-model-12345');
         expect(true).toBe(false);
       } catch (error: any) {
         expect(error.message).toContain('Error al obtener info del modelo');
@@ -88,7 +103,7 @@ describe('OllamaService - Integración Real', () => {
         await service.countTokens(
           'llama3.2',
           [{ role: 'user', content: 'Hello world' }],
-          ollamaUrl
+          OLLAMA_URL
         );
       } catch (error: any) {
         expect(error.message).toContain('Error al contar tokens');
@@ -109,12 +124,12 @@ describe('OllamaService - Integración Real', () => {
     }, 10000);
   });
 
-  describe('sendMessage', () => {
+  (isOllamaAvailable ? describe : describe.skip)('sendMessage', () => {
     it('should send message and receive response from running Ollama server', async () => {
       const result = await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'Say "Hello" and nothing else.' }],
-        ollamaUrl
+        OLLAMA_URL
       );
       
       expect(result).toHaveProperty('response');
@@ -128,7 +143,7 @@ describe('OllamaService - Integración Real', () => {
       const result = await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'What is 1+1?' }],
-        ollamaUrl
+        OLLAMA_URL
       );
       
       expect(result.tokensPerSecond).toBeGreaterThanOrEqual(0);
@@ -138,7 +153,7 @@ describe('OllamaService - Integración Real', () => {
       const result = await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'What is 2+2? Answer only with the number.' }],
-        ollamaUrl,
+        OLLAMA_URL,
         undefined,
         undefined,
         'You are a math tutor.'
@@ -151,7 +166,7 @@ describe('OllamaService - Integración Real', () => {
       const result = await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'Count to 3' }],
-        ollamaUrl,
+        OLLAMA_URL,
         undefined,
         { temperature: 0.5 }
       );
@@ -163,7 +178,7 @@ describe('OllamaService - Integración Real', () => {
       const result = await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'Hi' }],
-        ollamaUrl
+        OLLAMA_URL
       );
       
       expect(result).toHaveProperty('response');
@@ -176,7 +191,7 @@ describe('OllamaService - Integración Real', () => {
       await service.sendMessage(
         'llama3.2',
         [{ role: 'user', content: 'Say "test"' }],
-        ollamaUrl,
+        OLLAMA_URL,
         (chunk) => { chunkReceived = chunk; }
       );
       
