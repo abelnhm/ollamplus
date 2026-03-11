@@ -97,5 +97,17 @@ describe('Message Model', () => {
 
       expect(json.metrics).toBeDefined();
     });
+
+    it('should exclude metrics when all values are non-numeric', () => {
+      const message = new Message({
+        role: 'assistant',
+        content: 'Response',
+        metrics: {} as any
+      });
+
+      const json = message.toJSON();
+
+      expect(json.metrics).toBeUndefined();
+    });
   });
 });
