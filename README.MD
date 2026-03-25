@@ -8,6 +8,7 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 
 **Características:**
 
+- Logo personalizado en la cabecera y sidebar
 - Múltiples conversaciones simultáneas
 - Respuestas en tiempo real (streaming)
 - Selección de modelos de IA instalados
@@ -27,7 +28,7 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 
 ## Estructura del Proyecto
 
-El proyecto sigue una arquitectura de **workspaces simple** con separación clara entre cliente, servidor y tipos compartidos:
+El proyecto sigue una arquitectura de **workspaces simple** con separación clara entre cliente, servidor, tipos compartidos y archivos estáticos:
 
 ```
 OllamPlus/
@@ -50,6 +51,7 @@ OllamPlus/
 │   │   │
 │   │   ├── routes/          # Endpoints HTTP
 │   │   │   ├── chatRoutes.ts
+│   │   │   ├── configRoutes.ts
 │   │   │   └── modelRoutes.ts
 │   │   │
 │   │   ├── validators/      # Validación de inputs con Zod
@@ -58,14 +60,18 @@ OllamPlus/
 │   │   ├── db/              # Base de datos y migraciones
 │   │   │   └── migrations.ts
 │   │   │
+│   │   ├── test/            # Tests unitarios con Vitest
+│   │   │   ├── Chat.test.ts
+│   │   │   ├── Message.test.ts
+│   │   │   └── validators.test.ts
+│   │   │
 │   │   └── middlewares/     # Express middlewares
 │   │       ├── logger.ts    # Logging con Pino
 │   │       └── errorHandler.ts
 │   │
-│   ├── dist/                # Compilados del servidor
-│   └── tsconfig.json
+│   └── dist/                # Compilados del servidor
 │
-├── client/                  # === FRONTEND (TypeScript) ===
+├── client/                  # === FRONTEND (TypeScript - código fuente) ===
 │   ├── src/
 │   │   ├── app.ts          # Entry point
 │   │   ├── types.ts        # Interfaces del cliente
@@ -90,10 +96,7 @@ OllamPlus/
 │   │       ├── importService.ts
 │   │       └── templateService.ts
 │   │
-│   ├── tsconfig.json
-│   └── public/              # Archivos estáticos (HTML, CSS)
-│       ├── index.html
-│       └── style.css
+│   └── tsconfig.json
 │
 ├── shared/                  # === TIPOS COMPARTIDOS ===
 │   ├── types/
@@ -104,21 +107,36 @@ OllamPlus/
 │   ├── dist/               # Compilados (para imports)
 │   └── tsconfig.json
 │
+├── public/                 # === ARCHIVOS ESTÁTICOS (servidos por Express) ===
+│   ├── index.html         # HTML principal
+│   ├── style.css          # Estilos CSS
+│   ├── app.js             # JS compilado del cliente
+│   ├── types.js           # Tipos compilados
+│   ├── state.js           # Estado compilado
+│   ├── api.js             # API compilada
+│   ├── utils.js           # Utilidades compiladas
+│   ├── app.js.map         # Source maps
+│   ├── types.js.map
+│   ├── state.js.map
+│   ├── api.js.map
+│   ├── utils.js.map
+│   │
+│   └── img/               # Imágenes y recursos
+│       ├── logo4.png      # Logo de la aplicación
+│       ├── logo3.png
+│       ├── logo2.png
+│       └── logo1.png
+│
 ├── scripts/                 # Scripts de utilidad
 │   ├── setup.sh           # Configuración inicial
 │   └── reset-db.sh        # Resetear base de datos
 │
-├── public/                 # Archivos JS compilados (servidos por Express)
-│   ├── app.js
-│   ├── types.js
-│   ├── state.js
-│   ├── api.js
-│   ├── utils.js
-│   ├── ui/
-│   └── services/
+├── data/                   # Base de datos SQLite
+│   └── ollama.db
 │
-└── data/                   # Base de datos SQLite
-    └── ollama.db
+├── dist/                   # Compilados adicionales
+├── vitest.config.ts        # Configuración de tests
+└── tsconfig.json          # Configuración base de TypeScript
 ```
 
 ---
