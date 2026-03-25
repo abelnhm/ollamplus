@@ -1,4 +1,4 @@
-# OllamaUI — Chat con IA usando Arquitectura por Capas (TypeScript)
+# OllamPlus — Chat con IA usando Arquitectura por Capas (TypeScript)
 
 ## ¿Qué es este proyecto?
 
@@ -30,7 +30,7 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 El proyecto sigue una arquitectura de **workspaces simple** con separación clara entre cliente, servidor y tipos compartidos:
 
 ```
-ollamaUI/
+OllamPlus/
 ├── package.json              # Dependencias y scripts
 ├── .env.example              # Template de variables de entorno
 │
@@ -193,42 +193,43 @@ CREATE INDEX idx_chats_last_message_at ON chats(last_message_at);
 
 ### Campos del modelo Chat
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | TEXT | UUID único del chat |
-| `title` | TEXT | Título del chat |
-| `model` | TEXT | Modelo de Ollama usado |
-| `instructions` | TEXT | Instrucciones del sistema (system prompt) |
-| `parameters` | TEXT | JSON con parámetros del modelo |
-| `model_info` | TEXT | JSON con información del modelo |
-| `created_at` | TEXT | Fecha de creación (ISO) |
-| `last_message_at` | TEXT | Fecha del último mensaje (ISO) |
-| `pinned` | INTEGER | 1 si está anclado, 0 si no |
+| Campo             | Tipo    | Descripción                               |
+| ----------------- | ------- | ----------------------------------------- |
+| `id`              | TEXT    | UUID único del chat                       |
+| `title`           | TEXT    | Título del chat                           |
+| `model`           | TEXT    | Modelo de Ollama usado                    |
+| `instructions`    | TEXT    | Instrucciones del sistema (system prompt) |
+| `parameters`      | TEXT    | JSON con parámetros del modelo            |
+| `model_info`      | TEXT    | JSON con información del modelo           |
+| `created_at`      | TEXT    | Fecha de creación (ISO)                   |
+| `last_message_at` | TEXT    | Fecha del último mensaje (ISO)            |
+| `pinned`          | INTEGER | 1 si está anclado, 0 si no                |
 
 ### Campos del modelo Message
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | TEXT | UUID único del mensaje |
-| `chat_id` | TEXT | Referencia al chat padre |
-| `role` | TEXT | "user", "assistant" o "system" |
-| `content` | TEXT | Contenido del mensaje |
-| `timestamp` | TEXT | Fecha del mensaje (ISO) |
-| `token_count` | INTEGER | Tokens de la respuesta (solo assistant) |
-| `duration_ms` | INTEGER | Duración de la generación (ms) |
-| `tokens_per_second` | REAL | Velocidad de generación |
+| Campo               | Tipo    | Descripción                             |
+| ------------------- | ------- | --------------------------------------- |
+| `id`                | TEXT    | UUID único del mensaje                  |
+| `chat_id`           | TEXT    | Referencia al chat padre                |
+| `role`              | TEXT    | "user", "assistant" o "system"          |
+| `content`           | TEXT    | Contenido del mensaje                   |
+| `timestamp`         | TEXT    | Fecha del mensaje (ISO)                 |
+| `token_count`       | INTEGER | Tokens de la respuesta (solo assistant) |
+| `duration_ms`       | INTEGER | Duración de la generación (ms)          |
+| `tokens_per_second` | REAL    | Velocidad de generación                 |
 
 ### Tabla app_config
 
 Almacena configuración global de la aplicación:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `key` | TEXT | Clave de configuración |
-| `value` | TEXT | Valor guardado |
+| Campo        | Tipo | Descripción                   |
+| ------------ | ---- | ----------------------------- |
+| `key`        | TEXT | Clave de configuración        |
+| `value`      | TEXT | Valor guardado                |
 | `updated_at` | TEXT | Fecha de última actualización |
 
 **Usos actuales:**
+
 - `ollamaHost` - Host de Ollama
 - `ollamaPort` - Puerto de Ollama
 
@@ -249,11 +250,11 @@ TypeScript añade **tipado estático** a JavaScript. Esto permite:
 
 El proyecto tiene **tres paquetes TypeScript** porque cada uno tiene necesidades diferentes:
 
-| Paquete | Módulos | Salida | Propósito |
-|---------|---------|--------|-----------|
-| `server/` | `Node16` | `server/dist/` | Backend Node.js |
-| `client/` | `ES2022` | `public/` | Frontend navegador |
-| `shared/` | `Node16` | `shared/dist/` | Tipos compartidos |
+| Paquete   | Módulos  | Salida         | Propósito          |
+| --------- | -------- | -------------- | ------------------ |
+| `server/` | `Node16` | `server/dist/` | Backend Node.js    |
+| `client/` | `ES2022` | `public/`      | Frontend navegador |
+| `shared/` | `Node16` | `shared/dist/` | Tipos compartidos  |
 
 ### Tipos compartidos (`shared/`)
 
@@ -343,7 +344,10 @@ Inicializa la base de datos y crea las tablas si no existen. Usa `better-sqlite3
 const ollamaService = new OllamaService();
 
 const models = await ollamaService.listModels("http://localhost:11434");
-const modelInfo = await ollamaService.showModel("llama3.1", "http://localhost:11434");
+const modelInfo = await ollamaService.showModel(
+  "llama3.1",
+  "http://localhost:11434",
+);
 
 const response = await ollamaService.sendMessage(
   "llama3.1",
@@ -359,33 +363,33 @@ const response = await ollamaService.sendMessage(
 
 #### `chatRoutes.ts` — API de chats
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `POST` | `/api/new-chat` | Crear un nuevo chat |
-| `POST` | `/api/chat/:chatId/message` | Enviar mensaje (streaming SSE) |
-| `GET` | `/api/chats` | Listar todos los chats |
-| `GET` | `/api/chats/:chatId` | Obtener un chat por ID |
-| `GET` | `/api/chats/search?q=` | Buscar chats |
-| `PATCH` | `/api/chats/:chatId` | Renombrar chat |
-| `PATCH` | `/api/chats/:chatId/model` | Cambiar modelo |
-| `PATCH` | `/api/chats/:chatId/pin` | Anclar/desanclar |
-| `DELETE` | `/api/chats/:chatId` | Eliminar chat |
-| `DELETE` | `/api/chats/:chatId/last-message` | Eliminar último mensaje |
-| `PUT` | `/api/chats/:chatId/messages/:msgId` | Editar mensaje |
-| `POST` | `/api/import-chat` | Importar conversación |
-| `DELETE` | `/api/chats` | Borrar todos los chats |
+| Método   | Ruta                                 | Descripción                    |
+| -------- | ------------------------------------ | ------------------------------ |
+| `POST`   | `/api/new-chat`                      | Crear un nuevo chat            |
+| `POST`   | `/api/chat/:chatId/message`          | Enviar mensaje (streaming SSE) |
+| `GET`    | `/api/chats`                         | Listar todos los chats         |
+| `GET`    | `/api/chats/:chatId`                 | Obtener un chat por ID         |
+| `GET`    | `/api/chats/search?q=`               | Buscar chats                   |
+| `PATCH`  | `/api/chats/:chatId`                 | Renombrar chat                 |
+| `PATCH`  | `/api/chats/:chatId/model`           | Cambiar modelo                 |
+| `PATCH`  | `/api/chats/:chatId/pin`             | Anclar/desanclar               |
+| `DELETE` | `/api/chats/:chatId`                 | Eliminar chat                  |
+| `DELETE` | `/api/chats/:chatId/last-message`    | Eliminar último mensaje        |
+| `PUT`    | `/api/chats/:chatId/messages/:msgId` | Editar mensaje                 |
+| `POST`   | `/api/import-chat`                   | Importar conversación          |
+| `DELETE` | `/api/chats`                         | Borrar todos los chats         |
 
 #### `configRoutes.ts` — API de configuración
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/config/:key` | Obtener valor de configuración |
-| `PUT` | `/api/config/:key` | Guardar valor de configuración |
+| Método | Ruta               | Descripción                    |
+| ------ | ------------------ | ------------------------------ |
+| `GET`  | `/api/config/:key` | Obtener valor de configuración |
+| `PUT`  | `/api/config/:key` | Guardar valor de configuración |
 
 #### `modelRoutes.ts` — API de modelos
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
+| Método | Ruta          | Descripción                |
+| ------ | ------------- | -------------------------- |
 | `POST` | `/api/models` | Listar modelos disponibles |
 
 ---
@@ -415,25 +419,25 @@ const response = await ollamaService.sendMessage(
 
 ### Módulos del cliente
 
-| Capa | Módulo | Responsabilidad |
-|------|--------|----------------|
-| **Base** | `types.ts` | Interfaces (`ChatJSON`, `MessageJSON`, etc.) |
-| **Base** | `state.ts` | Estado global reactivo |
-| **Base** | `api.ts` | Cliente HTTP genérico |
-| **Base** | `utils.ts` | Utilidades (`formatMarkdown`, `escapeHtml`) |
-| **UI** | `ui/elements.ts` | Referencias DOM |
-| **UI** | `ui/messages.ts` | Renderizado de mensajes, streaming |
-| **UI** | `ui/sidebar.ts` | Sidebar de chats |
-| **UI** | `ui/theme.ts` | Modo oscuro/claro |
-| **UI** | `ui/settings.ts` | Configuración de Ollama |
-| **Servicios** | `services/chatService.ts` | Core: envío, streaming, CRUD |
-| **Servicios** | `services/modelService.ts` | Modelos de Ollama |
-| **Servicios** | `services/modelParams.ts` | Parámetros del modelo |
-| **Servicios** | `services/systemPrompt.ts` | System prompt |
-| **Servicios** | `services/tokenService.ts` | Conteo de tokens |
-| **Servicios** | `services/exportService.ts` | Exportar a MD/JSON/HTML |
-| **Servicios** | `services/importService.ts` | Importar desde otros formatos |
-| **Servicios** | `services/templateService.ts` | Plantillas de prompts |
+| Capa          | Módulo                        | Responsabilidad                              |
+| ------------- | ----------------------------- | -------------------------------------------- |
+| **Base**      | `types.ts`                    | Interfaces (`ChatJSON`, `MessageJSON`, etc.) |
+| **Base**      | `state.ts`                    | Estado global reactivo                       |
+| **Base**      | `api.ts`                      | Cliente HTTP genérico                        |
+| **Base**      | `utils.ts`                    | Utilidades (`formatMarkdown`, `escapeHtml`)  |
+| **UI**        | `ui/elements.ts`              | Referencias DOM                              |
+| **UI**        | `ui/messages.ts`              | Renderizado de mensajes, streaming           |
+| **UI**        | `ui/sidebar.ts`               | Sidebar de chats                             |
+| **UI**        | `ui/theme.ts`                 | Modo oscuro/claro                            |
+| **UI**        | `ui/settings.ts`              | Configuración de Ollama                      |
+| **Servicios** | `services/chatService.ts`     | Core: envío, streaming, CRUD                 |
+| **Servicios** | `services/modelService.ts`    | Modelos de Ollama                            |
+| **Servicios** | `services/modelParams.ts`     | Parámetros del modelo                        |
+| **Servicios** | `services/systemPrompt.ts`    | System prompt                                |
+| **Servicios** | `services/tokenService.ts`    | Conteo de tokens                             |
+| **Servicios** | `services/exportService.ts`   | Exportar a MD/JSON/HTML                      |
+| **Servicios** | `services/importService.ts`   | Importar desde otros formatos                |
+| **Servicios** | `services/templateService.ts` | Plantillas de prompts                        |
 
 ---
 
@@ -496,29 +500,29 @@ npm run dev
 
 El proyecto usa variables de entorno configuradas en `.env`:
 
-| Variable | Default | Descripción |
-|----------|---------|-------------|
-| `PORT` | 3000 | Puerto del servidor |
-| `OLLAMA_HOST` | http://localhost:11434 | URL de Ollama |
-| `DB_PATH` | ./data/ollama.db | Ruta de la base de datos |
-| `NODE_ENV` | development | Entorno (development/production) |
-| `LOG_LEVEL` | info | Nivel de logging |
+| Variable      | Default                | Descripción                      |
+| ------------- | ---------------------- | -------------------------------- |
+| `PORT`        | 3000                   | Puerto del servidor              |
+| `OLLAMA_HOST` | http://localhost:11434 | URL de Ollama                    |
+| `DB_PATH`     | ./data/ollama.db       | Ruta de la base de datos         |
+| `NODE_ENV`    | development            | Entorno (development/production) |
+| `LOG_LEVEL`   | info                   | Nivel de logging                 |
 
 ### Scripts disponibles
 
-| Script | Comando | Descripción |
-|--------|---------|-------------|
-| `dev` | `npm run dev` | Servidor + cliente en watch |
-| `dev:server` | `npm run dev:server` | Solo servidor en watch |
-| `dev:client` | `npm run dev:client` | Solo cliente en watch |
-| `build` | `npm run build` | Compila todo (shared + server + client) |
-| `build:shared` | `npm run build:shared` | Solo tipos compartidos |
-| `build:server` | `npm run build:server` | Solo servidor |
-| `build:client` | `npm run build:client` | Solo cliente |
-| `start` | `npm start` | Producción (`node server/dist/index.js`) |
-| `test` | `npm test` | Ejecutar tests unitarios |
-| `test:watch` | `npm run test:watch` | Ejecutar tests en modo watch |
-| `test:coverage` | `npm run test:coverage` | Ejecutar tests con cobertura |
+| Script          | Comando                 | Descripción                              |
+| --------------- | ----------------------- | ---------------------------------------- |
+| `dev`           | `npm run dev`           | Servidor + cliente en watch              |
+| `dev:server`    | `npm run dev:server`    | Solo servidor en watch                   |
+| `dev:client`    | `npm run dev:client`    | Solo cliente en watch                    |
+| `build`         | `npm run build`         | Compila todo (shared + server + client)  |
+| `build:shared`  | `npm run build:shared`  | Solo tipos compartidos                   |
+| `build:server`  | `npm run build:server`  | Solo servidor                            |
+| `build:client`  | `npm run build:client`  | Solo cliente                             |
+| `start`         | `npm start`             | Producción (`node server/dist/index.js`) |
+| `test`          | `npm test`              | Ejecutar tests unitarios                 |
+| `test:watch`    | `npm run test:watch`    | Ejecutar tests en modo watch             |
+| `test:coverage` | `npm run test:coverage` | Ejecutar tests con cobertura             |
 
 ---
 
@@ -551,6 +555,7 @@ server/src/test/
 ### Cobertura actual
 
 Los tests cubren:
+
 - **Modelos** (Chat, Message): ~100%
 - **Validators** (Zod): 100%
 
@@ -568,30 +573,30 @@ Consulta [TESTING.md](./TESTING.md) para una guía completa sobre cómo escribir
 
 ### Producción
 
-| Paquete | Para qué se usa |
-|---------|-----------------|
-| `express` | Framework web HTTP |
-| `better-sqlite3` | Base de datos SQLite |
-| `ollama` | Cliente de Ollama |
-| `cors` | Cross-Origin |
-| `dotenv` | Variables de entorno |
-| `zod` | Validación de schemas |
-| `pino` | Logging estructurado |
-| `openai` | Integración futura con OpenAI |
+| Paquete          | Para qué se usa               |
+| ---------------- | ----------------------------- |
+| `express`        | Framework web HTTP            |
+| `better-sqlite3` | Base de datos SQLite          |
+| `ollama`         | Cliente de Ollama             |
+| `cors`           | Cross-Origin                  |
+| `dotenv`         | Variables de entorno          |
+| `zod`            | Validación de schemas         |
+| `pino`           | Logging estructurado          |
+| `openai`         | Integración futura con OpenAI |
 
 ### Desarrollo
 
-| Paquete | Para qué se usa |
-|---------|-----------------|
-| `typescript` | Compilador |
-| `tsx` | Ejecutar TS directamente |
-| `concurrently` | Ejecutar múltiples comandos |
-| `vitest` | Framework de testing |
-| `@vitest/coverage-v8` | Cobertura de código |
-| `jsdom` | Simulación del DOM para tests |
-| `@types/node` | Tipos Node.js |
-| `@types/express` | Tipos Express |
-| `@types/better-sqlite3` | Tipos SQLite |
+| Paquete                 | Para qué se usa               |
+| ----------------------- | ----------------------------- |
+| `typescript`            | Compilador                    |
+| `tsx`                   | Ejecutar TS directamente      |
+| `concurrently`          | Ejecutar múltiples comandos   |
+| `vitest`                | Framework de testing          |
+| `@vitest/coverage-v8`   | Cobertura de código           |
+| `jsdom`                 | Simulación del DOM para tests |
+| `@types/node`           | Tipos Node.js                 |
+| `@types/express`        | Tipos Express                 |
+| `@types/better-sqlite3` | Tipos SQLite                  |
 
 ---
 

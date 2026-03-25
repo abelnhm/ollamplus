@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# OllamaUI - Script de configuración inicial
+# OllamPlus - Script de configuración inicial
 
-echo "🔧 Configurando OllamaUI..."
+echo "🔧 Configurando OllamPlus..."
 
 # Verificar Node.js
 if ! command -v node &> /dev/null; then

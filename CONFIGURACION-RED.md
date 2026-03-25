@@ -76,7 +76,7 @@ sudo firewall-cmd --add-port=11434/tcp --permanent
 sudo firewall-cmd --reload
 ```
 
-### 4. En la aplicación OllamaUI
+### 4. En la aplicación OllamPlus
 
 1. Haz clic en el botón de configuración (⚙️) en la esquina superior derecha
 2. Ingresa la IP del servidor (ejemplo: `192.168.1.100`)
@@ -149,7 +149,7 @@ curl -X POST http://192.168.1.100:11434/api/tags
 
 **Cliente (navegador):**
 
-- Abrir OllamaUI: http://localhost:3000
+- Abrir OllamPlus: http://localhost:3000
 - Configurar host: `192.168.1.100`
 - Configurar puerto: `11434`
 - URL completa usada: `http://192.168.1.100:11434`
@@ -177,7 +177,7 @@ Estas variables se cargan automáticamente al iniciar el servidor.
 ## Estructura del proyecto
 
 ```
-ollamaUI/
+OllamPlus/
 ├── server/              # Backend (Node.js + Express + SQLite)
 │   └── src/
 │       ├── index.ts    # Entry point

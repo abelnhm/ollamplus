@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# OllamaUI - Script para resetear la base de datos
+# OllamPlus - Script para resetear la base de datos
 
 DB_PATH="./data/ollama.db"
 
