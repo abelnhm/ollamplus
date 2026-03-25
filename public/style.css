@@ -159,9 +159,15 @@ body::before {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
   min-width: 0;
+}
+
+.app-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .chat-header h1 {
@@ -1355,6 +1361,14 @@ body::before {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid hsl(var(--border));
+  gap: 12px;
+}
+
+.sidebar-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .sidebar-header h2 {
@@ -1364,6 +1378,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
 }
 
 .sidebar-icon {
