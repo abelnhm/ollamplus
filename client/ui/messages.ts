@@ -8,6 +8,7 @@ import {
   formatTokenCount,
 } from "../utils.js";
 import { chatMessages, scrollToBottom } from "./elements.js";
+import { speakText, stopSpeaking, isSpeaking } from "../services/ttsService.js";
 
 // Callbacks para romper dependencias circulares con chatService
 let onRegenerateCallback: (() => void) | null = null;
@@ -142,6 +143,31 @@ export function addRegenerateButton(wrapper: HTMLDivElement): void {
   wrapper.querySelector(".message-content")!.appendChild(btn);
 }
 
+export function addSpeakButton(wrapper: HTMLDivElement): void {
+  const btn = document.createElement("button");
+  btn.className = "speak-msg-btn";
+  btn.title = "Reproducir en audio";
+  btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+
+  const getTextContent = (): string => {
+    const bodyEl = wrapper.querySelector(".message-body");
+    return bodyEl?.textContent || "";
+  };
+
+  btn.addEventListener("click", () => {
+    if (isSpeaking()) {
+      stopSpeaking();
+    } else {
+      const text = getTextContent();
+      if (text) {
+        speakText(text, btn);
+      }
+    }
+  });
+
+  wrapper.querySelector(".message-content")!.appendChild(btn);
+}
+
 export function addEditButton(
   wrapper: HTMLDivElement,
   originalContent: string,
@@ -258,6 +284,7 @@ export function addMessageToUI(
   if (role === "assistant") {
     addCopyButton(wrapper);
     addRegenerateButton(wrapper);
+    addSpeakButton(wrapper);
     injectCodeCopyButtons(wrapper);
   }
   scrollToBottom();
@@ -297,11 +324,16 @@ export function updateStreamingMessage(
   }
   if (streamEl) {
     streamEl.style.display = "";
-    // Si el texto es vacío, mostrar mensaje alternativo
     const safeText =
       text && text.trim() ? text : "No se pudo generar respuesta.";
     streamEl.innerHTML = formatMarkdown(safeText);
     injectCodeCopyButtons(streamEl);
+    
+    if (!wrapper.querySelector(".copy-msg-btn")) {
+      addCopyButton(wrapper);
+      addRegenerateButton(wrapper);
+      addSpeakButton(wrapper);
+    }
   }
   scrollToBottom();
 }
