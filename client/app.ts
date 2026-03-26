@@ -87,6 +87,7 @@ import {
   initParamTooltips,
 } from "./services/modelParams.js";
 import { loadModels } from "./services/modelService.js";
+import { initFileAttachment } from "./services/fileAttachment.js";
 import {
   sendMessage,
   regenerateLastResponse,
@@ -375,6 +376,7 @@ document.addEventListener("keydown", (e) => {
 
 // ─── Inicialización ──────────────────────────────────────
 initTheme();
+initFileAttachment();
 loadModels();
 refreshChatList();
 initParamSync();

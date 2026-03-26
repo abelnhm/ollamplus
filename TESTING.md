@@ -17,7 +17,7 @@ Este documento te enseña todo sobre testing en el proyecto OllamPlus, desde lo 
 
 ---
 
-## Fundamentos de Testing
+## 1. Fundamentos de Testing
 
 ### ¿Por qué hacer tests?
 
@@ -48,6 +48,12 @@ Prueban cómo múltiples componentes trabajan juntos. Usan mocks para simular de
 Prueban el sistema completo desde la interfaz hasta la base de datos. Requieren servicios reales.
 
 **Ejemplo**: Probar que Ollama responde correctamente a una solicitud de chat
+
+#### Client-Side Tests (Tests del Cliente)
+
+Prueban código que se ejecuta en el navegador. Requieren un entorno que simule el DOM (jsdom).
+
+**Ejemplo**: Probar funciones de utilidad como `escapeHtml()` o el servicio TTS
 
 ---
 
@@ -92,7 +98,7 @@ Vitest incluye funciones para crear mocks:
 
 ### Ubicación
 
-Los tests se encuentran en: `server/src/test/`
+Los tests se encuentran en: `server/src/test/` y `client/`
 
 ```
 server/src/test/
@@ -106,7 +112,14 @@ server/src/test/
 ├── ChatService.test.ts       # Tests del servicio (Integration tests)
 ├── integration.test.ts       # Tests de API con supertest (Integration tests)
 └── ollamaIntegration.test.ts # Tests con Ollama real (E2E tests)
+
+client/                       # Tests del lado del cliente
+├── state.test.ts             # Tests del estado global
+├── ttsService.test.ts        # Tests del servicio TTS
+└── ttsVoices.test.ts         # Tests de selección de voces
 ```
+
+> **Nota**: Los tests del cliente requieren entorno jsdom (configurado en `vitest.config.ts`) para simular el DOM del navegador.
 
 ### Anatomía de un Test
 
@@ -498,6 +511,119 @@ describe("countTokens", () => {
   });
 });
 ```
+
+### 9. Client-Side Tests (Cliente) - state.test.ts, ttsService.test.ts
+
+Los tests del cliente verifican código que se ejecuta en el navegador. Usan **jsdom** para simular el DOM.
+
+**Ejemplo - state.test.ts:**
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
+// Configurar jsdom global para el browser
+const { JSDOM } = await import("jsdom");
+const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
+global.window = dom.window as Window & typeof globalThis;
+global.document = dom.window.document;
+global.navigator = dom.window.navigator;
+
+describe("Client State", () => {
+  beforeEach(() => {
+    // Reset state
+    state.currentChatId = null;
+    state.isStreaming = false;
+  });
+
+  describe("setCurrentChat", () => {
+    it("should set current chat id", () => {
+      setCurrentChat("chat-123");
+      expect(state.currentChatId).toBe("chat-123");
+    });
+
+    it("should clear previous chat when setting new one", () => {
+      state.currentChatId = "chat-1";
+      setCurrentChat("chat-2");
+      expect(state.currentChatId).toBe("chat-2");
+    });
+  });
+});
+```
+
+**Ejemplo - ttsService.test.ts:**
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
+// Simular Web Speech API
+global.speechSynthesis = {
+  cancel: vi.fn(),
+  speak: vi.fn(),
+  speaking: false,
+  paused: false,
+  pending: false,
+};
+
+global.SpeechSynthesisUtterance = vi.fn().mockImplementation((text) => ({
+  text,
+  lang: "es-ES",
+  rate: 1,
+  pitch: 1,
+  volume: 1,
+  onend: null,
+  onerror: null,
+  voice: null,
+}));
+
+describe("TTS Service", () => {
+  describe("speakText", () => {
+    it("should cancel previous speech before speaking", () => {
+      speakText("Hello");
+      expect(speechSynthesis.cancel).toHaveBeenCalled();
+    });
+
+    it("should set the correct language based on text", () => {
+      speakText("Hola mundo");
+      expect(global.SpeechSynthesisUtterance).toHaveBeenCalledWith(
+        expect.stringContaining("Hola")
+      );
+    });
+
+    it("should use selected voice when available", () => {
+      state.ttsVoice = "Spanish Voice";
+      speakText("Test");
+      expect(speechSynthesis.speak).toHaveBeenCalled();
+    });
+  });
+
+  describe("stopSpeaking", () => {
+    it("should cancel current speech", () => {
+      stopSpeaking();
+      expect(speechSynthesis.cancel).toHaveBeenCalled();
+    });
+  });
+});
+```
+
+**Configuración necesaria (vitest.config.ts):**
+
+```typescript
+export default defineConfig({
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./client/test/setup.ts"],
+  },
+  // ...
+});
+```
+
+**Técnicas usadas:**
+
+- **jsdom**: Simula el DOM del navegador
+- **Global window/document**: Establer APIs del navegador
+- **Mocks de SpeechSynthesis**: Simula la API de voz del navegador
+- **vi.fn()**: Crea funciones simuladas para espiar comportamiento
 
 ---
 

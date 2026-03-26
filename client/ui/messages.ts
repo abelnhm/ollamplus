@@ -6,6 +6,7 @@ import {
   formatDuration,
   formatMarkdown,
   formatTokenCount,
+  escapeHtml,
 } from "../utils.js";
 import { chatMessages, scrollToBottom } from "./elements.js";
 import { speakText, stopSpeaking, isSpeaking } from "../services/ttsService.js";
@@ -151,7 +152,24 @@ export function addSpeakButton(wrapper: HTMLDivElement): void {
 
   const getTextContent = (): string => {
     const bodyEl = wrapper.querySelector(".message-body");
-    return bodyEl?.textContent || "";
+    if (!bodyEl) return "";
+    
+    const clone = bodyEl.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll("code, pre").forEach(el => el.remove());
+    
+    let text = clone.textContent || "";
+    
+    text = text.replace(/\*\*([^*]+)\*\*/g, "$1");
+    text = text.replace(/\*([^*]+)\*/g, "$1");
+    text = text.replace(/`([^`]+)`/g, "$1");
+    text = text.replace(/^#{1,6}\s+/gm, "");
+    text = text.replace(/^\s*[-*+]\s+/gm, "");
+    text = text.replace(/^\s*\d+\.\s+/gm, "");
+    text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+    text = text.replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1");
+    text = text.replace(/^\s*[-=_]{3,}\s*$/gm, "");
+    
+    return text.trim();
   };
 
   btn.addEventListener("click", () => {
@@ -191,7 +209,7 @@ function startEditMessage(
   const contentEl = wrapper.querySelector(".message-content") as HTMLDivElement;
   const savedHtml = contentEl.innerHTML;
 
-  contentEl.innerHTML = `<strong>👤 Tú:</strong>`;
+  contentEl.innerHTML = `<strong>👤 Usuario</strong>`;
   const textarea = document.createElement("textarea");
   textarea.className = "edit-msg-textarea";
   textarea.value = originalContent;
@@ -260,6 +278,7 @@ export function addMessageToUI(
   role: string,
   content: string,
   metadata: MessageRenderMeta = {},
+  attachedFileName?: string | null,
 ): HTMLDivElement {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${role}`;
@@ -269,11 +288,21 @@ export function addMessageToUI(
   const inner = document.createElement("div");
   inner.className = "message-content";
 
-  const label = role === "user" ? "👤 Tú" : "🤖 Asistente";
+  const label = role === "user" ? "👤 Usuario" : "🤖 Asistente";
+  let fileIndicator = "";
+  if (role === "user" && attachedFileName) {
+    fileIndicator = `<span class="file-attachment-indicator">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+      <span class="attached-file-name">${escapeHtml(attachedFileName)}</span>
+    </span>`;
+  }
   // Si el contenido está vacío, mostrar mensaje alternativo
   const safeContent =
     content && content.trim() ? content : "No se pudo generar respuesta.";
-  inner.innerHTML = `<strong>${label}:</strong><div class="message-body">${formatMarkdown(safeContent)}</div>`;
+  inner.innerHTML = `<strong>${label}:</strong>${fileIndicator}<div class="message-body">${formatMarkdown(safeContent)}</div>`;
   wrapper.appendChild(inner);
   updateMessageMetadata(wrapper, role, content, metadata);
 
@@ -297,7 +326,7 @@ export function createStreamingMessage(): HTMLDivElement {
 
   const inner = document.createElement("div");
   inner.className = "message-content";
-  inner.innerHTML = `<strong>🤖 Asistente:</strong>
+  inner.innerHTML = `<strong>🤖 Asistente</strong>
     <div class="thinking-indicator">
       <div class="thinking-spinner"></div>
       <span>Pensando...</span>
@@ -328,7 +357,7 @@ export function updateStreamingMessage(
       text && text.trim() ? text : "No se pudo generar respuesta.";
     streamEl.innerHTML = formatMarkdown(safeText);
     injectCodeCopyButtons(streamEl);
-    
+
     if (!wrapper.querySelector(".copy-msg-btn")) {
       addCopyButton(wrapper);
       addRegenerateButton(wrapper);

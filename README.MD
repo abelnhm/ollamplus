@@ -23,6 +23,14 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 - Conteo de tokens
 - Configuración de Ollama persistida en SQLite
 - Zona de peligro para borrar todos los chats
+- **Texto a voz (TTS)** - Reproducir respuestas en audio
+  - Botón de lectura en cada mensaje del asistente
+  - Selector de voz en configuración
+  - Control de velocidad de lectura (0.5x - 1.5x)
+  - Auto-hablar respuestas (toggle en el chat)
+- **Archivos adjuntos** - Adjuntar archivos de texto/código a los mensajes
+  - Icono y nombre del archivo junto al mensaje enviado
+  - Vista previa collapsible para archivos de código
 
 ---
 
@@ -440,15 +448,15 @@ const response = await ollamaService.sendMessage(
 | Capa          | Módulo                        | Responsabilidad                              |
 | ------------- | ----------------------------- | -------------------------------------------- |
 | **Base**      | `types.ts`                    | Interfaces (`ChatJSON`, `MessageJSON`, etc.) |
-| **Base**      | `state.ts`                    | Estado global reactivo                       |
+| **Base**      | `state.ts`                    | Estado global reactivo (incluye config TTS)   |
 | **Base**      | `api.ts`                      | Cliente HTTP genérico                        |
 | **Base**      | `utils.ts`                    | Utilidades (`formatMarkdown`, `escapeHtml`)  |
 | **UI**        | `ui/elements.ts`              | Referencias DOM                              |
 | **UI**        | `ui/messages.ts`              | Renderizado de mensajes, streaming           |
 | **UI**        | `ui/sidebar.ts`               | Sidebar de chats                             |
 | **UI**        | `ui/theme.ts`                 | Modo oscuro/claro                            |
-| **UI**        | `ui/settings.ts`              | Configuración de Ollama                      |
-| **Servicios** | `services/chatService.ts`     | Core: envío, streaming, CRUD                 |
+| **UI**        | `ui/settings.ts`              | Configuración de Ollama + TTS                |
+| **Servicios** | `services/chatService.ts`     | Core: envío, streaming, CRUD                |
 | **Servicios** | `services/modelService.ts`    | Modelos de Ollama                            |
 | **Servicios** | `services/modelParams.ts`     | Parámetros del modelo                        |
 | **Servicios** | `services/systemPrompt.ts`    | System prompt                                |
@@ -456,6 +464,9 @@ const response = await ollamaService.sendMessage(
 | **Servicios** | `services/exportService.ts`   | Exportar a MD/JSON/HTML                      |
 | **Servicios** | `services/importService.ts`   | Importar desde otros formatos                |
 | **Servicios** | `services/templateService.ts` | Plantillas de prompts                        |
+| **Servicios** | `services/ttsService.ts`      | Texto a voz (Web Speech API)                 |
+| **Servicios** | `services/ttsVoices.ts`      | Gestión de voces disponibles                 |
+| **Servicios** | `services/fileAttachment.ts` | Adjuntar archivos al chat                   |
 
 ---
 
@@ -568,6 +579,11 @@ server/src/test/
 ├── Chat.test.ts          # Tests del modelo Chat
 ├── Message.test.ts      # Tests del modelo Message
 └── validators.test.ts   # Tests de validadores Zod
+
+client/
+├── state.test.ts        # Tests del estado global
+├── ttsService.test.ts   # Tests del servicio TTS
+└── ttsVoices.test.ts    # Tests de selección de voces
 ```
 
 ### Cobertura actual
@@ -576,6 +592,8 @@ Los tests cubren:
 
 - **Modelos** (Chat, Message): ~100%
 - **Validators** (Zod): 100%
+- **Estado cliente** (state.ts): Funciones de gestión
+- **TTS** (servicio + voces): Funcionalidad de texto a voz
 
 ### Añadir nuevos tests
 

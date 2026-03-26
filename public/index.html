@@ -119,7 +119,7 @@
           <line x1="1" y1="9" x2="4" y2="9"></line>
           <line x1="1" y1="14" x2="4" y2="14"></line>
         </svg>
-        <span class="model-label">Modelo:</span>
+
         <select id="modelSelector" class="model-selector">
           <option value="">Cargando modelos...</option>
         </select>
@@ -137,7 +137,6 @@
               <line x1="9" y1="8" x2="15" y2="8"></line>
               <line x1="17" y1="16" x2="23" y2="16"></line>
             </svg>
-            <span class="panel-toggle-text">Parámetros</span>
           </button>
           <button id="systemPromptToggle" class="panel-toggle-btn" title="Instrucciones del sistema">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -146,7 +145,6 @@
               <line x1="16" y1="13" x2="8" y2="13"></line>
               <line x1="16" y1="17" x2="8" y2="17"></line>
             </svg>
-            <span class="panel-toggle-text">Instrucciones</span>
           </button>
         </div>
         <button id="loadModelBtn" class="load-model-btn" title="Aplicar modelo">
@@ -315,7 +313,7 @@
     <div class="chat-messages" id="chatMessages">
       <div class="message assistant">
         <div class="message-content">
-          <strong>🤖 Asistente:</strong>
+          <strong>🤖 Asistente</strong>
           <p>¡Hola! Soy tu asistente de IA. Selecciona un modelo y ¿en qué puedo ayudarte hoy?</p>
         </div>
       </div>
@@ -330,6 +328,17 @@
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           </svg>
         </button>
+        <button id="attachFileBtn" class="icon-btn attach-file-btn" title="Adjuntar archivo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+            <path
+              d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+            </path>
+          </svg>
+        </button>
+        <div id="attachedFilePreview" class="attached-file-preview" style="display:none;">
+          <span id="attachedFileName"></span>
+          <button id="removeAttachedFile" class="remove-file-btn" title="Quitar archivo">×</button>
+        </div>
         <button id="promptTemplatesBtn" class="icon-btn prompt-templates-btn" title="Plantillas de prompt">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -342,6 +351,8 @@
             plantillas</button>
         </div>
         <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
+        <input type="file" id="fileInput" class="file-input"
+          accept=".txt,.md,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.csv,.log,.sh,.bat,.sql">
       </div>
       <button id="sendBtn" class="send-btn">
         <svg id="sendIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

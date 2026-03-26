@@ -13,7 +13,9 @@ export function speakText(text: string, btn?: HTMLButtonElement): void {
       currentButton = null;
     }
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    let textToSpeak = stripCodeForSpeech(text);
+    
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
     const selectedVoice = getSelectedVoice();
     if (selectedVoice) {
@@ -73,6 +75,29 @@ function detectLanguage(text: string): string {
     return "es-ES";
   }
   return "en-US";
+}
+
+function stripCodeForSpeech(htmlText: string): string {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlText;
+  
+  tempDiv.querySelectorAll("code, pre").forEach((el) => {
+    el.remove();
+  });
+  
+  let text = tempDiv.textContent || "";
+  
+  text = text.replace(/\*\*([^*]+)\*\*/g, "$1");
+  text = text.replace(/\*([^*]+)\*/g, "$1");
+  text = text.replace(/`([^`]+)`/g, "$1");
+  text = text.replace(/^#{1,6}\s+/gm, "");
+  text = text.replace(/^\s*[-*+]\s+/gm, "");
+  text = text.replace(/^\s*\d+\.\s+/gm, "");
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  text = text.replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1");
+  text = text.replace(/^\s*[-=_]{3,}\s*$/gm, "");
+  
+  return text.trim();
 }
 
 export function isSpeaking(): boolean {

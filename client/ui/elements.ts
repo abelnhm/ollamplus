@@ -15,6 +15,11 @@ export const modelStatus = $<HTMLSpanElement>("modelStatus");
 export const sidebar = $<HTMLDivElement>("sidebar");
 export const sidebarOverlay = $<HTMLDivElement>("sidebarOverlay");
 export const chatsList = $<HTMLDivElement>("chatsList");
+export const fileInput = $<HTMLInputElement>("fileInput");
+export const attachFileBtn = $<HTMLButtonElement>("attachFileBtn");
+export const attachedFilePreview = $<HTMLDivElement>("attachedFilePreview");
+export const attachedFileName = $<HTMLSpanElement>("attachedFileName");
+export const removeAttachedFile = $<HTMLButtonElement>("removeAttachedFile");
 
 // ─── Header buttons ──────────────────────────────────────
 export const toggleSidebarBtn = $<HTMLButtonElement>("toggleSidebarBtn");

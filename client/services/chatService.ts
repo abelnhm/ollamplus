@@ -41,6 +41,12 @@ import { loadModelInfo } from "./modelService.js";
 import { getModelOptions } from "./modelParams.js";
 import { getSystemPrompt } from "./systemPrompt.js";
 import { speakText } from "./ttsService.js";
+import {
+  formatFileContentForPrompt,
+  formatFileContentForDisplay,
+  clearAttachedFile,
+  getAttachedFile,
+} from "./fileAttachment.js";
 
 // ==================================== Streaming helpers ====================================
 function startStreamingUI(): void {
@@ -178,13 +184,26 @@ async function readSSEStream(
 // ==================================== Envío de mensaje ====================================
 export async function sendMessage(): Promise<void> {
   const content = messageInput.value.trim();
-  if (!content || state.isStreaming) return;
+  if (!content && !getAttachedFile()) {
+    return;
+  }
+  if (state.isStreaming) return;
 
   const model = modelSelector.value;
   if (!model) {
     alert("Selecciona un modelo primero.");
     return;
   }
+
+  let finalContent = content;
+  const attachedFile = getAttachedFile();
+  const fileName = attachedFile?.name || null;
+  if (attachedFile) {
+    finalContent = `${content}\n\n${formatFileContentForPrompt()}`;
+  }
+
+  // Limpiar archivo adjunto después de preparar el mensaje
+  clearAttachedFile();
 
   // Si el chat activo tiene un modelo no local (importado), asignar el modelo seleccionado
   if (
@@ -225,11 +244,13 @@ export async function sendMessage(): Promise<void> {
     }
   }
 
-  // Mostrar mensaje del usuario
-  const userWrapper = addMessageToUI("user", content, {
+  // Mostrar mensaje del usuario con archivo adjunto
+  const userMessageContent = content || "";
+
+  const userWrapper = addMessageToUI("user", userMessageContent, {
     timestamp: new Date().toISOString(),
-    metrics: { tokenCount: estimateTokensFromText(content) },
-  });
+    metrics: { tokenCount: estimateTokensFromText(finalContent) },
+  }, fileName);
   messageInput.value = "";
   messageInput.style.height = "auto";
 
@@ -239,21 +260,21 @@ export async function sendMessage(): Promise<void> {
 
   const result = await readSSEStream(
     state.currentChatId!,
-    content,
+    finalContent,
     streamWrapper,
     state.abortController!.signal,
   );
 
   if (result.userMessage) {
-    updateMessageMetadata(userWrapper, "user", content, {
+    updateMessageMetadata(userWrapper, "user", finalContent, {
       id: result.userMessage.id,
       timestamp: result.userMessage.timestamp,
       metrics: result.userMessage.metrics || {
-        tokenCount: estimateTokensFromText(content),
+        tokenCount: estimateTokensFromText(finalContent),
       },
     });
   } else if (result.userMessageId) {
-    updateMessageMetadata(userWrapper, "user", content, {
+    updateMessageMetadata(userWrapper, "user", finalContent, {
       id: result.userMessageId,
     });
   }
@@ -266,7 +287,12 @@ export async function sendMessage(): Promise<void> {
       }
     : buildAssistantFallbackMeta(result, streamStartedAt);
 
-  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
+  updateMessageMetadata(
+    streamWrapper,
+    "assistant",
+    result.fullText,
+    assistantMeta,
+  );
 
   if (result.tokenUsage) {
     updateTokenUsage(
@@ -310,7 +336,12 @@ export async function regenerateLastResponse(): Promise<void> {
       }
     : buildAssistantFallbackMeta(result, streamStartedAt);
 
-  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
+  updateMessageMetadata(
+    streamWrapper,
+    "assistant",
+    result.fullText,
+    assistantMeta,
+  );
 
   if (result.tokenUsage) {
     updateTokenUsage(
@@ -351,7 +382,7 @@ export async function confirmEditMessage(
 
   // Re-renderizar el mensaje editado
   const contentEl = wrapper.querySelector(".message-content") as HTMLDivElement;
-  contentEl.innerHTML = `<strong>Tú:</strong><div class="message-body">${formatMarkdown(newContent)}</div>`;
+  contentEl.innerHTML = `<strong>Usuario</strong><div class="message-body">${formatMarkdown(newContent)}</div>`;
   updateMessageMetadata(wrapper, "user", newContent, {
     id: updatedUserMessage?.id || msgId,
     timestamp: updatedUserMessage?.timestamp || wrapper.dataset.timestamp,
@@ -380,7 +411,12 @@ export async function confirmEditMessage(
       }
     : buildAssistantFallbackMeta(result, streamStartedAt);
 
-  updateMessageMetadata(streamWrapper, "assistant", result.fullText, assistantMeta);
+  updateMessageMetadata(
+    streamWrapper,
+    "assistant",
+    result.fullText,
+    assistantMeta,
+  );
 
   if (result.tokenUsage) {
     updateTokenUsage(
@@ -414,7 +450,8 @@ export async function refreshChatList(): Promise<void> {
     if (pinned.length > 0) {
       const pinnedHeader = document.createElement("div");
       pinnedHeader.className = "chats-section-header";
-      pinnedHeader.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Anclados';
+      pinnedHeader.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Anclados';
       chatsList.appendChild(pinnedHeader);
       pinned.forEach((chat) => chatsList.appendChild(createChatItem(chat)));
     }
@@ -615,11 +652,7 @@ export function newChat(): void {
   chatMessages.innerHTML = `
     <div class="message assistant">
       <div class="message-content">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:inline-block;margin-right:6px;">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 8v8m-4-4h8"></path>
-        </svg>
+        🤖
         <strong style="display:inline-flex;align-items:center;gap:6px;">Asistente</strong>
         <p>¡Hola! Soy tu asistente de IA. ${modelInfo}</p>
       </div>
@@ -737,4 +770,3 @@ export function closeModelChange(): void {
   }
   state.pendingModel = null;
 }
-
