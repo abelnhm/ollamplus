@@ -16,7 +16,7 @@ import {
   importBtn,
   clearBtn,
   settingsBtn,
-  darkModeToggle,
+  darkModeToggleSetting,
   modelParamsToggle,
   modelParamsPanel,
   enableModelParams,
@@ -268,7 +268,14 @@ importDropZone.addEventListener("drop", (e) => {
 });
 
 // ─── Event Listeners: Tema y configuración ───────────────
-darkModeToggle.addEventListener("click", toggleTheme);
+darkModeToggleSetting.addEventListener("change", () => {
+  const isChecked = darkModeToggleSetting.checked;
+  const isCurrentlyDark = document.body.classList.contains("dark-mode");
+  
+  if ((isChecked && !isCurrentlyDark) || (!isChecked && isCurrentlyDark)) {
+    toggleTheme();
+  }
+});
 settingsBtn.addEventListener("click", openSettings);
 closeSettingsModal.addEventListener("click", closeSettings);
 cancelSettingsBtn.addEventListener("click", closeSettings);
@@ -327,14 +334,13 @@ cancelTemplateBtn.addEventListener("click", closeTemplateModal);
 saveTemplateBtn.addEventListener("click", addCustomTemplate);
 
 // ─── Event Listeners: Auto Speak ───────────────────────────
-autoSpeakToggleBtn.addEventListener("click", () => {
-  state.autoSpeak = !state.autoSpeak;
+autoSpeakToggleBtn.addEventListener("change", () => {
+  state.autoSpeak = autoSpeakToggleBtn.checked;
   localStorage.setItem("autoSpeak", state.autoSpeak.toString());
-  autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
 });
 
-// Inicializar estado del botón
-autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+// Inicializar estado del checkbox
+autoSpeakToggleBtn.checked = state.autoSpeak;
 
 // ─── Event Listeners: TTS Speed ──────────────────────────────
 ttsSpeedRange.addEventListener("input", () => {

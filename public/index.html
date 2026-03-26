@@ -43,6 +43,17 @@
     <div class="chats-list" id="chatsList">
       <div class="no-chats">No hay chats guardados</div>
     </div>
+    <div class="sidebar-footer">
+      <button id="settingsBtn" class="sidebar-settings-btn" title="Configuración">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+        <span>Configuración</span>
+      </button>
+    </div>
   </div>
 
   <!-- Overlay para cerrar sidebar en móvil -->
@@ -62,23 +73,10 @@
         <h1>OllamPlus</h1>
       </div>
       <div class="header-buttons">
-        <button id="settingsBtn" class="icon-btn" title="Configuración">
+        <button id="clearBtn" class="icon-btn" title="Limpiar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </button>
-        <button id="darkModeToggle" class="icon-btn" title="Cambiar tema">
-          <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-        <button id="newChatBtn" class="icon-btn" title="Nueva conversación">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
           </svg>
         </button>
         <button id="exportBtn" class="icon-btn" title="Exportar">
@@ -95,10 +93,10 @@
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
         </button>
-        <button id="clearBtn" class="icon-btn" title="Limpiar">
+        <button id="newChatBtn" class="icon-btn" title="Nueva conversación">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </button>
       </div>
@@ -153,7 +151,19 @@
           </svg>
           <span class="load-model-text">Cargar</span>
         </button>
-
+      </div>
+      <div class="model-selector-footer">
+        <label class="auto-speak-toggle" title="Auto reproducir audio">
+          <input type="checkbox" id="autoSpeakToggleBtn">
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+          <svg class="toggle-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <span class="toggle-label-text">Auto audio</span>
+        </label>
       </div>
       <!-- Panel de parámetros del modelo -->
       <div id="modelParamsPanel" class="collapsible-panel" style="display:none">
@@ -321,13 +331,7 @@
 
     <div class="chat-input-container">
       <div id="resizeHandle" class="resize-handle"></div>
-      <div class="input-row">
-        <button id="autoSpeakToggleBtn" class="icon-btn auto-speak-btn" title="Reproducción automática de audio">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        </button>
+      <div class="input-toolbar">
         <button id="attachFileBtn" class="icon-btn attach-file-btn" title="Adjuntar archivo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
             <path
@@ -350,6 +354,8 @@
           <button id="manageTemplatesBtn" class="btn-secondary" style="width:100%;margin-top:8px;">Gestionar
             plantillas</button>
         </div>
+      </div>
+      <div class="input-row">
         <textarea id="messageInput" class="message-input" placeholder="Escribe tu mensaje aquí..." rows="1"></textarea>
         <input type="file" id="fileInput" class="file-input"
           accept=".txt,.md,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.csv,.log,.sh,.bat,.sql">
@@ -409,6 +415,18 @@
             Probar Conexión
           </button>
           <small class="help-text" id="testResult"></small>
+        </div>
+        <div class="settings-section">
+          <div class="settings-toggle-row">
+            <div class="settings-toggle-info">
+              <label for="darkModeToggleSetting" class="settings-toggle-label">Modo oscuro</label>
+              <small class="help-text">Activar el tema oscuro de la aplicación</small>
+            </div>
+            <label class="settings-switch">
+              <input type="checkbox" id="darkModeToggleSetting">
+              <span class="settings-switch-slider"></span>
+            </label>
+          </div>
         </div>
         <div class="settings-section">
           <label for="ttsVoiceSelect">Voz para reproducción de audio</label>

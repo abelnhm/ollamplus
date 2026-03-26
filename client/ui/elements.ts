@@ -7,7 +7,7 @@ const $ = <T extends HTMLElement>(id: string) =>
 export const chatMessages = $<HTMLDivElement>("chatMessages");
 export const messageInput = $<HTMLTextAreaElement>("messageInput");
 export const sendBtn = $<HTMLButtonElement>("sendBtn");
-export const autoSpeakToggleBtn = $<HTMLButtonElement>("autoSpeakToggleBtn");
+export const autoSpeakToggleBtn = $<HTMLInputElement>("autoSpeakToggleBtn");
 export const sendIcon = $<HTMLElement>("sendIcon");
 export const sendText = $<HTMLSpanElement>("sendText");
 export const modelSelector = $<HTMLSelectElement>("modelSelector");
@@ -29,7 +29,7 @@ export const exportBtn = $<HTMLButtonElement>("exportBtn");
 export const importBtn = $<HTMLButtonElement>("importBtn");
 export const clearBtn = $<HTMLButtonElement>("clearBtn");
 export const settingsBtn = $<HTMLButtonElement>("settingsBtn");
-export const darkModeToggle = $<HTMLButtonElement>("darkModeToggle");
+export const darkModeToggleSetting = $<HTMLInputElement>("darkModeToggleSetting");
 
 // ─── Settings modal ─────────────────────────────────────
 export const settingsModal = $<HTMLDivElement>("settingsModal");

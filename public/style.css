@@ -382,6 +382,94 @@ body::before {
   flex-shrink: 0;
 }
 
+/* Auto-speak toggle - new design */
+.auto-speak-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+.auto-speak-toggle:hover {
+  background: hsl(var(--accent));
+}
+
+.auto-speak-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: hsl(var(--border));
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.auto-speak-toggle input:checked + .toggle-track {
+  background: hsl(var(--primary));
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: hsl(var(--background));
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.auto-speak-toggle input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(16px);
+}
+
+.toggle-label-icon {
+  width: 16px;
+  height: 16px;
+  stroke: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+
+.auto-speak-toggle:hover .toggle-label-icon {
+  stroke: hsl(var(--foreground));
+}
+
+.auto-speak-toggle input:checked ~ .toggle-label-icon {
+  stroke: hsl(var(--primary));
+}
+
+.toggle-label-text {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.auto-speak-toggle:hover .toggle-label-text {
+  color: hsl(var(--foreground));
+}
+
+.auto-speak-toggle input:checked ~ .toggle-label-text {
+  color: hsl(var(--primary));
+}
+
+.model-selector-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 4px;
+}
+
 .load-model-btn:hover {
   opacity: 0.9;
 }
@@ -950,13 +1038,14 @@ body::before {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 14px;
+  height: 20px;
   cursor: ns-resize;
   user-select: none;
   -webkit-user-select: none;
 }
 
-.resize-handle-bar {
+.resize-handle::before {
+  content: "";
   width: 40px;
   height: 4px;
   border-radius: 2px;
@@ -964,8 +1053,46 @@ body::before {
   transition: background 0.2s;
 }
 
-.resize-handle:hover .resize-handle-bar {
-  background: hsl(var(--muted-foreground));
+.resize-handle:hover::before {
+  background: hsl(var(--primary));
+}
+
+.input-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  width: 100%;
+  position: relative;
+}
+
+.attach-file-btn,
+.prompt-templates-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 7px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  color: hsl(var(--muted-foreground));
+  transition: all 0.2s;
+}
+
+.attach-file-btn:hover,
+.prompt-templates-btn:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--ring) / 0.3);
+}
+
+.attach-file-btn.has-file,
+.prompt-templates-btn.active {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 .message-input {
@@ -1726,6 +1853,8 @@ body::before {
   flex: 1;
   overflow-y: auto;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .no-chats {
@@ -1733,6 +1862,36 @@ body::before {
   color: hsl(var(--muted-foreground));
   padding: 24px 16px;
   font-size: 14px;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.sidebar-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  color: hsl(var(--foreground));
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-settings-btn:hover {
+  background: hsl(var(--accent));
+}
+
+.sidebar-settings-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .chats-section-header {
@@ -2379,6 +2538,85 @@ body::before {
   font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
   margin-top: 0.5rem;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+.settings-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-toggle-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0;
+}
+
+.settings-toggle-info .help-text {
+  margin-top: 0;
+}
+
+.settings-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.settings-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: hsl(var(--border));
+  border-radius: 13px;
+  transition: all 0.3s ease;
+}
+
+.settings-switch-slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: hsl(var(--background));
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.settings-switch input:checked + .settings-switch-slider {
+  background: hsl(var(--primary));
+}
+
+.settings-switch input:checked + .settings-switch-slider::before {
+  transform: translateX(22px);
+}
+
+.settings-switch:hover .settings-switch-slider {
+  background: hsl(var(--muted-foreground));
+}
+
+.settings-switch:hover input:checked + .settings-switch-slider {
+  background: hsl(var(--primary-hover, hsl(var(--primary))));
 }
 
 .settings-preview {

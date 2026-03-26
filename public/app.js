@@ -2,7 +2,7 @@
 // Arquitectura en capas: types → state → api/utils → ui → services → app
 import { state } from "./state.js";
 // UI
-import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggle, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, deleteAllChatsBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, autoSpeakToggleBtn, ttsSpeedRange, ttsSpeedValue, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
+import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggleSetting, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, deleteAllChatsBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, autoSpeakToggleBtn, ttsSpeedRange, ttsSpeedValue, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
 import { setMessageCallbacks } from "./ui/messages.js";
 import { openSidebar, closeSidebar } from "./ui/sidebar.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
@@ -145,7 +145,13 @@ importDropZone.addEventListener("drop", (e) => {
         handleImportFile(file);
 });
 // ─── Event Listeners: Tema y configuración ───────────────
-darkModeToggle.addEventListener("click", toggleTheme);
+darkModeToggleSetting.addEventListener("change", () => {
+    const isChecked = darkModeToggleSetting.checked;
+    const isCurrentlyDark = document.body.classList.contains("dark-mode");
+    if ((isChecked && !isCurrentlyDark) || (!isChecked && isCurrentlyDark)) {
+        toggleTheme();
+    }
+});
 settingsBtn.addEventListener("click", openSettings);
 closeSettingsModal.addEventListener("click", closeSettings);
 cancelSettingsBtn.addEventListener("click", closeSettings);
@@ -199,13 +205,12 @@ closeTemplateModalBtn.addEventListener("click", closeTemplateModal);
 cancelTemplateBtn.addEventListener("click", closeTemplateModal);
 saveTemplateBtn.addEventListener("click", addCustomTemplate);
 // ─── Event Listeners: Auto Speak ───────────────────────────
-autoSpeakToggleBtn.addEventListener("click", () => {
-    state.autoSpeak = !state.autoSpeak;
+autoSpeakToggleBtn.addEventListener("change", () => {
+    state.autoSpeak = autoSpeakToggleBtn.checked;
     localStorage.setItem("autoSpeak", state.autoSpeak.toString());
-    autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
 });
-// Inicializar estado del botón
-autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+// Inicializar estado del checkbox
+autoSpeakToggleBtn.checked = state.autoSpeak;
 // ─── Event Listeners: TTS Speed ──────────────────────────────
 ttsSpeedRange.addEventListener("input", () => {
     ttsSpeedValue.textContent = ttsSpeedRange.value;

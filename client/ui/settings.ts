@@ -10,6 +10,7 @@ import {
   ttsVoiceSelect,
   ttsSpeedRange,
   ttsSpeedValue,
+  darkModeToggleSetting,
 } from "./elements.js";
 import { state } from "../state.js";
 import { loadModels } from "../services/modelService.js";
@@ -18,6 +19,7 @@ import { loadVoices } from "../services/ttsVoices.js";
 
 export function openSettings(): void {
   loadSettingsFromServer();
+  darkModeToggleSetting.checked = document.body.classList.contains("dark-mode");
   settingsModal.classList.add("active");
 }
 
