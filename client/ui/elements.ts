@@ -135,6 +135,11 @@ export const importPreviewMessages = $<HTMLElement>("importPreviewMessages");
 export const importRemoveFile = $<HTMLButtonElement>("importRemoveFile");
 export const importError = $<HTMLDivElement>("importError");
 
+export const alertModal = $<HTMLDivElement>("alertModal");
+export const alertModalText = $<HTMLParagraphElement>("alertModalText");
+export const alertModalOk = $<HTMLButtonElement>("alertModalOk");
+export const closeAlertModalBtn = $<HTMLButtonElement>("closeAlertModal");
+
 // ─── DOM helpers ─────────────────────────────────────────
 export function scrollToBottom(): void {
   chatMessages.scrollTop = chatMessages.scrollHeight;

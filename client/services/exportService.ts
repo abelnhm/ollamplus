@@ -3,10 +3,11 @@ import type { ChatJSON, MessageJSON } from "../types.js";
 import { apiGet } from "../api.js";
 import { escapeHtml } from "../utils.js";
 import { chatMessages, modelSelector, exportModal } from "../ui/elements.js";
+import { openNoActiveChatModal } from "../ui/modalAlert.js";
 
 export function openExportModal(): void {
   if (!state.currentChatId) {
-    alert("No hay conversaci\u00F3n activa para exportar.");
+    openNoActiveChatModal();
     return;
   }
   exportModal.classList.add("active");
