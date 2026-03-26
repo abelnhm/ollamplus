@@ -1,4 +1,5 @@
 import { state } from "../state.js";
+import { getSelectedVoice } from "./ttsVoices.js";
 
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 let currentButton: HTMLButtonElement | null = null;
@@ -13,9 +14,18 @@ export function speakText(text: string, btn?: HTMLButtonElement): void {
     }
     
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = detectLanguage(text);
-    utterance.rate = 1.0;
+    
+    const selectedVoice = getSelectedVoice();
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else {
+      utterance.lang = detectLanguage(text);
+    }
+    
+    utterance.rate = state.ttsSpeed || 0.9;
     utterance.pitch = 1.0;
+    utterance.volume = 1.0;
     
     currentUtterance = utterance;
     currentButton = btn || null;

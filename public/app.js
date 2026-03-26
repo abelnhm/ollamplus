@@ -2,7 +2,7 @@
 // Arquitectura en capas: types → state → api/utils → ui → services → app
 import { state } from "./state.js";
 // UI
-import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggle, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, deleteAllChatsBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
+import { messageInput, sendBtn, toggleSidebarBtn, closeSidebarBtn, sidebarOverlay, newChatBtn, exportBtn, importBtn, clearBtn, settingsBtn, darkModeToggle, modelParamsToggle, modelParamsPanel, enableModelParams, modelParamsForm, resetParamsBtn, systemPromptToggle, systemPromptPanel, enableSystemPrompt, systemPromptForm, systemPromptInput, clearSystemPromptBtn, closeDeleteChatModalBtn, deleteChatAcceptBtn, deleteChatCancelBtn, deleteChatModal, loadModelBtn, modelChangeAcceptBtn, modelChangeCancelBtn, closeModelChangeModal, stopBtn, chatSearchInput, ollamaHostInput, ollamaPortInput, closeSettingsModal, cancelSettingsBtn, saveSettingsBtn, testConnectionBtn, deleteAllChatsBtn, closeExportModalBtn, cancelExportBtn, closeImportModalBtn, cancelImportBtn, confirmImportBtn, importDropZone, importFileInput, importRemoveFile, promptTemplatesBtn, autoSpeakToggleBtn, ttsSpeedRange, ttsSpeedValue, templateSearchInput, manageTemplatesBtn, closeTemplateModalBtn, cancelTemplateBtn, saveTemplateBtn, autoResize, } from "./ui/elements.js";
 import { setMessageCallbacks } from "./ui/messages.js";
 import { openSidebar, closeSidebar } from "./ui/sidebar.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
@@ -197,6 +197,18 @@ manageTemplatesBtn.addEventListener("click", openTemplateModal);
 closeTemplateModalBtn.addEventListener("click", closeTemplateModal);
 cancelTemplateBtn.addEventListener("click", closeTemplateModal);
 saveTemplateBtn.addEventListener("click", addCustomTemplate);
+// ─── Event Listeners: Auto Speak ───────────────────────────
+autoSpeakToggleBtn.addEventListener("click", () => {
+    state.autoSpeak = !state.autoSpeak;
+    localStorage.setItem("autoSpeak", state.autoSpeak.toString());
+    autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+});
+// Inicializar estado del botón
+autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+// ─── Event Listeners: TTS Speed ──────────────────────────────
+ttsSpeedRange.addEventListener("input", () => {
+    ttsSpeedValue.textContent = ttsSpeedRange.value;
+});
 // ─── Event Listeners: Cierre global ──────────────────────
 document.addEventListener("click", (e) => {
     const target = e.target;

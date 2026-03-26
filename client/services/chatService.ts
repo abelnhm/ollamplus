@@ -40,6 +40,7 @@ import {
 import { loadModelInfo } from "./modelService.js";
 import { getModelOptions } from "./modelParams.js";
 import { getSystemPrompt } from "./systemPrompt.js";
+import { speakText } from "./ttsService.js";
 
 // ==================================== Streaming helpers ====================================
 function startStreamingUI(): void {
@@ -150,6 +151,9 @@ async function readSSEStream(
             if (data.userMessage) userMessage = data.userMessage;
             if (data.assistantMessage) assistantMessage = data.assistantMessage;
             if (data.tokenUsage) tokenUsage = data.tokenUsage;
+            if (state.autoSpeak && fullText) {
+              speakText(fullText);
+            }
           } else if (data.chunk) {
             fullText += data.chunk;
             updateStreamingMessage(streamWrapper, fullText);

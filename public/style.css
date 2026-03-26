@@ -1140,6 +1140,45 @@ body::before {
   stroke: hsl(var(--primary-foreground));
 }
 
+.auto-speak-btn {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  padding: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.auto-speak-btn svg {
+  stroke: hsl(var(--muted-foreground));
+  transition: stroke 0.2s ease;
+}
+
+.auto-speak-btn:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--ring));
+}
+
+.auto-speak-btn:hover svg {
+  stroke: hsl(var(--accent-foreground));
+}
+
+.auto-speak-btn.active {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.auto-speak-btn.active svg {
+  stroke: hsl(var(--primary-foreground));
+}
+
 .prompt-templates-dropdown {
   display: none;
   position: absolute;

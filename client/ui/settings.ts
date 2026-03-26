@@ -7,9 +7,14 @@ import {
   ollamaPortInput,
   urlPreview,
   testResult,
+  ttsVoiceSelect,
+  ttsSpeedRange,
+  ttsSpeedValue,
 } from "./elements.js";
+import { state } from "../state.js";
 import { loadModels } from "../services/modelService.js";
 import { newChat, refreshChatList } from "../services/chatService.js";
+import { loadVoices } from "../services/ttsVoices.js";
 
 export function openSettings(): void {
   loadSettingsFromServer();
@@ -50,6 +55,18 @@ async function loadSettingsFromServer(): Promise<void> {
     ollamaHostInput.value = localStorage.getItem("ollamaHost") || "localhost";
     ollamaPortInput.value = localStorage.getItem("ollamaPort") || "11434";
   }
+  await loadVoices();
+  const savedVoice = localStorage.getItem("ttsVoice") || "";
+  const options = ttsVoiceSelect.options;
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].value === savedVoice) {
+      ttsVoiceSelect.selectedIndex = i;
+      break;
+    }
+  }
+  const savedSpeed = localStorage.getItem("ttsSpeed") || "0.9";
+  ttsSpeedRange.value = savedSpeed;
+  ttsSpeedValue.textContent = savedSpeed;
   updateUrlPreview();
   testResult.textContent = "";
 }
@@ -57,9 +74,15 @@ async function loadSettingsFromServer(): Promise<void> {
 export async function saveSettings(): Promise<void> {
   const host = ollamaHostInput.value || "localhost";
   const port = ollamaPortInput.value || "11434";
+  const voice = ttsVoiceSelect.value;
+  const speed = ttsSpeedRange.value;
 
   localStorage.setItem("ollamaHost", host);
   localStorage.setItem("ollamaPort", port);
+  localStorage.setItem("ttsVoice", voice);
+  localStorage.setItem("ttsSpeed", speed);
+  state.ttsVoice = voice;
+  state.ttsSpeed = parseFloat(speed);
 
   try {
     await apiPut("/api/config/ollamaHost", { value: host });

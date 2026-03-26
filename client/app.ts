@@ -54,6 +54,9 @@ import {
   importFileInput,
   importRemoveFile,
   promptTemplatesBtn,
+  autoSpeakToggleBtn,
+  ttsSpeedRange,
+  ttsSpeedValue,
   templateSearchInput,
   manageTemplatesBtn,
   closeTemplateModalBtn,
@@ -321,6 +324,21 @@ manageTemplatesBtn.addEventListener("click", openTemplateModal);
 closeTemplateModalBtn.addEventListener("click", closeTemplateModal);
 cancelTemplateBtn.addEventListener("click", closeTemplateModal);
 saveTemplateBtn.addEventListener("click", addCustomTemplate);
+
+// ─── Event Listeners: Auto Speak ───────────────────────────
+autoSpeakToggleBtn.addEventListener("click", () => {
+  state.autoSpeak = !state.autoSpeak;
+  localStorage.setItem("autoSpeak", state.autoSpeak.toString());
+  autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+});
+
+// Inicializar estado del botón
+autoSpeakToggleBtn.classList.toggle("active", state.autoSpeak);
+
+// ─── Event Listeners: TTS Speed ──────────────────────────────
+ttsSpeedRange.addEventListener("input", () => {
+  ttsSpeedValue.textContent = ttsSpeedRange.value;
+});
 
 // ─── Event Listeners: Cierre global ──────────────────────
 document.addEventListener("click", (e) => {
