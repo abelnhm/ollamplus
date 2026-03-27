@@ -468,12 +468,30 @@ export async function refreshChatList(): Promise<void> {
   }
 }
 
+function formatChatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else if (diffDays === 1) {
+    return "Ayer";
+  } else if (diffDays < 7) {
+    return date.toLocaleDateString([], { weekday: "short" });
+  } else {
+    return date.toLocaleDateString([], { day: "numeric", month: "short" });
+  }
+}
+
 function createChatItem(chat: ChatJSON): HTMLDivElement {
   const item = document.createElement("div");
   item.className = `chat-item${chat.id === state.currentChatId ? " active" : ""}${chat.pinned ? " pinned" : ""}`;
   item.innerHTML = `
     <div class="chat-item-content">
       <div class="chat-item-title">${escapeHtml(chat.title)}</div>
+      <div class="chat-item-date">${formatChatDate(chat.lastMessageAt)}</div>
       <div class="chat-item-meta">${chat.model} - ${chat.messageCount} msgs</div>
     </div>
     <div class="chat-item-actions">

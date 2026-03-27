@@ -10,6 +10,7 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 
 - Logo personalizado en la cabecera y sidebar
 - Múltiples conversaciones simultáneas
+- Fecha y hora en cada chat de la lista
 - Respuestas en tiempo real (streaming)
 - Selección de modelos de IA instalados
 - Exportar conversaciones a Markdown/JSON/HTML
