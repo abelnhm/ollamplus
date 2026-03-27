@@ -12,6 +12,7 @@ import { loadSystemPromptFromStorage, saveSystemPromptToStorage, } from "./servi
 import { resetModelParams, initParamSync, initParamTooltips, } from "./services/modelParams.js";
 import { loadModels } from "./services/modelService.js";
 import { initFileAttachment } from "./services/fileAttachment.js";
+import { initSpeechToText } from "./services/sttService.js";
 import { sendMessage, regenerateLastResponse, confirmEditMessage, refreshChatList, newChat, clearChat, closeDeleteChatModal, confirmDeleteChat, handleLoadModelClick, handleModelChangeAccept, closeModelChange, } from "./services/chatService.js";
 import { openExportModal, closeExportModal, exportChat, } from "./services/exportService.js";
 import { openImportModal, closeImportModal, resetImportModal, handleImportFile, confirmImport, } from "./services/importService.js";
@@ -247,6 +248,7 @@ document.addEventListener("keydown", (e) => {
 // ─── Inicialización ──────────────────────────────────────
 initTheme();
 initFileAttachment();
+initSpeechToText();
 loadModels();
 refreshChatList();
 initParamSync();

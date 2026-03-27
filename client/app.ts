@@ -88,6 +88,7 @@ import {
 } from "./services/modelParams.js";
 import { loadModels } from "./services/modelService.js";
 import { initFileAttachment } from "./services/fileAttachment.js";
+import { initSpeechToText } from "./services/sttService.js";
 import {
   sendMessage,
   regenerateLastResponse,
@@ -383,6 +384,7 @@ document.addEventListener("keydown", (e) => {
 // ─── Inicialización ──────────────────────────────────────
 initTheme();
 initFileAttachment();
+initSpeechToText();
 loadModels();
 refreshChatList();
 initParamSync();

@@ -339,6 +339,18 @@
             </path>
           </svg>
         </button>
+        <button id="recordAudioBtn" class="icon-btn record-audio-btn" title="Grabar audio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
+        <div id="recordingIndicator" class="recording-indicator" style="display:none;">
+          <span class="recording-dot"></span>
+          <span id="recordingTime">0:00</span>
+        </div>
         <div id="attachedFilePreview" class="attached-file-preview" style="display:none;">
           <span id="attachedFileName"></span>
           <button id="removeAttachedFile" class="remove-file-btn" title="Quitar archivo">×</button>

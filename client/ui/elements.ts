@@ -21,6 +21,10 @@ export const attachedFilePreview = $<HTMLDivElement>("attachedFilePreview");
 export const attachedFileName = $<HTMLSpanElement>("attachedFileName");
 export const removeAttachedFile = $<HTMLButtonElement>("removeAttachedFile");
 
+export const recordAudioBtn = $<HTMLButtonElement>("recordAudioBtn");
+export const recordingIndicator = $<HTMLDivElement>("recordingIndicator");
+export const recordingTime = $<HTMLSpanElement>("recordingTime");
+
 // ─── Header buttons ──────────────────────────────────────
 export const toggleSidebarBtn = $<HTMLButtonElement>("toggleSidebarBtn");
 export const closeSidebarBtn = $<HTMLButtonElement>("closeSidebarBtn");
