@@ -30,6 +30,13 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
   - Selector de voz en configuración
   - Control de velocidad de lectura (0.5x - 1.5x)
   - Auto-hablar respuestas (toggle switch en selector de modelo)
+- **Voz a texto (STT)** - Transcribir audio a texto
+  - Botón de micrófono para grabar audio
+  - Transcripción en tiempo real usando Web Speech API
+  - Indicador de grabación con tiempo
+  - **Auto enviar**: Envía automáticamente al detectar silencio (2 segundos)
+  - **Auto voz**: Activa el micrófono automáticamente después de reproducir audio TTS
+  - Flujo completo manos libres: Auto audio → Auto voz → Auto enviar
 - **Archivos adjuntos** - Adjuntar archivos de texto/código a los mensajes
   - Icono y nombre del archivo junto al mensaje enviado
   - Botones de adjunto y plantillas sobre el campo de entrada
@@ -468,6 +475,7 @@ const response = await ollamaService.sendMessage(
 | **Servicios** | `services/templateService.ts` | Plantillas de prompts                        |
 | **Servicios** | `services/ttsService.ts`      | Texto a voz (Web Speech API)                 |
 | **Servicios** | `services/ttsVoices.ts`      | Gestión de voces disponibles                 |
+| **Servicios** | `services/sttService.ts`     | Voz a texto (Speech Recognition API)        |
 | **Servicios** | `services/fileAttachment.ts` | Adjuntar archivos al chat                   |
 
 ---
