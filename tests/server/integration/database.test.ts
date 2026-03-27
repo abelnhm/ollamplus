@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { db, AppConfigRow, ChatRow, MessageRow } from '../services/database.js';
+import { db, AppConfigRow, ChatRow, MessageRow } from '../../../server/src/services/database.js';
 
 describe('Database', () => {
   it('should have a valid database connection', () => {

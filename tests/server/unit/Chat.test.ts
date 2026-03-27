@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { Chat } from '../models/Chat.js';
-import { Message } from '../models/Message.js';
+import { Chat } from '../../../server/src/models/Chat.js';
+import { Message } from '../../../server/src/models/Message.js';
 
 describe('Chat Model', () => {
   describe('constructor', () => {

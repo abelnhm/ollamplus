@@ -5,7 +5,7 @@ import {
   updateChatSchema,
   editMessageSchema,
   importChatSchema
-} from '../validators/chatValidator.js';
+} from '../../../server/src/validators/chatValidator.js';
 
 describe('Validators', () => {
   describe('createChatSchema', () => {

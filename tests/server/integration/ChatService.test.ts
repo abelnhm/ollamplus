@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ChatService } from '../services/ChatService.js';
-import { db } from '../services/database.js';
+import { ChatService } from '../../../server/src/services/ChatService.js';
+import { db } from '../../../server/src/services/database.js';
 
 describe('ChatService', () => {
   let chatService: ChatService;

@@ -571,20 +571,30 @@ npm run test:watch
 
 # Con cobertura de código
 npm run test:coverage
+
+# Tests específicos por tipo
+npm run test:server      # Solo tests del servidor
+npm run test:client     # Solo tests del cliente
+npm run test:unit       # Solo tests unitarios
+npm run test:integration # Solo tests de integración
+npm run test:e2e        # Solo tests end-to-end
 ```
 
 ### Estructura de los tests
 
-```
-server/src/test/
-├── Chat.test.ts          # Tests del modelo Chat
-├── Message.test.ts      # Tests del modelo Message
-└── validators.test.ts   # Tests de validadores Zod
+Los tests están organizados en el directorio `tests/`:
 
-client/
-├── state.test.ts        # Tests del estado global
-├── ttsService.test.ts   # Tests del servicio TTS
-└── ttsVoices.test.ts    # Tests de selección de voces
+```
+tests/
+├── server/
+│   ├── unit/             # Tests unitarios (Chat, Message, validators, middlewares, config)
+│   ├── integration/      # Tests de integración (ChatService, routes, database, API)
+│   └── e2e/             # Tests end-to-end (Ollama)
+│
+├── client/
+│   └── unit/            # Tests unitarios del cliente (state, tts)
+│
+└── setup-global.ts      # Configuración global
 ```
 
 ### Cobertura actual

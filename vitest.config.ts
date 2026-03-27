@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    include: ['server/**/*.test.ts', 'shared/**/*.test.ts', 'client/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'server/src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -13,10 +13,10 @@ export default defineConfig({
       exclude: [
         'server/src/**/*.test.ts', 
         'server/src/db/',
-        'client/**/*.test.ts'
+        'tests/'
       ],
     },
-    setupFiles: ['./server/src/test/setup.ts'],
+    setupFiles: ['tests/setup-global.ts'],
   },
   resolve: {
     alias: {

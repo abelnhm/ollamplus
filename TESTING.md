@@ -98,25 +98,36 @@ Vitest incluye funciones para crear mocks:
 
 ### Ubicación
 
-Los tests se encuentran en: `server/src/test/` y `client/`
+Los tests se encuentran organizados en el directorio `tests/`:
 
 ```
-server/src/test/
-├── Chat.test.ts              # Tests del modelo Chat (Unit tests)
-├── Message.test.ts           # Tests del modelo Message (Unit tests)
-├── validators.test.ts        # Tests de validadores Zod (Unit tests)
-├── database.test.ts          # Tests de base de datos (Integration tests)
-├── config.test.ts            # Tests de configuración (Unit tests)
-├── middlewares.test.ts       # Tests de middlewares (Unit tests)
-├── routes.test.ts            # Tests de rutas (Unit tests con mocks)
-├── ChatService.test.ts       # Tests del servicio (Integration tests)
-├── integration.test.ts       # Tests de API con supertest (Integration tests)
-└── ollamaIntegration.test.ts # Tests con Ollama real (E2E tests)
-
-client/                       # Tests del lado del cliente
-├── state.test.ts             # Tests del estado global
-├── ttsService.test.ts        # Tests del servicio TTS
-└── ttsVoices.test.ts         # Tests de selección de voces
+tests/
+├── server/                          # Tests del servidor
+│   ├── unit/                       # Tests unitarios
+│   │   ├── models/                 # Chat.test.ts, Message.test.ts
+│   │   ├── validators/             # validators.test.ts
+│   │   ├── middlewares/            # middlewares.test.ts
+│   │   └── config/                 # config.test.ts
+│   ├── integration/                # Tests de integración
+│   │   ├── services/               # ChatService.test.ts
+│   │   ├── routes/                 # routes.test.ts
+│   │   ├── api/                    # integration.test.ts
+│   │   └── database/               # database.test.ts
+│   ├── e2e/                        # Tests end-to-end
+│   │   └── ollama/                 # ollamaIntegration.test.ts
+│   └── setup.ts                    # Setup específico del servidor
+│
+├── client/                         # Tests del cliente
+│   ├── unit/                       # Tests unitarios
+│   │   ├── state/                  # state.test.ts
+│   │   ├── tts/                    # ttsService.test.ts, ttsVoices.test.ts
+│   │   └── utils/
+│   ├── integration/                # Tests de integración del cliente
+│   └── mocks/                      # Mocks del navegador
+│   └── setup.ts                    # Setup jsdom específico
+│
+├── setup-global.ts                 # Configuración global para todos los tests
+└── vitest.config.ts               # Configuración de Vitest
 ```
 
 > **Nota**: Los tests del cliente requieren entorno jsdom (configurado en `vitest.config.ts`) para simular el DOM del navegador.

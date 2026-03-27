@@ -19,7 +19,7 @@ describe('Config', () => {
     delete process.env.NODE_ENV;
     delete process.env.LOG_LEVEL;
 
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     
     expect(config_.port).toBeDefined();
     expect(config_.ollamaHost).toBeDefined();
@@ -31,42 +31,42 @@ describe('Config', () => {
   it('should have correct default port', async () => {
     vi.resetModules();
     delete process.env.PORT;
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.port).toBe(3000);
   });
 
   it('should have correct default ollamaHost', async () => {
     vi.resetModules();
     delete process.env.OLLAMA_HOST;
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.ollamaHost).toBe('http://localhost:11434');
   });
 
   it('should have correct default dbPath', async () => {
     vi.resetModules();
     delete process.env.DB_PATH;
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.dbPath).toBe('./data/ollama.db');
   });
 
   it('should have correct default nodeEnv when not set', async () => {
     vi.resetModules();
     delete process.env.NODE_ENV;
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.nodeEnv).toBe('development');
   });
 
   it('should use custom nodeEnv when set', async () => {
     vi.resetModules();
     process.env.NODE_ENV = 'production';
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.nodeEnv).toBe('production');
   });
 
   it('should have correct default logLevel', async () => {
     vi.resetModules();
     delete process.env.LOG_LEVEL;
-    const { config_ } = await import('../config.js');
+    const { config_ } = await import('../../../server/src/config.js');
     expect(config_.logLevel).toBe('info');
   });
 });

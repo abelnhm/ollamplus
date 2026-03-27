@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { OllamaService } from '../services/OllamaService.js';
+import { OllamaService } from '../../../server/src/services/OllamaService.js';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 

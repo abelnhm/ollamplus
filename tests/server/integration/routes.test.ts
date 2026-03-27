@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Router } from 'express';
-import { createChatRoutes } from '../routes/chatRoutes.js';
-import { createModelRoutes } from '../routes/modelRoutes.js';
+import { createChatRoutes } from '../../../server/src/routes/chatRoutes.js';
+import { createModelRoutes } from '../../../server/src/routes/modelRoutes.js';
 
 const mockChatService = {
   create: vi.fn((model, title) => ({ 

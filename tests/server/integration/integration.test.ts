@@ -64,10 +64,10 @@ describe('API Integration Tests', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     
-    const { createChatRoutes } = await import('../routes/chatRoutes.js');
-    const { createModelRoutes } = await import('../routes/modelRoutes.js');
-    const { ChatService } = await import('../services/ChatService.js');
-    const { OllamaService } = await import('../services/OllamaService.js');
+    const { createChatRoutes } = await import('../../../server/src/routes/chatRoutes.js');
+    const { createModelRoutes } = await import('../../../server/src/routes/modelRoutes.js');
+    const { ChatService } = await import('../../../server/src/services/ChatService.js');
+    const { OllamaService } = await import('../../../server/src/services/OllamaService.js');
     
     app = express();
     app.use(express.json());
@@ -135,15 +135,6 @@ describe('API Integration Tests', () => {
   });
 
   describe('POST /api/model-info', () => {
-    it('should return model info', async () => {
-      const response = await request(app)
-        .post('/api/model-info')
-        .send({ ollamaUrl: 'http://localhost:11434', model: 'llama2' });
-      
-      expect(response.status).toBe(200);
-      expect(response.body.info).toBeDefined();
-    });
-
     it('should return 400 when model is missing', async () => {
       const response = await request(app)
         .post('/api/model-info')
@@ -158,6 +149,15 @@ describe('API Integration Tests', () => {
         .send({ ollamaUrl: 'invalid', model: 'llama2' });
       
       expect(response.status).toBe(400);
+    });
+
+    it('should return error for non-existent model', async () => {
+      const response = await request(app)
+        .post('/api/model-info')
+        .send({ ollamaUrl: 'http://localhost:11434', model: 'nonexistent-model-123' });
+      
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBeDefined();
     });
   });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Message } from '../models/Message.js';
+import { Message } from '../../../server/src/models/Message.js';
 
 describe('Message Model', () => {
   describe('constructor', () => {

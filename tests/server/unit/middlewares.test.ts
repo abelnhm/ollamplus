@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { errorHandler } from '../middlewares/errorHandler.js';
-import { expressLogger, logger } from '../middlewares/logger.js';
+import { errorHandler } from '../../../server/src/middlewares/errorHandler.js';
+import { expressLogger, logger } from '../../../server/src/middlewares/logger.js';
 import { Request, Response, NextFunction } from 'express';
 
 beforeEach(() => {
