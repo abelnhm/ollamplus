@@ -1,5 +1,6 @@
-import { messageInput, recordAudioBtn, recordingIndicator, recordingTime } from "../ui/elements.js";
+import { messageInput, recordAudioBtn, recordingIndicator, recordingTime, autoSendVoiceBtn } from "../ui/elements.js";
 import { autoResize } from "../ui/elements.js";
+import { sendMessage } from "./chatService.js";
 
 interface SpeechRecognitionResultList {
   length: number;
@@ -50,6 +51,10 @@ let recognition: ISpeechRecognition | null = null;
 let isRecording = false;
 let recordingStartTime = 0;
 let recordingTimer: ReturnType<typeof setInterval> | null = null;
+let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+let lastTranscriptLength = 0;
+
+const SILENCE_THRESHOLD_MS = 2000;
 
 export function initSpeechToText(): void {
   const win = window as unknown as WindowWithSpeechRecognition;
@@ -78,23 +83,79 @@ export function initSpeechToText(): void {
 
     if (finalTranscript) {
       messageInput.value += finalTranscript;
-    }
+      lastTranscriptLength = messageInput.value.length;
+      autoResize(messageInput);
 
-    autoResize(messageInput);
+      if (autoSendVoiceBtn.checked) {
+        resetSilenceTimer();
+      }
+    }
   };
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
     console.error("Speech recognition error:", event.error);
-    stopRecording();
-  };
-
-  recognition.onend = () => {
-    if (isRecording) {
+    if (event.error !== "no-speech") {
       stopRecording();
     }
   };
 
+  recognition.onend = () => {
+    if (isRecording) {
+      try {
+        recognition?.start();
+      } catch (e) {
+        stopRecording();
+      }
+    }
+  };
+
   recordAudioBtn.addEventListener("click", toggleRecording);
+}
+
+function resetSilenceTimer(): void {
+  if (silenceTimer) {
+    clearTimeout(silenceTimer);
+  }
+  
+  silenceTimer = setTimeout(() => {
+    if (isRecording && autoSendVoiceBtn.checked && messageInput.value.trim().length > 0) {
+      stopRecordingAndSend();
+    }
+  }, SILENCE_THRESHOLD_MS);
+}
+
+function stopRecordingAndSend(): void {
+  if (!recognition) return;
+
+  isRecording = false;
+
+  if (silenceTimer) {
+    clearTimeout(silenceTimer);
+    silenceTimer = null;
+  }
+
+  if (recordingTimer) {
+    clearInterval(recordingTimer);
+    recordingTimer = null;
+  }
+
+  recordAudioBtn.classList.remove("recording");
+  recordingIndicator.style.display = "none";
+  recordingTime.textContent = "0:00";
+
+  const transcript = messageInput.value.trim();
+
+  try {
+    recognition.stop();
+  } catch (e) {
+    console.error("Failed to stop recognition:", e);
+  }
+
+  autoResize(messageInput);
+
+  if (transcript.length > 0) {
+    sendMessage();
+  }
 }
 
 function toggleRecording(): void {
@@ -110,6 +171,7 @@ function startRecording(): void {
 
   isRecording = true;
   messageInput.value = "";
+  lastTranscriptLength = 0;
   messageInput.focus();
 
   recordAudioBtn.classList.add("recording");
@@ -118,6 +180,10 @@ function startRecording(): void {
   updateRecordingTime();
 
   recordingTimer = setInterval(updateRecordingTime, 1000);
+
+  if (autoSendVoiceBtn.checked) {
+    resetSilenceTimer();
+  }
 
   try {
     recognition.start();
@@ -131,6 +197,11 @@ function stopRecording(): void {
   if (!recognition) return;
 
   isRecording = false;
+
+  if (silenceTimer) {
+    clearTimeout(silenceTimer);
+    silenceTimer = null;
+  }
 
   if (recordingTimer) {
     clearInterval(recordingTimer);
@@ -158,5 +229,6 @@ function updateRecordingTime(): void {
 }
 
 export function isSttSupported(): boolean {
-  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  const win = window as unknown as WindowWithSpeechRecognition;
+  return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
 }

@@ -24,6 +24,7 @@ export const removeAttachedFile = $<HTMLButtonElement>("removeAttachedFile");
 export const recordAudioBtn = $<HTMLButtonElement>("recordAudioBtn");
 export const recordingIndicator = $<HTMLDivElement>("recordingIndicator");
 export const recordingTime = $<HTMLSpanElement>("recordingTime");
+export const autoSendVoiceBtn = $<HTMLInputElement>("autoSendVoiceBtn");
 
 // ─── Header buttons ──────────────────────────────────────
 export const toggleSidebarBtn = $<HTMLButtonElement>("toggleSidebarBtn");
