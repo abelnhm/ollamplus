@@ -56,6 +56,7 @@ import {
   promptTemplatesBtn,
   autoSpeakToggleBtn,
   autoSendVoiceBtn,
+  autoVoiceAfterTtsBtn,
   ttsSpeedRange,
   ttsSpeedValue,
   templateSearchInput,
@@ -346,9 +347,15 @@ autoSendVoiceBtn.addEventListener("change", () => {
   localStorage.setItem("autoSendVoice", state.autoSendVoice.toString());
 });
 
+autoVoiceAfterTtsBtn.addEventListener("change", () => {
+  state.autoVoiceAfterTts = autoVoiceAfterTtsBtn.checked;
+  localStorage.setItem("autoVoiceAfterTts", state.autoVoiceAfterTts.toString());
+});
+
 // Inicializar estado del checkbox
 autoSpeakToggleBtn.checked = state.autoSpeak;
 autoSendVoiceBtn.checked = state.autoSendVoice;
+autoVoiceAfterTtsBtn.checked = state.autoVoiceAfterTts;
 
 // ─── Event Listeners: TTS Speed ──────────────────────────────
 ttsSpeedRange.addEventListener("input", () => {

@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { getSelectedVoice } from "./ttsVoices.js";
+import { startVoiceRecording } from "./sttService.js";
 
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 let currentButton: HTMLButtonElement | null = null;
@@ -42,6 +43,9 @@ export function speakText(text: string, btn?: HTMLButtonElement): void {
       if (currentButton) {
         resetButtonIcon(currentButton);
         currentButton = null;
+      }
+      if (state.autoVoiceAfterTts) {
+        setTimeout(() => startVoiceRecording(), 500);
       }
     };
     

@@ -193,6 +193,11 @@ function startRecording(): void {
   }
 }
 
+export function startVoiceRecording(): void {
+  if (!recognition || isRecording) return;
+  startRecording();
+}
+
 function stopRecording(): void {
   if (!recognition) return;
 

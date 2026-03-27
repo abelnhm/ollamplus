@@ -14,6 +14,7 @@ export const state = {
   pendingImport: null as ImportedChat | null,
   autoSpeak: false,
   autoSendVoice: false,
+  autoVoiceAfterTts: false,
   ttsVoice: "",
   ttsSpeed: 0.9,
 };
@@ -26,6 +27,10 @@ export function loadSettings(): void {
   const savedAutoSendVoice = localStorage.getItem("autoSendVoice");
   if (savedAutoSendVoice === "true") {
     state.autoSendVoice = true;
+  }
+  const savedAutoVoiceAfterTts = localStorage.getItem("autoVoiceAfterTts");
+  if (savedAutoVoiceAfterTts === "true") {
+    state.autoVoiceAfterTts = true;
   }
   const savedVoice = localStorage.getItem("ttsVoice");
   if (savedVoice) {

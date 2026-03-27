@@ -25,6 +25,7 @@ export const recordAudioBtn = $<HTMLButtonElement>("recordAudioBtn");
 export const recordingIndicator = $<HTMLDivElement>("recordingIndicator");
 export const recordingTime = $<HTMLSpanElement>("recordingTime");
 export const autoSendVoiceBtn = $<HTMLInputElement>("autoSendVoiceBtn");
+export const autoVoiceAfterTtsBtn = $<HTMLInputElement>("autoVoiceAfterTtsBtn");
 
 // ─── Header buttons ──────────────────────────────────────
 export const toggleSidebarBtn = $<HTMLButtonElement>("toggleSidebarBtn");
