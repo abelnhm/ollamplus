@@ -3444,6 +3444,35 @@ body::before {
   margin-bottom: 0;
 }
 
+/* Prism.js code blocks */
+.message-body pre {
+  background: #2d2d2d;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.message-body pre code {
+  background: transparent;
+  padding: 0;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+}
+
+.message-body code {
+  background: hsl(var(--accent));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+}
+
+.message-body p code {
+  color: hsl(var(--foreground));
+}
+
 .message-meta {
   margin-top: 8px;
   font-size: 11px;

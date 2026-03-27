@@ -12,21 +12,31 @@ export function escapeHtml(text: string): string {
 
 export function formatMarkdown(text: string): string {
   const marked = (window as any).marked;
-  const hljs = (window as any).hljs;
+  const Prism = (window as any).Prism;
 
-  if (marked) {
-    marked.setOptions({
-      highlight(code: string, lang: string) {
-        if (hljs && lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(code, { language: lang }).value;
-        }
-        return hljs ? hljs.highlightAuto(code).value : escapeHtml(code);
-      },
-      breaks: true,
-    });
-    return marked.parse(text) as string;
+  if (!marked) {
+    return escapeHtml(text).replace(/\n/g, "<br>");
   }
-  return escapeHtml(text).replace(/\n/g, "<br>");
+
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+  });
+
+  let html = marked.parse(text) as string;
+
+  if (Prism) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    
+    tempDiv.querySelectorAll("pre code").forEach((block) => {
+      Prism.highlightElement(block as HTMLElement);
+    });
+    
+    html = tempDiv.innerHTML;
+  }
+
+  return html;
 }
 
 export function formatBytes(bytes: number): string {
