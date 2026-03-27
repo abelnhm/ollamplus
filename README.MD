@@ -15,7 +15,7 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 - Exportar conversaciones a Markdown/JSON/HTML
 - Importar conversaciones desde ChatGPT/NousSave
 - Interfaz responsiva (móvil y escritorio)
-- Modo oscuro
+- Modo oscuro (configurable desde ajustes)
 - Persistencia de datos con SQLite
 - Parámetros configurables del modelo (temperature, top_p, etc.)
 - System prompt personalizable
@@ -23,14 +23,15 @@ Todo el proyecto está escrito en **TypeScript**, tanto el servidor (Node.js + E
 - Conteo de tokens
 - Configuración de Ollama persistida en SQLite
 - Zona de peligro para borrar todos los chats
+- Confirmación de eliminación de chat
 - **Texto a voz (TTS)** - Reproducir respuestas en audio
   - Botón de lectura en cada mensaje del asistente
   - Selector de voz en configuración
   - Control de velocidad de lectura (0.5x - 1.5x)
-  - Auto-hablar respuestas (toggle en el chat)
+  - Auto-hablar respuestas (toggle switch en selector de modelo)
 - **Archivos adjuntos** - Adjuntar archivos de texto/código a los mensajes
   - Icono y nombre del archivo junto al mensaje enviado
-  - Vista previa collapsible para archivos de código
+  - Botones de adjunto y plantillas sobre el campo de entrada
 
 ---
 
