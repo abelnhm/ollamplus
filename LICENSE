@@ -1,4 +1,4 @@
-MIT License - Custom
+MIT License
 
 Copyright (c) 2024-2026 OllamPlus
 
@@ -9,10 +9,10 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-1. The above copyright notice and this permission notice shall be included in all
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-2. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -22,16 +22,15 @@ SOFTWARE.
 
 ---
 
-RESTRICCIONES COMERCIALES / COMMERCIAL RESTRICTIONS:
+COMMERCIAL USE RESTRICTION / RESTRICCIÓN DE USO COMERCIAL
+
+This software is provided for personal and educational use only.
 
 El uso comercial de este software requiere autorización escrita del autor.
-El autor se reserva el derecho de otorgar o denegar permisos comerciales a su entera discreción.
-
-Para solicitud de uso comercial, contacta al autor.
+The author reserves the right to grant or deny commercial permissions at their sole discretion.
+For commercial use requests, please contact the author.
 
 ---
 
-Commercial use of this software requires written authorization from the author.
-The author reserves the right to grant or deny commercial permissions at their sole discretion.
-
-For commercial use requests, contact the author.
+NOTICE: This license does not grant permission to use the trade names, trademarks,
+service marks, or product names of the copyright holder.
