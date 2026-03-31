@@ -1,10 +1,31 @@
-# OllamPlus — Chat con IA usando Arquitectura por Capas (TypeScript)
+<p align="center">
+  <img src="public/img/logo4.png" alt="OllamPlus Logo" width="120">
+</p>
 
-[![GitHub stars](https://img.shields.io/github/stars/abelnhm/ollamplus)](https://github.com/abelnhm/ollamplus/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/abelnhm/ollamplus)](https://github.com/abelnhm/ollamplus/network)
-[![License](https://img.shields.io/github/license/abelnhm/ollamplus)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org)
+<h1 align="center">OllamPlus</h1>
+
+<p align="center">
+  <strong>Chat con IA local usando Ollama</strong><br>
+  Cliente web completo escrito en TypeScript con arquitectura por capas
+</p>
+
+<p align="center">
+  <a href="https://github.com/abelnhm/ollamplus/stargazers">
+    <img src="https://img.shields.io/github/stars/abelnhm/ollamplus" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/abelnhm/ollamplus/network">
+    <img src="https://img.shields.io/github/forks/abelnhm/ollamplus" alt="GitHub forks">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/abelnhm/ollamplus" alt="License">
+  </a>
+  <a href="https://nodejs.org">
+    <img src="https://img.shields.io/badge/Node.js-18%2B-green" alt="Node.js">
+  </a>
+  <a href="https://www.typescriptlang.org">
+    <img src="https://img.shields.io/badge/TypeScript-5.9-blue" alt="TypeScript">
+  </a>
+</p>
 
 ---
 
