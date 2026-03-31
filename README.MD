@@ -8,6 +8,12 @@
 
 ---
 
+<p align="center">
+  <img src="public/img/Captura-de-pantalla.png" alt="OllamPlus Interface" width="800">
+</p>
+
+---
+
 ## ¿Qué es este proyecto?
 
 Una aplicación web **completa** (frontend + backend) que te permite chatear con modelos de inteligencia artificial ejecutados localmente con [Ollama](https://ollama.com). Funciona como un "ChatGPT local" en tu propia máquina.
@@ -133,19 +139,14 @@ OllamPlus/
 ├── public/                 # === ARCHIVOS ESTÁTICOS (servidos por Express) ===
 │   ├── index.html         # HTML principal
 │   ├── style.css          # Estilos CSS
-│   ├── app.js             # JS compilado del cliente
-│   ├── types.js           # Tipos compilados
-│   ├── state.js           # Estado compilado
-│   ├── api.js             # API compilada
-│   ├── utils.js           # Utilidades compiladas
+│   ├── app.js             # JS compilado del cliente (NO incluido en repo)
+│   ├── types.js           # Tipos compilados (NO incluido en repo)
+│   ├── state.js           # Estado compilado (NO incluido en repo)
+│   ├── api.js             # API compilada (NO incluida en repo)
+│   ├── utils.js           # Utilidades compiladas (NO incluidas en repo)
 │   │
-│   └── services/          # Servicios compilados
-│   │   ├── chatService.js
-│   │   ├── sttService.js
-│   │   ├── ttsService.js
-│   │   └── ...
-│   │
-│   └── img/               # Imágenes y recursos
+│   └── img/               # Imágenes y recursos (INCLUIDO en repo)
+│       ├── Captura-de-pantalla.png  # Captura de pantalla de la interfaz
 │       ├── logo4.png      # Logo de la aplicación
 │       ├── logo3.png
 │       ├── logo2.png
@@ -527,18 +528,33 @@ export function createChatRoutes(
 ### Pasos
 
 ```bash
-# 1. Instalar dependencias
+# 1. Clonar el repositorio
+git clone https://github.com/abelnhm/ollamplus.git
+cd ollamplus
+
+# 2. Instalar dependencias
 npm install
 
-# 2. Copiar archivo de configuración
+# 3. Copiar archivo de configuración
 cp .env.example .env
 
-# 3. Iniciar en modo desarrollo
-npm run dev
+# 4. Compilar el proyecto (TypeScript → JavaScript)
+npm run build
 
-# 4. Abrir en el navegador
+# 5. Iniciar el servidor
+npm start
+
+# 6. Abrir en el navegador
 # http://localhost:3000
 ```
+
+### Modo Desarrollo (con auto-recompilación)
+
+```bash
+npm run dev
+```
+
+Esto inicia el servidor en modo watch y recompila el cliente automáticamente al detectar cambios.
 
 ### Configuración
 
