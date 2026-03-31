@@ -45,6 +45,12 @@ public/*.js.map
 public/ui/
 public/services/
 
+# Build output - shared types
+shared/dist/
+
+# Base de datos SQLite
+data/
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json

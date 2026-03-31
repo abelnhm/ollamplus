@@ -1,5 +1,13 @@
 # OllamPlus — Chat con IA usando Arquitectura por Capas (TypeScript)
 
+[![GitHub stars](https://img.shields.io/github/stars/abelnhm/ollamplus)](https://github.com/abelnhm/ollamplus/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/abelnhm/ollamplus)](https://github.com/abelnhm/ollamplus/network)
+[![License](https://img.shields.io/github/license/abelnhm/ollamplus)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org)
+
+---
+
 ## ¿Qué es este proyecto?
 
 Una aplicación web **completa** (frontend + backend) que te permite chatear con modelos de inteligencia artificial ejecutados localmente con [Ollama](https://ollama.com). Funciona como un "ChatGPT local" en tu propia máquina.
