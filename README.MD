@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/github/forks/abelnhm/ollamplus" alt="GitHub forks">
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/abelnhm/ollamplus" alt="License">
+    <img src="https://img.shields.io/badge/License-MIT%20No--Commercial-yellow" alt="License">
   </a>
   <a href="https://nodejs.org">
     <img src="https://img.shields.io/badge/Node.js-18%2B-green" alt="Node.js">
