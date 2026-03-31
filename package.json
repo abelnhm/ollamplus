@@ -1,7 +1,8 @@
 {
-  "name": "ias-proyect",
+  "name": "ollamplus",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chat con IA local usando Ollama - Cliente web completo en TypeScript",
+  "homepage": "https://github.com/abelnhm/ollamplus",
   "main": "server/dist/index.js",
   "scripts": {
     "build": "npm run build:shared && npm run build:server && npm run build:client",
@@ -14,11 +15,13 @@
     "dev:client": "tsc --watch -p client",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "audit": "npm audit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["ollama", "ai", "chat", "typescript", "nodejs"],
+  "author": "OllamPlus",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "better-sqlite3": "^12.6.2",
