@@ -538,15 +538,15 @@ export function createChatRoutes(
 
 ---
 
-## Instalación y Ejecución
+## 🚀 Instalación y Ejecución
 
-### Requisitos previos
+### Requisitos Previos
 
 1. [Node.js](https://nodejs.org) (v18 o superior)
 2. [Ollama](https://ollama.com) instalado y ejecutándose
 3. Al menos un modelo descargado (`ollama pull llama3.1`)
 
-### Pasos
+### Instalación Rápida
 
 ```bash
 # 1. Clonar el repositorio
@@ -558,7 +558,13 @@ npm install
 
 # 3. Copiar archivo de configuración
 cp .env.example .env
+```
 
+### Ejecución
+
+#### Modo Producción
+
+```bash
 # 4. Compilar el proyecto (TypeScript → JavaScript)
 npm run build
 
@@ -569,7 +575,7 @@ npm start
 # http://localhost:3000
 ```
 
-### Modo Desarrollo (con auto-recompilación)
+#### Modo Desarrollo (recomendado)
 
 ```bash
 npm run dev
