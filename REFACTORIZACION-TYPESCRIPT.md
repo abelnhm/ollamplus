@@ -63,37 +63,86 @@ Se realizó la migración completa del backend del proyecto **IAS-PROJECT** de *
 ## Estructura del Proyecto
 
 ```
-IAS-PROJECT/
-├── index.ts                        ← Punto de entrada
-├── generate-icons.ts               ← Script de generación de iconos PWA
-├── tsconfig.json                   ← Configuración TypeScript (backend)
-├── package.json                    ← Dependencias y scripts actualizados
-├── dist/                           ← Backend compilado (generado por tsc)
-├── client/                         ← Código fuente TypeScript del frontend
-│   ├── app.ts                      ← Fuente TS → se compila a public/app.js
-│   └── tsconfig.json               ← Configuración TypeScript (frontend)
-├── public/                         ← Archivos estáticos servidos al navegador
+OllamPlus/
+├── package.json                    ← Dependencias y scripts
+├── tsconfig.json                   ← Configuración base TypeScript
+├── .env.example                    ← Template de variables de entorno
+│
+├── server/                         ← Backend (Node.js + Express + SQLite)
+│   ├── src/
+│   │   ├── index.ts              ← Punto de entrada del servidor
+│   │   ├── config.ts             ← Carga de variables de entorno
+│   │   ├── models/               ← Modelos de datos
+│   │   │   ├── Chat.ts
+│   │   │   └── Message.ts
+│   │   ├── services/             ← Lógica de negocio
+│   │   │   ├── ChatService.ts
+│   │   │   ├── OllamaService.ts
+│   │   │   └── database.ts
+│   │   ├── routes/               ← Endpoints HTTP
+│   │   │   ├── chatRoutes.ts
+│   │   │   └── modelRoutes.ts
+│   │   ├── validators/           ← Validación con Zod
+│   │   │   └── chatValidator.ts
+│   │   ├── db/                   ← Base de datos y migraciones
+│   │   │   └── migrations.ts
+│   │   └── middlewares/          ← Express middlewares
+│   │       ├── logger.ts
+│   │       └── errorHandler.ts
+│   └── dist/                     ← Backend compilado
+│
+├── client/                        ← Frontend (TypeScript → JS)
+│   ├── app.ts                    ← Entry point
+│   ├── types.ts                  ← Interfaces
+│   ├── state.ts                  ← Estado global
+│   ├── api.ts                    ← Cliente HTTP
+│   ├── utils.ts                  ← Utilidades
+│   ├── ui/                       ← Capa de presentación
+│   │   ├── elements.ts
+│   │   ├── messages.ts
+│   │   ├── sidebar.ts
+│   │   ├── theme.ts
+│   │   ├── settings.ts
+│   │   └── modalAlert.ts        ← Modal de alertas
+│   ├── services/                ← Lógica del cliente
+│   │   ├── chatService.ts
+│   │   ├── modelService.ts
+│   │   ├── modelParams.ts
+│   │   ├── systemPrompt.ts
+│   │   ├── tokenService.ts
+│   │   ├── exportService.ts
+│   │   ├── importService.ts
+│   │   ├── templateService.ts
+│   │   ├── ttsService.ts        ← Texto a voz
+│   │   ├── ttsVoices.ts        ← Gestión de voces TTS
+│   │   ├── sttService.ts       ← Voz a texto
+│   │   └── fileAttachment.ts
+│   └── tsconfig.json
+│
+├── shared/                       ← Tipos compartidos
+│   ├── types/
+│   │   ├── chat.ts
+│   │   ├── message.ts
+│   │   ├── api.ts
+│   │   └── index.ts
+│   └── dist/
+│
+├── public/                       ← Archivos estáticos servidos
 │   ├── index.html
-│   ├── app.js                      ← ⚙️ Generado automáticamente desde client/app.ts
-│   ├── app.js.map                  ← ⚙️ Source map generado
 │   ├── style.css
-│   ├── sw.js
-│   ├── manifest.json
-│   └── icons/
-└── src/
-    ├── server.ts                   ← Configuración del servidor Express
-    ├── models/
-    │   ├── Chat.ts                 ← Modelo Chat + interfaz ChatData
-    │   └── Message.ts              ← Modelo Message + interfaz MessageData
-    ├── services/
-    │   ├── ChatService.ts          ← Lógica de negocio de chats
-    │   └── OllamaService.ts        ← Integración con API Ollama + interfaz OllamaModel
-    ├── routes/
-    │   ├── chatRoutes.ts           ← Endpoints HTTP de chat
-    │   └── modelRoutes.ts          ← Endpoints HTTP de modelos
-    └── middlewares/
-        ├── errorHandler.ts         ← Middleware de manejo de errores
-        └── logger.ts               ← Middleware de logging
+│   ├── app.js                   ← ⚙️ Generado desde client/app.ts
+│   ├── services/               ← ⚙️ Servicios compilados
+│   │   ├── chatService.js
+│   │   ├── sttService.js
+│   │   ├── ttsService.js
+│   │   └── ...
+│   └── img/
+│
+├── data/                        ← Base de datos SQLite
+│   └── ollama.db
+│
+├── vitest.config.ts             ← Configuración de tests
+└── tsconfig.json               ← Configuración base TypeScript
 ```
 
 ---

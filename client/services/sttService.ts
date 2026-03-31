@@ -1,6 +1,7 @@
 import { messageInput, recordAudioBtn, recordingIndicator, recordingTime, autoSendVoiceBtn } from "../ui/elements.js";
 import { autoResize } from "../ui/elements.js";
 import { sendMessage } from "./chatService.js";
+import { openMicrophoneErrorModal } from "../ui/modalAlert.js";
 
 interface SpeechRecognitionResultList {
   length: number;
@@ -94,6 +95,9 @@ export function initSpeechToText(): void {
 
   recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
     console.error("Speech recognition error:", event.error);
+    if (event.error === "not-allowed" || event.error === "audio-not-allowed") {
+      openMicrophoneErrorModal();
+    }
     if (event.error !== "no-speech") {
       stopRecording();
     }

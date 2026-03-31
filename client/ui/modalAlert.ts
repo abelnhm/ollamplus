@@ -72,5 +72,12 @@ export function openChatDataErrorModal(): void {
   openAlertModal(t("chatDataError"));
 }
 
+export function openMicrophoneErrorModal(): void {
+  openAlertModal(
+    "❌ Permiso de micrófono denegado o no disponible.\n\nPara activar:\n• Conecta un micrófono\n• Haz clic en el icono de cámara en la barra de direcciones\n• O ve a Configuración → Privacidad → Permisos de micrófono\n• Luego recarga la página e intenta de nuevo",
+    "Error de micrófono"
+  );
+}
+
 alertModalOk.addEventListener("click", closeAlertModal);
 closeAlertModalBtn.addEventListener("click", closeAlertModal);

@@ -10,8 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true,
-    "noEmitOnError": true,
+    "sourceMap": false,
     "paths": {
       "@shared/*": ["../shared/types/*"]
     },

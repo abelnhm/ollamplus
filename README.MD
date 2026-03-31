@@ -68,7 +68,6 @@ OllamPlus/
 │   │   │
 │   │   ├── routes/          # Endpoints HTTP
 │   │   │   ├── chatRoutes.ts
-│   │   │   ├── configRoutes.ts
 │   │   │   └── modelRoutes.ts
 │   │   │
 │   │   ├── validators/      # Validación de inputs con Zod
@@ -77,11 +76,6 @@ OllamPlus/
 │   │   ├── db/              # Base de datos y migraciones
 │   │   │   └── migrations.ts
 │   │   │
-│   │   ├── test/            # Tests unitarios con Vitest
-│   │   │   ├── Chat.test.ts
-│   │   │   ├── Message.test.ts
-│   │   │   └── validators.test.ts
-│   │   │
 │   │   └── middlewares/     # Express middlewares
 │   │       ├── logger.ts    # Logging con Pino
 │   │       └── errorHandler.ts
@@ -89,29 +83,33 @@ OllamPlus/
 │   └── dist/                # Compilados del servidor
 │
 ├── client/                  # === FRONTEND (TypeScript - código fuente) ===
-│   ├── src/
-│   │   ├── app.ts          # Entry point
-│   │   ├── types.ts        # Interfaces del cliente
-│   │   ├── state.ts        # Estado global
-│   │   ├── api.ts          # Cliente HTTP
-│   │   ├── utils.ts        # Utilidades
-│   │   │
-│   │   ├── ui/             # Capa de presentación
-│   │   │   ├── elements.ts
-│   │   │   ├── messages.ts
-│   │   │   ├── sidebar.ts
-│   │   │   ├── theme.ts
-│   │   │   └── settings.ts
-│   │   │
-│   │   └── services/        # Lógica del cliente
-│   │       ├── chatService.ts
-│   │       ├── modelService.ts
-│   │       ├── modelParams.ts
-│   │       ├── systemPrompt.ts
-│   │       ├── tokenService.ts
-│   │       ├── exportService.ts
-│   │       ├── importService.ts
-│   │       └── templateService.ts
+│   ├── app.ts              # Entry point
+│   ├── types.ts            # Interfaces del cliente
+│   ├── state.ts            # Estado global
+│   ├── api.ts              # Cliente HTTP
+│   ├── utils.ts            # Utilidades
+│   │
+│   ├── ui/                 # Capa de presentación
+│   │   ├── elements.ts
+│   │   ├── messages.ts
+│   │   ├── sidebar.ts
+│   │   ├── theme.ts
+│   │   ├── settings.ts
+│   │   └── modalAlert.ts   # Modal de alertas
+│   │
+│   ├── services/           # Lógica del cliente
+│   │   ├── chatService.ts
+│   │   ├── modelService.ts
+│   │   ├── modelParams.ts
+│   │   ├── systemPrompt.ts
+│   │   ├── tokenService.ts
+│   │   ├── exportService.ts
+│   │   ├── importService.ts
+│   │   ├── templateService.ts
+│   │   ├── ttsService.ts   # Texto a voz
+│   │   ├── ttsVoices.ts   # Gestión de voces TTS
+│   │   ├── sttService.ts  # Voz a texto (Speech Recognition)
+│   │   └── fileAttachment.ts
 │   │
 │   └── tsconfig.json
 │
@@ -132,11 +130,12 @@ OllamPlus/
 │   ├── state.js           # Estado compilado
 │   ├── api.js             # API compilada
 │   ├── utils.js           # Utilidades compiladas
-│   ├── app.js.map         # Source maps
-│   ├── types.js.map
-│   ├── state.js.map
-│   ├── api.js.map
-│   ├── utils.js.map
+│   │
+│   └── services/          # Servicios compilados
+│   │   ├── chatService.js
+│   │   ├── sttService.js
+│   │   ├── ttsService.js
+│   │   └── ...
 │   │
 │   └── img/               # Imágenes y recursos
 │       ├── logo4.png      # Logo de la aplicación
@@ -144,14 +143,9 @@ OllamPlus/
 │       ├── logo2.png
 │       └── logo1.png
 │
-├── scripts/                 # Scripts de utilidad
-│   ├── setup.sh           # Configuración inicial
-│   └── reset-db.sh        # Resetear base de datos
-│
 ├── data/                   # Base de datos SQLite
 │   └── ollama.db
 │
-├── dist/                   # Compilados adicionales
 ├── vitest.config.ts        # Configuración de tests
 └── tsconfig.json          # Configuración base de TypeScript
 ```
@@ -442,10 +436,12 @@ const response = await ollamaService.sendMessage(
 │           CAPA SERVICIOS: services/                     │
 │  chatService · modelService · modelParams               │
 │  systemPrompt · tokenService · exportService            │
-│  importService · templateService                        │
+│  importService · templateService · sttService          │
+│  ttsService · ttsVoices · fileAttachment               │
 ├─────────────────────────────────────────────────────────┤
 │           CAPA UI: ui/                                  │
 │  elements · messages · sidebar · theme · settings       │
+│  modalAlert                                             │
 ├─────────────────────────────────────────────────────────┤
 │           CAPA BASE                                     │
 │  types.ts · state.ts · api.ts · utils.ts                │
@@ -465,15 +461,16 @@ const response = await ollamaService.sendMessage(
 | **UI**        | `ui/sidebar.ts`               | Sidebar de chats                             |
 | **UI**        | `ui/theme.ts`                 | Modo oscuro/claro                            |
 | **UI**        | `ui/settings.ts`              | Configuración de Ollama + TTS                |
+| **UI**        | `ui/modalAlert.ts`            | Modal de alertas y errores                   |
 | **Servicios** | `services/chatService.ts`     | Core: envío, streaming, CRUD                |
 | **Servicios** | `services/modelService.ts`    | Modelos de Ollama                            |
-| **Servicios** | `services/modelParams.ts`     | Parámetros del modelo                        |
+| **Servicios** | `services/modelParams.ts`    | Parámetros del modelo                        |
 | **Servicios** | `services/systemPrompt.ts`    | System prompt                                |
 | **Servicios** | `services/tokenService.ts`    | Conteo de tokens                             |
-| **Servicios** | `services/exportService.ts`   | Exportar a MD/JSON/HTML                      |
+| **Servicios** | `services/exportService.ts`  | Exportar a MD/JSON/HTML                      |
 | **Servicios** | `services/importService.ts`   | Importar desde otros formatos                |
 | **Servicios** | `services/templateService.ts` | Plantillas de prompts                        |
-| **Servicios** | `services/ttsService.ts`      | Texto a voz (Web Speech API)                 |
+| **Servicios** | `services/ttsService.ts`     | Texto a voz (Web Speech API)                 |
 | **Servicios** | `services/ttsVoices.ts`      | Gestión de voces disponibles                 |
 | **Servicios** | `services/sttService.ts`     | Voz a texto (Speech Recognition API)        |
 | **Servicios** | `services/fileAttachment.ts` | Adjuntar archivos al chat                   |
@@ -674,6 +671,21 @@ Consulta [TESTING.md](./TESTING.md) para una guía completa sobre cómo escribir
 
 - Si usas Ollama en otra máquina, configura la IP desde la interfaz
 - Verifica que el firewall no bloquee el puerto 11434
+
+### Error de micrófono (Speech Recognition)
+
+Si al usar el botón de micrófono aparece un error:
+
+1. **Permiso denegado**: El navegador necesita permiso de micrófono
+   - Haz clic en el icono de cámara/micrófono en la barra de direcciones
+   - O ve a Configuración → Privacidad → Permisos de micrófono
+   - Luego recarga la página e intenta de nuevo
+
+2. **Sin dispositivo de audio**: No hay micrófono conectado
+   - Conecta un micrófono (externo o integrado)
+   - Verifica en la configuración del sistema que el micrófono esté activo
+
+La aplicación mostrará un modal con instrucciones cuando ocurra este error.
 
 ### Errores de compilación
 

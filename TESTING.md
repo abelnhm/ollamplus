@@ -121,6 +121,36 @@ tests/
 │   ├── unit/                       # Tests unitarios
 │   │   ├── state/                  # state.test.ts
 │   │   ├── tts/                    # ttsService.test.ts, ttsVoices.test.ts
+│   │   ├── stt/                    # sttService.test.ts
+│   │   ├── modalAlert/             # modalAlert.test.ts
+│   │   └── utils/
+│   ├── integration/                # Tests de integración del cliente
+│   └── mocks/                      # Mocks del navegador
+│       └── setup.ts                # Setup jsdom específico
+│
+├── setup-global.ts                 # Configuración global para todos los tests
+└── vitest.config.ts               # Configuración de Vitest
+```
+tests/
+├── server/                          # Tests del servidor
+│   ├── unit/                       # Tests unitarios
+│   │   ├── models/                 # Chat.test.ts, Message.test.ts
+│   │   ├── validators/             # validators.test.ts
+│   │   ├── middlewares/            # middlewares.test.ts
+│   │   └── config/                 # config.test.ts
+│   ├── integration/                # Tests de integración
+│   │   ├── services/               # ChatService.test.ts
+│   │   ├── routes/                 # routes.test.ts
+│   │   ├── api/                    # integration.test.ts
+│   │   └── database/               # database.test.ts
+│   ├── e2e/                        # Tests end-to-end
+│   │   └── ollama/                 # ollamaIntegration.test.ts
+│   └── setup.ts                    # Setup específico del servidor
+│
+├── client/                         # Tests del cliente
+│   ├── unit/                       # Tests unitarios
+│   │   ├── state/                  # state.test.ts
+│   │   ├── tts/                    # ttsService.test.ts, ttsVoices.test.ts
 │   │   └── utils/
 │   ├── integration/                # Tests de integración del cliente
 │   └── mocks/                      # Mocks del navegador
